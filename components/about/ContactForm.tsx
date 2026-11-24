@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2, Info } from 'lucide-react';
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -9,7 +9,7 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email) return;
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) return;
     setSubmitted(true);
   };
 
@@ -76,6 +76,11 @@ export default function ContactForm() {
           placeholder="Đóng góp về tính năng bản đồ, địa điểm mới hoặc trải nghiệm giao diện..."
           className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white transition-colors"
         />
+      </div>
+
+      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-teal-50/80 border border-teal-100 text-[11px] text-teal-800">
+        <Info className="w-4 h-4 text-teal-600 shrink-0" />
+        <span>Biểu mẫu thử nghiệm: Phản hồi được mô phỏng tiếp nhận trong hệ thống.</span>
       </div>
 
       <button

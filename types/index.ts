@@ -60,7 +60,7 @@ export interface Place {
   created_at: string;
   updated_at: string;
   // Metadata indicating mock data
-  is_mock_data: true;
+  is_mock_data: boolean;
 }
 
 export interface FilterState {

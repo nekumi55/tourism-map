@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Filter,
   X,
+  ChevronDown,
 } from 'lucide-react';
 import { Category, District } from '@/types';
 import { useData } from '@/context/DataContext';
@@ -241,18 +242,21 @@ export default function ExploreContainer() {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Khu vực địa lý
               </label>
-              <select
-                value={district}
-                onChange={(e) => handleFilterChange(() => setDistrict(e.target.value))}
-                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-hidden focus:border-teal-500 focus:bg-white"
-              >
-                <option value="all">Toàn bộ tỉnh Non Xanh</option>
-                {districts.map((d: District) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={district}
+                  onChange={(e) => handleFilterChange(() => setDistrict(e.target.value))}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer hover:border-teal-300 transition-colors"
+                >
+                  <option value="all">Toàn bộ tỉnh Quảng Ngãi</option>
+                  {districts.map((d: District) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-teal-600 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
 
             {/* Price Range Filter */}
@@ -260,17 +264,20 @@ export default function ExploreContainer() {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Mức chi phí
               </label>
-              <select
-                value={priceRange}
-                onChange={(e) => handleFilterChange(() => setPriceRange(e.target.value))}
-                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-hidden focus:border-teal-500 focus:bg-white"
-              >
-                <option value="all">Tất cả mức giá</option>
-                <option value="free">Miễn phí vé tham quan</option>
-                <option value="budget">Tiết kiệm (&lt; 100.000đ)</option>
-                <option value="moderate">Trung bình (100k - 500k)</option>
-                <option value="luxury">Cao cấp (&gt; 500.000đ)</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={priceRange}
+                  onChange={(e) => handleFilterChange(() => setPriceRange(e.target.value))}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer hover:border-teal-300 transition-colors"
+                >
+                  <option value="all">Tất cả mức giá</option>
+                  <option value="free">Miễn phí vé tham quan</option>
+                  <option value="budget">Tiết kiệm (&lt; 100.000đ)</option>
+                  <option value="moderate">Trung bình (100k - 500k)</option>
+                  <option value="luxury">Cao cấp (&gt; 500.000đ)</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-teal-600 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
 
             {/* Rating Filter */}
@@ -316,16 +323,19 @@ export default function ExploreContainer() {
 
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500 font-medium">Sắp xếp:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg focus:outline-hidden focus:border-teal-500"
-              >
-                <option value="featured">Nổi bật nhất</option>
-                <option value="rating-desc">Đánh giá cao nhất</option>
-                <option value="reviews-desc">Nhiều đánh giá nhất</option>
-                <option value="name-asc">Tên (A đến Z)</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg focus:outline-hidden focus:border-teal-500 appearance-none pr-7 cursor-pointer hover:border-teal-300 transition-colors"
+                >
+                  <option value="featured">Nổi bật nhất</option>
+                  <option value="rating-desc">Đánh giá cao nhất</option>
+                  <option value="reviews-desc">Nhiều đánh giá nhất</option>
+                  <option value="name-asc">Tên (A đến Z)</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-teal-600 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
           </div>
 
@@ -430,9 +440,9 @@ export default function ExploreContainer() {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => handleFilterChange(() => setSearch(e.target.value))}
                   placeholder="Tên địa danh..."
-                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
+                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white"
                 />
               </div>
 
@@ -441,18 +451,21 @@ export default function ExploreContainer() {
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
                   Danh mục
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
-                >
-                  <option value="all">Tất cả danh mục</option>
-                  {categories.map((c: Category) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={category}
+                    onChange={(e) => handleFilterChange(() => setCategory(e.target.value))}
+                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
+                  >
+                    <option value="all">Tất cả danh mục</option>
+                    {categories.map((c: Category) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-teal-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
 
               {/* Mobile District */}
@@ -460,18 +473,21 @@ export default function ExploreContainer() {
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
                   Khu vực
                 </label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200"
-                >
-                  <option value="all">Toàn bộ tỉnh</option>
-                  {districts.map((d: District) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={district}
+                    onChange={(e) => handleFilterChange(() => setDistrict(e.target.value))}
+                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
+                  >
+                    <option value="all">Toàn bộ tỉnh Quảng Ngãi</option>
+                    {districts.map((d: District) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-teal-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
             </div>
 

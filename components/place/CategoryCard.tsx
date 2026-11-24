@@ -65,9 +65,6 @@ export default function CategoryCard({ category }: CategoryCardProps) {
         <h4 className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors text-base">
           {category.name}
         </h4>
-        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-          {category.description}
-        </p>
       </div>
 
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">

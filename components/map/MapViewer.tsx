@@ -22,6 +22,7 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Place, Category } from '@/types';
 import { useData } from '@/context/DataContext';
 import {
@@ -146,7 +147,7 @@ export default function MapViewer() {
         className={`bg-white border-r border-slate-200 z-20 flex flex-col transition-all duration-300 shadow-xl ${
           isSidebarOpen
             ? 'w-full lg:w-96 xl:w-[420px] h-1/2 lg:h-full'
-            : 'w-full lg:w-0 h-14 lg:h-full overflow-hidden'
+            : 'w-full lg:w-0 h-0 lg:h-full overflow-hidden'
         }`}
       >
         {/* Sidebar Header & Tab Switcher */}
@@ -179,10 +180,11 @@ export default function MapViewer() {
 
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200 lg:flex hidden ml-2 shrink-0"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200 flex ml-2 shrink-0"
             title="Thu gọn sidebar"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 hidden lg:block" />
+            <X className="w-5 h-5 lg:hidden" />
           </button>
         </div>
 
@@ -262,11 +264,15 @@ export default function MapViewer() {
                       }`}
                     >
                       <div className="flex gap-3">
-                        <img
-                          src={place.cover_image}
-                          alt={place.name}
-                          className="w-16 h-16 rounded-xl object-cover shrink-0 shadow-2xs"
-                        />
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 shadow-2xs bg-slate-100">
+                          <Image
+                            src={place.cover_image}
+                            alt={place.name}
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1 mb-1">
                             <span className="text-[10px] font-bold text-teal-800 bg-teal-100/70 px-2 py-0.5 rounded-md truncate">
@@ -418,11 +424,15 @@ export default function MapViewer() {
                           <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                             {idx + 1}
                           </span>
-                          <img
-                            src={place.cover_image}
-                            alt={place.name}
-                            className="w-12 h-12 rounded-xl object-cover shrink-0"
-                          />
+                          <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                            <Image
+                              src={place.cover_image}
+                              alt={place.name}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          </div>
                           <div className="min-w-0">
                             <h5 className="font-bold text-slate-900 text-xs truncate">
                               {place.name.replace(/\[Minh Họa\]\s*/g, '')}
@@ -483,10 +493,11 @@ export default function MapViewer() {
       {!isSidebarOpen && (
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="absolute top-4 left-4 z-30 p-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-soft-xl text-slate-800 hover:text-teal-700 hidden lg:flex items-center gap-2 text-xs font-bold"
+          className="absolute top-4 left-4 z-30 p-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-soft-xl text-slate-800 hover:text-teal-700 flex items-center gap-2 text-xs font-bold"
         >
           <ChevronRight className="w-4 h-4 text-teal-600" />
-          <span>Mở danh sách & Lịch trình</span>
+          <span className="hidden sm:inline">Mở danh sách & Lịch trình</span>
+          <span className="sm:hidden">Danh sách</span>
         </button>
       )}
 
@@ -503,13 +514,15 @@ export default function MapViewer() {
         {/* Selected Place Popup Window */}
         {selectedPlace && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm sm:max-w-md bg-white/95 backdrop-blur-md rounded-3xl shadow-soft-xl border border-white/40 overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <div className="relative h-32 sm:h-36 bg-slate-100">
-              <img
+            <div className="relative h-32 sm:h-36 bg-slate-100 overflow-hidden">
+              <Image
                 src={selectedPlace.cover_image}
                 alt={selectedPlace.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 640px) 90vw, 400px"
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
               <button
                 onClick={() => setSelectedPlace(null)}
                 className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white transition-colors"

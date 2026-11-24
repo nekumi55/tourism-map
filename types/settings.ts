@@ -2,7 +2,6 @@ export interface SiteStats {
   totalPlaces: string;
   districtsCount: string;
   avgRating: string;
-  techStatus: string;
 }
 
 export interface SiteSettings {

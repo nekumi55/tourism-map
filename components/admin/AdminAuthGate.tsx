@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Lock, KeyRound, ShieldAlert, CheckCircle2, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Lock, KeyRound, ShieldAlert, ArrowRight } from 'lucide-react';
 
 const ADMIN_STORAGE_KEY = 'tourism_map_admin_auth_v1';
-const DEFAULT_PIN = '888888';
-const DEFAULT_PASS = 'admin123';
+const ADMIN_PIN = process.env.ADMIN_PIN ?? '888888';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123';
 
 interface AdminAuthGateProps {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputCode === DEFAULT_PIN || inputCode === DEFAULT_PASS) {
+    if (inputCode === ADMIN_PIN || inputCode === ADMIN_PASSWORD) {
       sessionStorage.setItem(ADMIN_STORAGE_KEY, 'true');
       setIsAuthenticated(true);
       setErrorMsg('');
@@ -95,17 +95,6 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Credential Hint for the user */}
-          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 space-y-1">
-            <div className="font-bold flex items-center gap-1.5 text-amber-800">
-              <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-              <span>Thông tin đăng nhập mặc định:</span>
-            </div>
-            <div>
-              Mã PIN nhanh: <code className="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded text-amber-950">888888</code> hoặc mật khẩu: <code className="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded text-amber-950">admin123</code>
-            </div>
-          </div>
         </div>
       </div>
     );

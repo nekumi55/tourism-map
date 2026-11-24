@@ -19,6 +19,5 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     totalPlaces: '12+',
     districtsCount: '5 Khu vực trọng điểm',
     avgRating: '4.9 / 5.0 (Du khách tin chọn)',
-    techStatus: '',
   },
 };

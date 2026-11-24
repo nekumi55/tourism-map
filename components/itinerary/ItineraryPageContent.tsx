@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useData } from '@/context/DataContext';
 import { Place } from '@/types';
 import {
@@ -253,11 +254,15 @@ export default function ItineraryPageContent() {
                           {idx + 1}
                         </div>
 
-                        <img
-                          src={place.cover_image}
-                          alt={place.name}
-                          className="w-14 h-14 rounded-2xl object-cover shrink-0"
-                        />
+                        <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-100">
+                          <Image
+                            src={place.cover_image}
+                            alt={place.name}
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                          />
+                        </div>
 
                         <div className="min-w-0">
                           <h4 className="font-bold text-slate-900 text-sm truncate">
@@ -314,7 +319,7 @@ export default function ItineraryPageContent() {
                       <div className="flex items-center gap-2 pl-8 py-1 text-xs font-bold text-teal-800">
                         <div className="w-0.5 h-5 bg-teal-400 border-l border-dashed" />
                         <span className="bg-teal-50/80 px-2.5 py-1 rounded-lg border border-teal-200/80 text-[11px]">
-                          Chặng {idx + 1} $\rightarrow$ Chặng {idx + 2}: ~ {legDistance} km (ước tính ~{Math.round((legDistance / 35) * 60)} phút di chuyển)
+                          Chặng {idx + 1} → Chặng {idx + 2}: ~ {legDistance} km (ước tính ~{Math.round((legDistance / 35) * 60)} phút di chuyển)
                         </span>
                       </div>
                     )}

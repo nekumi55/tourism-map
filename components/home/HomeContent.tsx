@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Map,
   Sparkles,
@@ -35,14 +36,13 @@ export default function HomeContent() {
               style={{ background: settings.heroBgImage }}
             />
           ) : (
-            <img
+            <Image
               src={settings.heroBgImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=85'}
               alt={settings.siteTitle}
-              className="w-full h-full object-cover object-center scale-102 transition-transform duration-1000 ease-out"
-              onError={(e) => {
-                // If image fails to load, gracefully fall back so vibrant CSS gradient shines
-                (e.target as HTMLElement).style.display = 'none';
-              }}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center scale-102 transition-transform duration-1000 ease-out"
             />
           )}
 

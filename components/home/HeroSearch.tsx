@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, Grid, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Grid, ArrowRight, ChevronDown } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 
 export default function HeroSearch() {
@@ -47,44 +47,50 @@ export default function HeroSearch() {
       {/* Category selector */}
       <div className="w-full md:w-52 flex items-center gap-2.5 px-3 py-2 border-b md:border-b-0 md:border-r border-slate-200">
         <Grid className="w-5 h-5 text-teal-600 shrink-0" />
-        <div className="w-full">
+        <div className="w-full relative">
           <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             Danh mục
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer"
-          >
-            <option value="">Tất cả danh mục</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
+            >
+              <option value="" className="text-slate-800 bg-white">Tất cả danh mục</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id} className="text-slate-800 bg-white">
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-teal-600 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 
       {/* District selector */}
       <div className="w-full md:w-52 flex items-center gap-2.5 px-3 py-2">
         <MapPin className="w-5 h-5 text-teal-600 shrink-0" />
-        <div className="w-full">
+        <div className="w-full relative">
           <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             Khu vực
           </label>
-          <select
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-            className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer"
-          >
-            <option value="">Toàn bộ tỉnh</option>
-            {districts.map((dist) => (
-              <option key={dist.id} value={dist.id}>
-                {dist.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+              className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
+            >
+              <option value="" className="text-slate-800 bg-white">Toàn bộ tỉnh</option>
+              {districts.map((dist) => (
+                <option key={dist.id} value={dist.id} className="text-slate-800 bg-white">
+                  {dist.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-teal-600 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 

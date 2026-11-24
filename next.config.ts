@@ -15,6 +15,19 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
+  },
+  env: {
+    ADMIN_PIN: process.env.ADMIN_PIN ?? '888888',
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD ?? 'admin123',
+  },
 };
 
 export default nextConfig;

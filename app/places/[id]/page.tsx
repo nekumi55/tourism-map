@@ -8,6 +8,13 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Note on data architecture:
+ * generateStaticParams pre-renders routes for MOCK_PLACES at build time.
+ * Dynamic places created in client-side state (localStorage) via Admin CMS
+ * will not have pre-rendered static HTML routes at build time. For Phase 2,
+ * migrate to a remote database (e.g. Supabase/PostgreSQL) with dynamic server rendering or ISR.
+ */
 export async function generateStaticParams() {
   return MOCK_PLACES.map((p) => ({
     id: p.id,

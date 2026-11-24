@@ -20,7 +20,7 @@ export default function AboutPage() {
     <div className="bg-slate-50 min-h-screen pb-20">
       {/* Header Banner */}
       <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/20 border border-teal-500/40 text-teal-300 text-xs font-semibold mb-6">
             <Compass className="w-4 h-4" />
             <span>Về Dự Án Bản Đồ Số Du Lịch</span>

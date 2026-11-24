@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Place, Category, District } from '@/types';
 import { SiteSettings } from '@/types/settings';
 import { MOCK_PLACES } from '@/data/places';
@@ -43,53 +43,70 @@ const STORAGE_KEYS = {
 };
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [places, setPlaces] = useState<Place[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEYS.PLACES);
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return MOCK_PLACES;
-  });
+  // Initialize with static defaults to ensure consistent SSR and client hydration
+  const [places, setPlaces] = useState<Place[]>(MOCK_PLACES);
+  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [districts, setDistricts] = useState<District[]>(DISTRICTS);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
 
-  const [categories, setCategories] = useState<Category[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
+  // Sync from localStorage after component mounts on client (avoids hydration mismatch)
+  useEffect(() => {
+    try {
+      const savedPlaces = localStorage.getItem(STORAGE_KEYS.PLACES);
+      if (savedPlaces) {
+        const parsed = JSON.parse(savedPlaces);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setPlaces(parsed);
+        }
       }
+    } catch (e) {
+      console.error('Error loading places from localStorage:', e);
     }
-    return CATEGORIES;
-  });
 
-  const [districts, setDistricts] = useState<District[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEYS.DISTRICTS);
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
+    try {
+      const savedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      if (savedCategories) {
+        const parsed = JSON.parse(savedCategories);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCategories(parsed);
+        }
       }
+    } catch (e) {
+      console.error('Error loading categories from localStorage:', e);
     }
-    return DISTRICTS;
-  });
 
-  const [settings, setSettings] = useState<SiteSettings>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
+    try {
+      const savedDistricts = localStorage.getItem(STORAGE_KEYS.DISTRICTS);
+      if (savedDistricts) {
+        const parsed = JSON.parse(savedDistricts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDistricts(parsed);
+        }
       }
+    } catch (e) {
+      console.error('Error loading districts from localStorage:', e);
     }
-    return DEFAULT_SITE_SETTINGS;
-  });
+
+    try {
+      const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed && typeof parsed === 'object') {
+          setSettings(parsed);
+        }
+      }
+    } catch (e) {
+      console.error('Error loading settings from localStorage:', e);
+    }
+  }, []);
+
+  // Dynamically compute category counts based on current active places list
+  const dynamicCategories = useMemo(() => {
+    return categories.map((cat) => ({
+      ...cat,
+      count: places.filter((p) => p.category_id === cat.id).length,
+    }));
+  }, [categories, places]);
 
   // Save changes to LocalStorage
   const persist = (key: string, data: unknown) => {
@@ -201,7 +218,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return JSON.stringify(
       {
         places,
-        categories,
+        categories: dynamicCategories,
         districts,
         settings,
         exportedAt: new Date().toISOString(),
@@ -214,22 +231,52 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const importDataJson = (jsonString: string): boolean => {
     try {
       const data = JSON.parse(jsonString);
-      if (data.places) {
-        setPlaces(data.places);
-        persist(STORAGE_KEYS.PLACES, data.places);
+      if (typeof data !== 'object' || data === null) {
+        return false;
       }
-      if (data.categories) {
-        setCategories(data.categories);
-        persist(STORAGE_KEYS.CATEGORIES, data.categories);
+
+      if (Array.isArray(data.places)) {
+        const validPlaces = data.places.filter(
+          (p: unknown) =>
+            typeof p === 'object' &&
+            p !== null &&
+            'id' in p &&
+            'name' in p &&
+            'category_id' in p
+        );
+        if (validPlaces.length > 0) {
+          setPlaces(validPlaces as Place[]);
+          persist(STORAGE_KEYS.PLACES, validPlaces);
+        }
       }
-      if (data.districts) {
-        setDistricts(data.districts);
-        persist(STORAGE_KEYS.DISTRICTS, data.districts);
+
+      if (Array.isArray(data.categories)) {
+        const validCats = data.categories.filter(
+          (c: unknown) =>
+            typeof c === 'object' && c !== null && 'id' in c && 'name' in c
+        );
+        if (validCats.length > 0) {
+          setCategories(validCats as Category[]);
+          persist(STORAGE_KEYS.CATEGORIES, validCats);
+        }
       }
-      if (data.settings) {
-        setSettings(data.settings);
+
+      if (Array.isArray(data.districts)) {
+        const validDistricts = data.districts.filter(
+          (d: unknown) =>
+            typeof d === 'object' && d !== null && 'id' in d && 'name' in d
+        );
+        if (validDistricts.length > 0) {
+          setDistricts(validDistricts as District[]);
+          persist(STORAGE_KEYS.DISTRICTS, validDistricts);
+        }
+      }
+
+      if (data.settings && typeof data.settings === 'object') {
+        setSettings(data.settings as SiteSettings);
         persist(STORAGE_KEYS.SETTINGS, data.settings);
       }
+
       return true;
     } catch (e) {
       console.error('Import failed:', e);
@@ -241,7 +288,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     <DataContext.Provider
       value={{
         places,
-        categories,
+        categories: dynamicCategories,
         districts,
         settings,
         addPlace,

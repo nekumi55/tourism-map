@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PlaceGalleryProps {
@@ -26,10 +27,13 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
     <div className="space-y-3">
       {/* Main Image Frame */}
       <div className="relative aspect-16/9 sm:aspect-21/9 rounded-3xl overflow-hidden bg-slate-900 shadow-xl group">
-        <img
+        <Image
           src={currentImage}
           alt={`${placeName} - Ảnh ${activeIdx + 1}`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          className="object-cover transition-transform duration-500 group-hover:scale-102"
         />
 
         {/* Gradient Overlay */}
@@ -63,10 +67,12 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
                   : 'border-transparent opacity-70 hover:opacity-100'
               }`}
             >
-              <img
+              <Image
                 src={img}
                 alt={`Thumbnail ${idx + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                sizes="112px"
+                className="object-cover"
               />
             </button>
           ))}
@@ -90,12 +96,16 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="max-w-5xl max-h-[85vh] flex flex-col items-center">
-            <img
-              src={currentImage}
-              alt={placeName}
-              className="max-h-[80vh] w-auto object-contain rounded-2xl shadow-2xl"
-            />
+          <div className="max-w-5xl w-full max-h-[85vh] flex flex-col items-center">
+            <div className="relative w-full max-w-4xl h-[70vh]">
+              <Image
+                src={currentImage}
+                alt={placeName}
+                fill
+                sizes="100vw"
+                className="object-contain rounded-2xl shadow-2xl"
+              />
+            </div>
             <div className="mt-3 text-white/80 text-xs font-medium">
               {placeName} · {activeIdx + 1} / {images.length}
             </div>

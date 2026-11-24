@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, Navigation, Sparkles } from 'lucide-react';
 import { Place } from '@/types';
 import { CATEGORIES } from '@/data/categories';
@@ -23,12 +24,13 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
     return (
       <div className="group bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col sm:flex-row">
         {/* Image */}
-        <div className="sm:w-64 sm:shrink-0 relative overflow-hidden h-48 sm:h-auto bg-slate-100">
-          <img
+        <div className="sm:w-64 sm:shrink-0 relative overflow-hidden h-48 sm:h-auto bg-slate-100 min-h-[192px]">
+          <Image
             src={place.cover_image}
             alt={cleanName}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 100vw, 256px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
             <Badge variant="outline" size="sm" className="bg-white/95 font-bold shadow-2xs backdrop-blur-md">
@@ -101,11 +103,12 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
     <div className="group bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col">
       {/* Image Container */}
       <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
-        <img
+        <Image
           src={place.cover_image}
           alt={cleanName}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-90" />
 
