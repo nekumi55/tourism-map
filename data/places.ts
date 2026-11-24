@@ -71,9 +71,9 @@ export const MOCK_PLACES: Place[] = [
     opening_hours: 'Mở cửa cả ngày',
     tags: ['Thiên nhiên sinh thái', 'Măng Đen', 'Thác Pa Sỹ', 'Hồ Đăk Ke', 'Săn mây'],
     amenities: ['Resort nghỉ dưỡng', 'Quán cà phê view rừng', 'Nhà hàng đặc sản', 'Bãi đỗ xe'],
-    cover_image: 'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1200&q=80',
+    cover_image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80'
     ],
     is_featured: true,
@@ -480,7 +480,7 @@ export const MOCK_PLACES: Place[] = [
     cover_image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80'
     ],
     is_featured: false,
     is_open_now: true,

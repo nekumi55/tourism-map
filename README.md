@@ -34,3 +34,39 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## cách cập nhật github
+
+ Bước 1: Mở Terminal
+
+  Mở PowerShell, Command Prompt hoặc Terminal tích hợp trong VS Code ngay tại thư mục dự án tourism-map.
+  ──────
+  Bước 2: Kiểm tra các file đã thay đổi
+
+  Chạy lệnh:
+
+    git status
+
+  Bạn sẽ thấy danh sách các tệp màu đỏ (các tệp mới sửa hoặc tệp mới tạo).
+  ──────
+  Bước 3: Thêm các tệp vào danh sách chuẩn bị lưu (Staging)
+
+  Chạy lệnh:
+
+    git add .
+
+  (Lệnh này sẽ gom tất cả các thay đổi vừa thực hiện vào hàng chờ).
+  ──────
+  Bước 4: Tạo một bản lưu (Commit)
+
+  Ghi chú nội dung bạn đã thay đổi bằng lệnh:
+
+    git commit -m "Cap nhat giao dien va tinh nang moi"
+
+  (Bạn có thể thay đổi nội dung trong dấu ngoặc kép tùy theo đợt cập nhật của mình).
+  ──────
+  Bước 5: Đẩy lên GitHub
+
+  Đẩy mã nguồn từ máy tính lên nhánh main trên GitHub:
+
+    git push origin main

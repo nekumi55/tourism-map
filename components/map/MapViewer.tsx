@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -20,6 +20,9 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
+  Layers,
+  Map as MapIcon,
+  Check,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -42,12 +45,21 @@ const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
   ),
 });
 
+const LAYER_OPTIONS = [
+  { id: 'standard' as const, label: 'Đường bộ (Google)', emoji: '🗺️' },
+  { id: 'terrain' as const, label: 'Địa hình đồi núi', emoji: '⛰️' },
+  { id: 'satellite' as const, label: 'Vệ tinh & Địa danh', emoji: '🛰️' },
+];
+
 export default function MapViewer() {
   const searchParams = useSearchParams();
   const initialPlaceId = searchParams.get('placeId');
   const { places, categories } = useData();
 
-  // Sidebar mode: 'places' or 'itinerary'
+  // Mobile segmented control view: 'map' | 'places' | 'itinerary'
+  const [mobileTab, setMobileTab] = useState<'map' | 'places' | 'itinerary'>('map');
+
+  // Sidebar mode: 'places' or 'itinerary' (used for desktop and internal sidebar rendering)
   const [sidebarMode, setSidebarMode] = useState<'places' | 'itinerary'>('places');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -59,12 +71,32 @@ export default function MapViewer() {
   });
 
   const [mapLayer, setMapLayer] = useState<'standard' | 'satellite' | 'terrain'>('standard');
+  const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
+  const layersPopoverRef = useRef<HTMLDivElement>(null);
+  const layersBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Close layers popover on outside click
+  useEffect(() => {
+    if (!isLayersOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        layersPopoverRef.current &&
+        !layersPopoverRef.current.contains(e.target as Node) &&
+        layersBtnRef.current &&
+        !layersBtnRef.current.contains(e.target as Node)
+      ) {
+        setIsLayersOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isLayersOpen]);
+
   // Itinerary Stops list
   const [itinerary, setItinerary] = useState<Place[]>(() => {
-    // Default initial itinerary: Lý Sơn highlights
     const lySonPlaces = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
     return lySonPlaces.length > 0 ? lySonPlaces : places.slice(0, 3);
   });
@@ -87,7 +119,6 @@ export default function MapViewer() {
   const totalDistance = useMemo(() => calculateTotalRouteDistance(itinerary), [itinerary]);
   const estimatedHours = useMemo(() => {
     if (itinerary.length === 0) return 0;
-    // ~ 2 hours per stop + travel time (avg 35km/h in VN traffic)
     const travelHours = totalDistance / 35;
     const sightseeingHours = itinerary.length * 1.8;
     return Number((travelHours + sightseeingHours).toFixed(1));
@@ -99,13 +130,12 @@ export default function MapViewer() {
       alert('Địa điểm này đã có trong lịch trình của bạn!');
       return;
     }
-    setItinerary([...itinerary, place]);
-    setSidebarMode('itinerary');
+    setItinerary((prev) => [...prev, place]);
   };
 
   // Remove place from itinerary
   const removeFromItinerary = (id: string) => {
-    setItinerary(itinerary.filter((p) => p.id !== id));
+    setItinerary((prev) => prev.filter((p) => p.id !== id));
   };
 
   // Move itinerary item up or down
@@ -135,24 +165,140 @@ export default function MapViewer() {
     setSidebarMode('itinerary');
   };
 
+  const isMobileSidebarActive = mobileTab === 'places' || mobileTab === 'itinerary';
+
+  // Render Layer Popover content
+  const renderLayerPopover = () => (
+    <div
+      ref={layersPopoverRef}
+      className="absolute top-full right-0 mt-2 w-52 sm:w-56 bg-white/95 backdrop-blur-md rounded-2xl shadow-soft-2xl border border-slate-200/90 p-1.5 flex flex-col gap-1 text-xs font-bold text-slate-700 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+    >
+      <div className="px-2.5 py-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+        Lớp hiển thị bản đồ
+      </div>
+      {LAYER_OPTIONS.map((opt) => {
+        const isActive = mapLayer === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => {
+              setMapLayer(opt.id);
+              setIsLayersOpen(false);
+            }}
+            className={`px-3 py-2 rounded-xl text-left transition-colors flex items-center justify-between ${
+              isActive
+                ? 'bg-teal-50 text-teal-800 font-extrabold border border-teal-200/60'
+                : 'hover:bg-slate-100 text-slate-700'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <span>{opt.emoji}</span>
+              <span>{opt.label}</span>
+            </span>
+            {isActive && <Check className="w-3.5 h-3.5 text-teal-600" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div
       className={`relative flex flex-col lg:flex-row w-full bg-slate-900 overflow-hidden ${
         isFullscreen
           ? 'fixed inset-0 z-50 h-screen'
-          : 'h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] min-h-[640px]'
+          : 'h-[calc(100dvh-57px)] lg:h-[calc(100vh-80px)] lg:min-h-[640px]'
       }`}
     >
+      {/* MOBILE FLOATING BAR: SEGMENTED CONTROL + COMPACT LAYERS */}
+      <div className="lg:hidden absolute top-3 left-3 right-3 z-30 flex items-center gap-2">
+        <div className="flex-1 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-soft-xl border border-slate-200/90 flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMobileTab('map')}
+            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+              mobileTab === 'map'
+                ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <MapIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>Bản đồ</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMobileTab('places');
+              setSidebarMode('places');
+            }}
+            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+              mobileTab === 'places'
+                ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 shrink-0" />
+            <span>Địa điểm</span>
+            <span className="text-[10px] font-semibold opacity-85">({filteredPlaces.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMobileTab('itinerary');
+              setSidebarMode('itinerary');
+            }}
+            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+              mobileTab === 'itinerary'
+                ? 'bg-amber-500 text-slate-950 shadow-soft-sm font-black'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Route className="w-3.5 h-3.5 shrink-0" />
+            <span>Lịch trình</span>
+            {itinerary.length > 0 && (
+              <span className="text-[10px] font-black bg-slate-950/15 px-1 rounded-full">
+                {itinerary.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {mobileTab === 'map' && (
+          <div className="relative shrink-0">
+            <button
+              ref={layersBtnRef}
+              type="button"
+              onClick={() => setIsLayersOpen((prev) => !prev)}
+              className={`p-2.5 rounded-2xl backdrop-blur-md shadow-soft-xl border transition-all flex items-center justify-center ${
+                isLayersOpen
+                  ? 'bg-teal-600 text-white border-teal-500 shadow-teal-500/20'
+                  : 'bg-white/95 text-slate-700 hover:text-teal-700 border-slate-200/90'
+              }`}
+              title="Đổi lớp bản đồ"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+            {isLayersOpen && renderLayerPopover()}
+          </div>
+        )}
+      </div>
+
       {/* 1. SIDEBAR LIST & ITINERARY */}
       <div
         className={`bg-white border-r border-slate-200 z-20 flex flex-col transition-all duration-300 shadow-xl ${
+          isMobileSidebarActive
+            ? 'absolute inset-0 pt-16 lg:pt-0 lg:relative lg:inset-auto'
+            : 'hidden lg:flex'
+        } ${
           isSidebarOpen
-            ? 'w-full lg:w-96 xl:w-[420px] h-1/2 lg:h-full'
-            : 'w-full lg:w-0 h-0 lg:h-full overflow-hidden'
+            ? 'w-full lg:w-96 xl:w-[420px] h-full'
+            : 'lg:w-0 lg:h-full lg:overflow-hidden'
         }`}
       >
-        {/* Sidebar Header & Tab Switcher */}
-        <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="p-3 bg-slate-50 border-b border-slate-200 hidden lg:flex items-center justify-between">
           <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-xl w-full">
             <button
               onClick={() => setSidebarMode('places')}
@@ -185,14 +331,12 @@ export default function MapViewer() {
             title="Thu gọn sidebar"
           >
             <ChevronLeft className="w-5 h-5 hidden lg:block" />
-            <X className="w-5 h-5 lg:hidden" />
           </button>
         </div>
 
         {/* TAB A: PLACES LIST */}
         {sidebarMode === 'places' && (
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Search & Category Pills */}
             <div className="p-3 border-b border-slate-100 space-y-2 bg-white">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -213,7 +357,6 @@ export default function MapViewer() {
                 )}
               </div>
 
-              {/* Category Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
                 <button
                   onClick={() => setSelectedCategory('all')}
@@ -241,12 +384,11 @@ export default function MapViewer() {
               </div>
             </div>
 
-            {/* Places List Items */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-slate-100" data-lenis-prevent>
               {filteredPlaces.length === 0 ? (
                 <div className="text-center py-12 px-4 text-slate-500 text-xs">
                   <MapPin className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  Không tìm thấy địa điểm nào phù compliance bộ lọc.
+                  Không tìm thấy địa điểm nào phù hợp bộ lọc.
                 </div>
               ) : (
                 filteredPlaces.map((place) => {
@@ -257,7 +399,10 @@ export default function MapViewer() {
                   return (
                     <div
                       key={place.id}
-                      onClick={() => setSelectedPlace(place)}
+                      onClick={() => {
+                        setSelectedPlace(place);
+                        setMobileTab('map');
+                      }}
                       className={`pt-2.5 first:pt-0 p-2.5 rounded-2xl cursor-pointer transition-all ${
                         isSelected
                           ? 'bg-teal-50/90 border border-teal-300 shadow-soft-sm'
@@ -323,7 +468,6 @@ export default function MapViewer() {
         {/* TAB B: ITINERARY TOUR PLANNER */}
         {sidebarMode === 'itinerary' && (
           <div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-            {/* Itinerary Stats Card */}
             <div className="p-4 bg-white border-b border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase text-amber-800 bg-amber-100 px-2.5 py-1 rounded-lg flex items-center gap-1">
@@ -335,7 +479,6 @@ export default function MapViewer() {
                 </span>
               </div>
 
-              {/* Quick Stats Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded-xl bg-teal-50 border border-teal-100">
                   <div className="text-[10px] font-bold uppercase text-teal-700">
@@ -355,7 +498,6 @@ export default function MapViewer() {
                 </div>
               </div>
 
-              {/* Navigation Action Buttons */}
               <div className="flex items-center gap-2 pt-1">
                 <a
                   href={buildGoogleMapsRouteUrl(itinerary)}
@@ -377,7 +519,6 @@ export default function MapViewer() {
                 )}
               </div>
 
-              {/* Quick Preset Tours */}
               <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100">
                 <span className="font-semibold text-slate-600">Gợi ý tour mẫu:</span>
                 <button
@@ -395,8 +536,7 @@ export default function MapViewer() {
               </div>
             </div>
 
-            {/* Sequential Stops List */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+            <div className="flex-1 overflow-y-auto p-3 space-y-2.5" data-lenis-prevent>
               {itinerary.length === 0 ? (
                 <div className="text-center py-12 px-4 text-slate-500 text-xs">
                   <Route className="w-10 h-10 text-slate-300 mx-auto mb-2" />
@@ -419,8 +559,13 @@ export default function MapViewer() {
 
                   return (
                     <div key={place.id} className="space-y-2">
-                      {/* Place Stop Card */}
-                      <div className="p-3 bg-white rounded-2xl border border-slate-200/90 shadow-soft-sm flex items-center justify-between gap-3">
+                      <div
+                        onClick={() => {
+                          setSelectedPlace(place);
+                          setMobileTab('map');
+                        }}
+                        className="p-3 bg-white rounded-2xl border border-slate-200/90 shadow-soft-sm flex items-center justify-between gap-3 cursor-pointer hover:border-teal-300 transition-all"
+                      >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                             {idx + 1}
@@ -444,9 +589,12 @@ export default function MapViewer() {
                           </div>
                         </div>
 
-                        {/* Reorder and Delete Actions */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div
+                          className="flex items-center gap-1 shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
+                            type="button"
                             onClick={() => moveItineraryItem(idx, 'up')}
                             disabled={idx === 0}
                             className="p-1 rounded-lg text-slate-400 hover:text-slate-800 disabled:opacity-20"
@@ -455,6 +603,7 @@ export default function MapViewer() {
                             <ArrowUp className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => moveItineraryItem(idx, 'down')}
                             disabled={idx === itinerary.length - 1}
                             className="p-1 rounded-lg text-slate-400 hover:text-slate-800 disabled:opacity-20"
@@ -463,6 +612,7 @@ export default function MapViewer() {
                             <ArrowDown className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => removeFromItinerary(place.id)}
                             className="p-1 rounded-lg text-rose-500 hover:bg-rose-50"
                             title="Bỏ khỏi lịch trình"
@@ -472,7 +622,6 @@ export default function MapViewer() {
                         </div>
                       </div>
 
-                      {/* Leg distance connector */}
                       {legDist !== null && (
                         <div className="flex items-center gap-2 pl-6 py-0.5 text-[11px] text-teal-700 font-bold">
                           <div className="w-0.5 h-4 bg-teal-400 border-l border-dashed" />
@@ -490,138 +639,149 @@ export default function MapViewer() {
         )}
       </div>
 
-      {/* Floating Toggle Button for Closed Sidebar */}
       {!isSidebarOpen && (
         <button
+          type="button"
           onClick={() => setIsSidebarOpen(true)}
-          className="absolute top-4 left-4 z-30 p-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-soft-xl text-slate-800 hover:text-teal-700 flex items-center gap-2 text-xs font-bold"
+          className="hidden lg:flex absolute top-4 left-4 z-30 p-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-soft-xl text-slate-800 hover:text-teal-700 items-center gap-2 text-xs font-bold"
         >
           <ChevronRight className="w-4 h-4 text-teal-600" />
-          <span className="hidden sm:inline">Mở danh sách & Lịch trình</span>
-          <span className="sm:hidden">Danh sách</span>
+          <span>Mở danh sách & Lịch trình</span>
         </button>
       )}
 
-      {/* 2. REAL INTERACTIVE LEAFLET MAP (QUẢNG NGÃI + TILES: STANDARD, TERRAIN, SATELLITE) */}
-      <div className="flex-1 relative h-1/2 lg:h-full bg-slate-900 overflow-hidden min-h-[450px]">
+      {/* 2. REAL INTERACTIVE LEAFLET MAP */}
+      <div className="flex-1 relative w-full h-full bg-slate-900 overflow-hidden">
         <LeafletMap
           places={places}
           selectedPlace={selectedPlace}
-          onSelectPlace={(p) => setSelectedPlace(p)}
+          onSelectPlace={(p) => {
+            setSelectedPlace(p);
+            setMobileTab('map');
+          }}
           itineraryPlaces={itinerary}
           mapLayer={mapLayer}
         />
 
-        {/* Selected Place Popup Window */}
-        {selectedPlace && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm sm:max-w-md bg-white/95 backdrop-blur-md rounded-3xl shadow-soft-xl border border-white/40 overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <div className="relative h-32 sm:h-36 bg-slate-100 overflow-hidden">
-              <Image
-                src={selectedPlace.cover_image}
-                alt={selectedPlace.name}
-                fill
-                sizes="(max-width: 640px) 90vw, 400px"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
-              <button
-                onClick={() => setSelectedPlace(null)}
-                className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-teal-600/90 backdrop-blur-xs">
-                  {categories.find((c: Category) => c.id === selectedPlace.category_id)?.name}
-                </span>
-                <div className="flex items-center text-xs text-amber-300 font-black">
-                  <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300 mr-1" />
-                  {selectedPlace.rating} ({selectedPlace.review_count})
+        {/* Selected Place Popup Window (Modern Floating Bottom Card) */}
+        {selectedPlace && mobileTab === 'map' && (
+          <div className="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:w-96 sm:max-w-md bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-soft-2xl border border-slate-200/80 p-3 sm:p-3.5 overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-3 duration-200">
+            <div className="w-8 h-1 bg-slate-200 rounded-full mx-auto mb-2 sm:hidden" />
+
+            <div className="flex gap-3">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 bg-slate-100 shadow-2xs">
+                <Image
+                  src={selectedPlace.cover_image}
+                  alt={selectedPlace.name}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-950/80 backdrop-blur-xs text-[10px] text-amber-300 font-black flex items-center gap-0.5 shadow-xs">
+                  <Star className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
+                  <span>{selectedPlace.rating}</span>
                 </div>
               </div>
-            </div>
 
-            <div className="p-4 space-y-2">
-              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base line-clamp-1">
-                {selectedPlace.name.replace(/\[Minh Họa\]\s*/g, '')}
-              </h3>
-              <p className="text-xs text-slate-500 line-clamp-1 flex items-center gap-1 font-medium">
-                <MapPin className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                {selectedPlace.address}
-              </p>
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-start justify-between gap-1 mb-0.5">
+                    <span className="text-[10px] font-bold text-teal-800 bg-teal-100/70 px-2 py-0.5 rounded-md truncate max-w-[140px]">
+                      {categories.find((c: Category) => c.id === selectedPlace.category_id)?.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlace(null)}
+                      className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 -mr-1 -mt-0.5"
+                      title="Đóng popup"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm line-clamp-1">
+                    {selectedPlace.name.replace(/\[Minh Họa\]\s*/g, '')}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 line-clamp-1 flex items-center gap-1 font-medium mt-0.5">
+                    <MapPin className="w-3 h-3 text-teal-600 shrink-0" />
+                    <span className="truncate">{selectedPlace.address}</span>
+                  </p>
+                </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md">
-                  {selectedPlace.price_label}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => addToItinerary(selectedPlace)}
-                    className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-2xs transition-all"
-                  >
-                    + Lịch trình
-                  </button>
-                  <Link
-                    href={`/places/${selectedPlace.id}`}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-soft-sm transition-colors"
-                  >
-                    <span>Chi tiết</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 mt-1">
+                  <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md shrink-0">
+                    {selectedPlace.price_label}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => addToItinerary(selectedPlace)}
+                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                        itinerary.some((p) => p.id === selectedPlace.id)
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-2xs'
+                      }`}
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>
+                        {itinerary.some((p) => p.id === selectedPlace.id) ? 'Đã thêm' : '+ Lịch trình'}
+                      </span>
+                    </button>
+                    <Link
+                      href={`/places/${selectedPlace.id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-soft-sm transition-colors"
+                    >
+                      <span>Chi tiết</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* 3. MAP CONTROLS FLOATING BAR */}
-        <div className="absolute top-4 right-4 z-30 flex flex-col gap-2.5">
-          {/* Layer switcher: Đường bộ / Địa hình / Vệ tinh */}
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-soft-xl border border-slate-200/80 p-1 flex flex-col gap-1 text-[11px] font-bold text-slate-700">
+        {/* Desktop Controls (Top Right): Compact Layers Button + Fullscreen */}
+        <div className="hidden lg:flex absolute top-4 right-4 z-30 items-center gap-2">
+          <div className="relative">
             <button
-              onClick={() => setMapLayer('standard')}
-              className={`px-3 py-1.5 rounded-xl text-left transition-colors flex items-center gap-1.5 ${
-                mapLayer === 'standard'
-                  ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
-                  : 'hover:bg-slate-100'
+              ref={layersBtnRef}
+              type="button"
+              onClick={() => setIsLayersOpen((prev) => !prev)}
+              className={`px-3 py-2 rounded-2xl backdrop-blur-md shadow-soft-xl border text-xs font-bold transition-all flex items-center gap-1.5 ${
+                isLayersOpen
+                  ? 'bg-teal-600 text-white border-teal-500 shadow-teal-500/20'
+                  : 'bg-white/95 text-slate-700 hover:text-teal-700 hover:bg-slate-50 border-slate-200/90'
               }`}
+              title="Đổi lớp hiển thị bản đồ"
             >
-              <span>Đường bộ (Google Maps)</span>
+              <Layers className="w-4 h-4 text-teal-600" />
+              <span>
+                {mapLayer === 'standard'
+                  ? 'Đường bộ'
+                  : mapLayer === 'terrain'
+                  ? 'Địa hình'
+                  : 'Vệ tinh'}
+              </span>
             </button>
-            <button
-              onClick={() => setMapLayer('terrain')}
-              className={`px-3 py-1.5 rounded-xl text-left transition-colors flex items-center gap-1.5 ${
-                mapLayer === 'terrain'
-                  ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
-                  : 'hover:bg-slate-100'
-              }`}
-            >
-              <span>Địa hình (Đồi núi Quảng Ngãi)</span>
-            </button>
-            <button
-              onClick={() => setMapLayer('satellite')}
-              className={`px-3 py-1.5 rounded-xl text-left transition-colors flex items-center gap-1.5 ${
-                mapLayer === 'satellite'
-                  ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
-                  : 'hover:bg-slate-100'
-              }`}
-            >
-              <span>Vệ tinh & Địa danh thật</span>
-            </button>
+            {isLayersOpen && renderLayerPopover()}
           </div>
 
-          {/* Fullscreen toggle */}
           <button
+            type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-3 rounded-2xl bg-white/95 backdrop-blur-md text-slate-700 hover:text-teal-700 hover:bg-slate-50 shadow-soft-xl border border-slate-200/80 transition-colors self-end"
+            className="p-2.5 rounded-2xl bg-white/95 backdrop-blur-md text-slate-700 hover:text-teal-700 hover:bg-slate-50 shadow-soft-xl border border-slate-200/90 transition-colors"
             title={isFullscreen ? 'Thu nhỏ giao diện' : 'Toàn màn hình'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Map Legend (Bottom Right) */}
-        <div className="hidden sm:flex absolute bottom-4 right-4 z-30 bg-slate-950/85 backdrop-blur-md border border-slate-800 text-white px-3.5 py-2 rounded-2xl text-[11px] items-center gap-3 shadow-soft-xl">
+        {/* Map Legend (Bottom Right, Desktop/Tablet only) */}
+        <div
+          className={`hidden sm:flex absolute bottom-4 right-4 z-20 bg-slate-950/85 backdrop-blur-md border border-slate-800 text-white px-3.5 py-2 rounded-2xl text-[11px] items-center gap-3 shadow-soft-xl ${
+            selectedPlace ? 'hidden lg:flex' : ''
+          }`}
+        >
           <div className="flex items-center gap-1.5 font-bold">
             <span className="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
             <span>Địa danh Quảng Ngãi</span>
@@ -631,7 +791,7 @@ export default function MapViewer() {
             <span>Chặng lộ trình</span>
           </div>
           <div className="text-slate-400 border-l border-slate-700 pl-3">
-            Bản đồ số thực tế OpenStreetMap / Esri
+            Bản đồ số OpenStreetMap / Google
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ const AnimatedContent = ({
   distance = 100,
   direction = 'vertical',
   reverse = false,
-  duration = 0.8,
+  duration = 0.55,
   ease = 'power3.out',
   initialOpacity = 0,
   animateOpacity = true,
@@ -75,7 +75,7 @@ const AnimatedContent = ({
   once = true,
   scrub = false,
   disappearAfter = 0,
-  disappearDuration = 0.5,
+  disappearDuration = 0.35,
   disappearEase = 'power3.in',
   onStart,
   onComplete,
@@ -92,10 +92,10 @@ const AnimatedContent = ({
     const el = ref.current;
     if (!el) return undefined;
 
-    let scroller: Element | string | null = container || document.getElementById('snap-main-container') || null;
+    let scroller: Element | string | null = container || null;
     if (typeof scroller === 'string') scroller = document.querySelector(scroller);
 
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const reduce = false; // Always provide smooth animations on both desktop and mobile
 
     const ctx = gsap.context(() => {
       const targets: Element[] = stagger > 0 && el.children.length ? Array.from(el.children) : [el];
@@ -106,11 +106,6 @@ const AnimatedContent = ({
 
       gsap.set(el, { visibility: 'visible' });
 
-      if (reduce) {
-        callbacksRef.current.onComplete?.();
-        return;
-      }
-
       const from: gsap.TweenVars = {
         [axis]: distance * sign,
         scale,
@@ -120,7 +115,7 @@ const AnimatedContent = ({
         [axis]: 0,
         scale: 1,
         opacity: 1,
-        duration,
+        duration: Math.max(0.25, duration),
         ease
       };
 

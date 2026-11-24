@@ -88,8 +88,8 @@ const getEffect = (effect: SplitTextEffect, em: number): Look => {
 const SplitText = ({
   text,
   className = '',
-  delay = 50,
-  duration = 1.25,
+  delay = 20,
+  duration = 0.5,
   ease,
   splitType = 'chars',
   from,
@@ -114,7 +114,7 @@ const SplitText = ({
   const onCompleteRef = useRef(onLetterAnimationComplete);
   const liveRef = useRef({ trigger, hoverEffect, accentColor });
   const [fontsLoaded, setFontsLoaded] = useState(fontsAreLoaded);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(true);
 
   useIsoLayoutEffect(() => {
     onCompleteRef.current = onLetterAnimationComplete;
@@ -135,24 +135,14 @@ const SplitText = ({
   useGSAP(
     () => {
       const el = ref.current;
-      if (!el || !text || !fontsLoaded) return;
+      if (!el || !text) return;
       el.getBoundingClientRect();
-      if (!fontsAreLoaded()) {
-        setFontsLoaded(false);
-        return;
-      }
 
       const finish = () => {
         if (completedTextRef.current === text) return;
         completedTextRef.current = text;
         onCompleteRef.current?.();
       };
-
-      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-        setReady(true);
-        finish();
-        return;
-      }
 
       const startPct = (1 - threshold) * 100;
       const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);

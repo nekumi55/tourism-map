@@ -56,7 +56,7 @@ export default function HomeContent() {
           <AnimatedContent
             distance={20}
             direction="vertical"
-            duration={0.6}
+            duration={0.35}
             trigger="mount"
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-md border border-white/30 text-teal-200 text-xs sm:text-sm font-semibold mb-6 shadow-glow transition-all">
@@ -69,8 +69,8 @@ export default function HomeContent() {
             text={settings.heroHeading || 'Khám Phá Bản Đồ Du Lịch Tỉnh Quảng Ngãi'}
             className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight max-w-4xl leading-tight sm:leading-snug drop-shadow-md"
             tag="h1"
-            delay={40}
-            duration={0.85}
+            delay={20}
+            duration={0.45}
             splitType="words"
             effect="rise"
             trigger="load"
@@ -79,8 +79,8 @@ export default function HomeContent() {
           <AnimatedContent
             distance={25}
             direction="vertical"
-            duration={0.7}
-            delay={0.2}
+            duration={0.4}
+            delay={0.1}
             trigger="mount"
           >
             <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-slate-100 max-w-2xl leading-relaxed drop-shadow-sm font-medium">
@@ -91,8 +91,8 @@ export default function HomeContent() {
           <AnimatedContent
             distance={30}
             direction="vertical"
-            duration={0.8}
-            delay={0.3}
+            duration={0.45}
+            delay={0.15}
             trigger="mount"
             className="w-full mt-8 sm:mt-10 flex justify-center relative z-40"
           >
@@ -102,8 +102,8 @@ export default function HomeContent() {
           <AnimatedContent
             distance={20}
             direction="vertical"
-            duration={0.7}
-            delay={0.4}
+            duration={0.4}
+            delay={0.2}
             trigger="mount"
           >
             <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5 text-xs text-white">
@@ -136,7 +136,7 @@ export default function HomeContent() {
         <AnimatedContent
           distance={40}
           direction="vertical"
-          duration={0.8}
+          duration={0.45}
           ease="power3.out"
           threshold={0.15}
         >
@@ -175,7 +175,7 @@ export default function HomeContent() {
         <AnimatedContent
           distance={30}
           direction="vertical"
-          duration={0.7}
+          duration={0.4}
           threshold={0.15}
         >
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -200,9 +200,9 @@ export default function HomeContent() {
         <AnimatedContent
           distance={40}
           direction="vertical"
-          duration={0.75}
+          duration={0.45}
           threshold={0.1}
-          stagger={0.06}
+          stagger={0.04}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
         >
           {categories.map((cat) => (
@@ -216,7 +216,7 @@ export default function HomeContent() {
         <AnimatedContent
           distance={30}
           direction="vertical"
-          duration={0.7}
+          duration={0.4}
           threshold={0.15}
         >
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -242,11 +242,11 @@ export default function HomeContent() {
         </AnimatedContent>
 
         <AnimatedContent
-          distance={50}
+          distance={45}
           direction="vertical"
-          duration={0.8}
+          duration={0.45}
           threshold={0.1}
-          stagger={0.08}
+          stagger={0.05}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {displayPlaces.slice(0, 6).map((place) => (
@@ -260,7 +260,7 @@ export default function HomeContent() {
         <AnimatedContent
           distance={40}
           direction="vertical"
-          duration={0.85}
+          duration={0.45}
           threshold={0.15}
         >
           <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white overflow-hidden p-8 sm:p-12 lg:p-16 border border-slate-800 shadow-2xl">
