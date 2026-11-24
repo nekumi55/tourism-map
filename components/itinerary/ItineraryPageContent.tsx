@@ -86,10 +86,10 @@ export default function ItineraryPageContent() {
     setSelectedPlaces(lySon.slice(0, 4));
   };
 
-  // Preset Tour: Di Sản Sông Trà & Biển Mỹ Khê 1 Ngày
+  // Preset Tour: Di Sản & Danh Thắng
   const handlePresetHeritage = () => {
     const items = places.filter(
-      (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-binh-son'
+      (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
     );
     setSelectedPlaces(items.slice(0, 4));
   };

@@ -30,6 +30,7 @@ import {
   calculateTotalRouteDistance,
   buildGoogleMapsRouteUrl,
 } from '@/utils/itinerary';
+import { matchSearchKeyword } from '@/utils/vietnamese';
 
 const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
   ssr: false,
@@ -75,9 +76,9 @@ export default function MapViewer() {
         selectedCategory === 'all' || p.category_id === selectedCategory;
       const matchQuery =
         searchQuery.trim() === '' ||
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+        matchSearchKeyword(p.name, searchQuery) ||
+        matchSearchKeyword(p.address, searchQuery) ||
+        p.tags.some((t) => matchSearchKeyword(t, searchQuery));
       return matchCategory && matchQuery;
     });
   }, [places, selectedCategory, searchQuery]);
@@ -125,10 +126,10 @@ export default function MapViewer() {
     setSidebarMode('itinerary');
   };
 
-  // Preset Itinerary: TP. Quảng Ngãi & Di sản
+  // Preset Itinerary: Di sản
   const loadHeritageTour = () => {
     const items = places.filter(
-      (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-binh-son'
+      (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
     ).slice(0, 4);
     setItinerary(items);
     setSidebarMode('itinerary');
@@ -241,7 +242,7 @@ export default function MapViewer() {
             </div>
 
             {/* Places List Items */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-slate-100">
+            <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-slate-100" data-lenis-prevent>
               {filteredPlaces.length === 0 ? (
                 <div className="text-center py-12 px-4 text-slate-500 text-xs">
                   <MapPin className="w-8 h-8 text-slate-300 mx-auto mb-2" />

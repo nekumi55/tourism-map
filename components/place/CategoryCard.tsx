@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Category } from '@/types';
 import { Trees, Palmtree, Landmark, Utensils, Compass, ChevronRight } from 'lucide-react';
+import SpotlightCard from '@/components/ui/SpotlightCard/SpotlightCard';
 
 interface CategoryCardProps {
   category: Category;
@@ -56,25 +57,32 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
       href={`/explore?category=${category.id}`}
-      className={`group p-6 rounded-3xl border bg-white shadow-soft hover:shadow-soft-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between ${colors.border} ${colors.glow}`}
+      className="group block h-full focus:outline-hidden"
     >
-      <div>
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${colors.bg} ${colors.text}`}>
-          <IconComponent className="w-6 h-6" />
+      <SpotlightCard
+        theme="light"
+        spotlightColor="rgba(20, 184, 166, 0.25)"
+        intensity={0.5}
+        className={`h-full p-6 rounded-3xl border shadow-soft group-hover:shadow-soft-xl group-hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between ${colors.border} ${colors.glow}`}
+      >
+        <div>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${colors.bg} ${colors.text}`}>
+            <IconComponent className="w-6 h-6" />
+          </div>
+          <h4 className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors text-base">
+            {category.name}
+          </h4>
         </div>
-        <h4 className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors text-base">
-          {category.name}
-        </h4>
-      </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span className="font-semibold text-slate-600">
-          {category.count} địa điểm
-        </span>
-        <span className="inline-flex items-center text-teal-600 font-medium group-hover:translate-x-1 transition-transform">
-          Khám phá <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-        </span>
-      </div>
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span className="font-semibold text-slate-600">
+            {category.count} địa điểm
+          </span>
+          <span className="inline-flex items-center text-teal-600 font-medium group-hover:translate-x-1 transition-transform">
+            Khám phá <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+          </span>
+        </div>
+      </SpotlightCard>
     </Link>
   );
 }

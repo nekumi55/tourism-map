@@ -17,32 +17,20 @@ import {
   Eye,
   Sliders,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
-import { MOCK_PLACES } from '@/data/places';
 import { Place } from '@/types';
+import { useData } from '@/context/DataContext';
 import PlaceCard from '@/components/place/PlaceCard';
-
-const STORAGE_KEY = 'tourism_map_custom_places';
+import ImageLibraryModal from '@/components/admin/ImageLibraryModal';
 
 export default function ImageManager() {
-  const [places, setPlaces] = useState<Place[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-    return MOCK_PLACES;
-  });
-
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string>(MOCK_PLACES[0].id);
+  const { places, updatePlace, resetAllToDefault } = useData();
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string>(() => places[0]?.id || '');
   const [newImageUrl, setNewImageUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   const selectedPlace = places.find((p) => p.id === selectedPlaceId) || places[0];
 
@@ -52,13 +40,8 @@ export default function ImageManager() {
   };
 
   const updateSelectedPlace = (updatedFields: Partial<Place>) => {
-    const updatedPlaces = places.map((p) =>
-      p.id === selectedPlace.id ? { ...p, ...updatedFields } : p
-    );
-    setPlaces(updatedPlaces);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPlaces));
-    }
+    if (!selectedPlace) return;
+    updatePlace(selectedPlace.id, updatedFields);
     showNotification('Đã cập nhật hình ảnh thành công!');
   };
 
@@ -115,10 +98,7 @@ export default function ImageManager() {
   // Reset to default mock data
   const handleResetDefaults = () => {
     if (confirm('Bạn có chắc muốn đặt lại toàn bộ hình ảnh về mặc định ban đầu?')) {
-      setPlaces(MOCK_PLACES);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+      resetAllToDefault();
       showNotification('Đã khôi phục hình ảnh ban đầu.');
     }
   };
@@ -212,30 +192,20 @@ export default function ImageManager() {
             </h3>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Option A: URL Input */}
-              <div className="flex-1 flex gap-2">
-                <div className="relative flex-1">
-                  <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="url"
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="Dán URL ảnh (https://images.unsplash.com/...)"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  />
-                </div>
-                <button
-                  onClick={() => handleAddImage(newImageUrl)}
-                  className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shrink-0 transition-colors"
-                >
-                  Thêm URL
-                </button>
-              </div>
+              {/* Option A: Library Selection */}
+              <button
+                type="button"
+                onClick={() => setIsLibraryOpen(true)}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-xs transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Chọn từ thư viện ảnh</span>
+              </button>
 
               {/* Option B: Local File Upload */}
-              <label className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer shrink-0 transition-colors">
+              <label className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer shrink-0 transition-colors">
                 <Upload className="w-3.5 h-3.5 text-slate-500" />
-                <span>Tải từ máy tính</span>
+                <span>Tải từ máy / điện thoại</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -243,6 +213,26 @@ export default function ImageManager() {
                   className="hidden"
                 />
               </label>
+
+              {/* Option C: URL Input */}
+              <div className="flex-1 flex gap-2">
+                <div className="relative flex-1">
+                  <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="url"
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="Hoặc dán URL ảnh ngoài..."
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white"
+                  />
+                </div>
+                <button
+                  onClick={() => handleAddImage(newImageUrl)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold shrink-0 transition-colors"
+                >
+                  Thêm URL
+                </button>
+              </div>
             </div>
 
             {/* Quick Unsplash Inspiration Presets */}
@@ -390,6 +380,16 @@ export default function ImageManager() {
           </div>
         </div>
       </div>
+      {/* Modal Image Library */}
+      <ImageLibraryModal
+        isOpen={isLibraryOpen}
+        onClose={() => setIsLibraryOpen(false)}
+        onSelect={(url) => {
+          handleAddImage(url);
+          showNotification('Đã thêm hình ảnh từ thư viện!');
+        }}
+        title={`Thư Viện Ảnh Du Lịch Cho ${selectedPlace.name}`}
+      />
     </div>
   );
 }

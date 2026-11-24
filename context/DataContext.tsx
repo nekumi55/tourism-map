@@ -31,15 +31,16 @@ interface DataContextType {
   resetAllToDefault: () => void;
   exportDataJson: () => string;
   importDataJson: (jsonString: string) => boolean;
+  importPlacesJson: (jsonString: string) => { success: boolean; count: number; error?: string };
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PLACES: 'tourism_map_places_v4',
-  CATEGORIES: 'tourism_map_categories_v4',
-  DISTRICTS: 'tourism_map_districts_v4',
-  SETTINGS: 'tourism_map_settings_v4',
+  PLACES: 'tourism_map_places_v6',
+  CATEGORIES: 'tourism_map_categories_v6',
+  DISTRICTS: 'tourism_map_districts_v6',
+  SETTINGS: 'tourism_map_settings_v6',
 };
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
@@ -228,11 +229,94 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const importPlacesJson = (
+    jsonString: string
+  ): { success: boolean; count: number; error?: string } => {
+    try {
+      const data = JSON.parse(jsonString);
+      let list: unknown[] | null = null;
+      if (Array.isArray(data)) {
+        list = data;
+      } else if (typeof data === 'object' && data !== null && Array.isArray((data as Record<string, unknown>).places)) {
+        list = (data as Record<string, unknown>).places as unknown[];
+      }
+
+      if (!list || !Array.isArray(list) || list.length === 0) {
+        return {
+          success: false,
+          count: 0,
+          error: 'File JSON không chứa danh sách địa điểm hợp lệ (cần là mảng [ ... ] hoặc object { places: [ ... ] })',
+        };
+      }
+
+      const validPlaces: Place[] = [];
+      for (const item of list) {
+        if (typeof item === 'object' && item !== null) {
+          const p = item as Record<string, unknown>;
+          if (p.name && typeof p.name === 'string') {
+            const placeItem: Place = {
+              id: p.id ? String(p.id) : `pl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+              name: String(p.name),
+              slug: p.slug ? String(p.slug) : String(p.name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+              category_id: p.category_id ? String(p.category_id) : 'cat-culture',
+              district_id: p.district_id ? String(p.district_id) : 'dist-tp-quang-ngai',
+              description: p.description ? String(p.description) : '',
+              content: p.content ? String(p.content) : (p.description ? String(p.description) : ''),
+              highlights: Array.isArray(p.highlights) ? p.highlights.map(String) : [],
+              tips: Array.isArray(p.tips) ? p.tips.map(String) : [],
+              address: p.address ? String(p.address) : 'Quảng Ngãi',
+              latitude: typeof p.latitude === 'number' ? p.latitude : 15.12,
+              longitude: typeof p.longitude === 'number' ? p.longitude : 108.80,
+              rating: typeof p.rating === 'number' ? p.rating : 4.8,
+              review_count: typeof p.review_count === 'number' ? p.review_count : 100,
+              price_range: (['free', 'budget', 'moderate', 'luxury'] as const).includes(p.price_range as any)
+                ? (p.price_range as 'free' | 'budget' | 'moderate' | 'luxury')
+                : 'budget',
+              price_label: p.price_label ? String(p.price_label) : 'Miễn phí',
+              opening_hours: p.opening_hours ? String(p.opening_hours) : '07:00 - 18:00',
+              phone: p.phone ? String(p.phone) : undefined,
+              website: p.website ? String(p.website) : undefined,
+              tags: Array.isArray(p.tags) ? p.tags.map(String) : ['Du lịch', 'Quảng Ngãi'],
+              amenities: Array.isArray(p.amenities) ? p.amenities.map(String) : ['Bãi đỗ xe'],
+              cover_image: p.cover_image ? String(p.cover_image) : 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+              gallery: Array.isArray(p.gallery) ? p.gallery.map(String) : [
+                p.cover_image ? String(p.cover_image) : 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80'
+              ],
+              is_featured: Boolean(p.is_featured),
+              is_open_now: p.is_open_now !== undefined ? Boolean(p.is_open_now) : true,
+              created_at: p.created_at ? String(p.created_at) : new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              is_mock_data: true,
+            };
+            validPlaces.push(placeItem);
+          }
+        }
+      }
+
+      if (validPlaces.length === 0) {
+        return { success: false, count: 0, error: 'Không tìm thấy địa điểm nào có tên (name) hợp lệ trong file JSON!' };
+      }
+
+      setPlaces(validPlaces);
+      persist(STORAGE_KEYS.PLACES, validPlaces);
+      return { success: true, count: validPlaces.length };
+    } catch (e: unknown) {
+      console.error('Lỗi nạp places.json:', e);
+      return { success: false, count: 0, error: e instanceof Error ? e.message : 'Lỗi cú pháp file JSON!' };
+    }
+  };
+
   const importDataJson = (jsonString: string): boolean => {
     try {
       const data = JSON.parse(jsonString);
       if (typeof data !== 'object' || data === null) {
         return false;
+      }
+
+      // If user uploaded direct places array into general import
+      if (Array.isArray(data)) {
+        const res = importPlacesJson(jsonString);
+        return res.success;
       }
 
       if (Array.isArray(data.places)) {
@@ -304,6 +388,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         resetAllToDefault,
         exportDataJson,
         importDataJson,
+        importPlacesJson,
       }}
     >
       {children}

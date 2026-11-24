@@ -21,11 +21,14 @@ import {
   Layers,
   Map,
   Sparkles,
+  Star,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { Place, Category, District } from '@/types';
 import { SiteSettings } from '@/types/settings';
 import { HERO_TEMPLATES } from '@/components/home/HeroBackgroundPicker';
+import ImageLibraryModal from '@/components/admin/ImageLibraryModal';
 
 const AdminMapPicker = dynamic(() => import('@/components/admin/AdminMapPicker'), {
   ssr: false,
@@ -80,6 +83,7 @@ export default function AdminDashboard() {
     resetAllToDefault,
     exportDataJson,
     importDataJson,
+    importPlacesJson,
   } = useData();
 
   const [activeTab, setActiveTab] = useState<'places' | 'map-picker' | 'categories' | 'districts' | 'settings'>('places');
@@ -93,6 +97,10 @@ export default function AdminDashboard() {
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [placeForm, setPlaceForm] = useState<Partial<Place>>({});
+
+  // Image Library Modal State
+  const [isImageLibraryOpen, setIsImageLibraryOpen] = useState(false);
+  const [imageLibraryTarget, setImageLibraryTarget] = useState<'cover' | 'gallery'>('cover');
 
   // Category Modal State
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
@@ -114,6 +122,82 @@ export default function AdminDashboard() {
   const notify = (msg: string) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  // Image Library Handlers
+  const handleOpenCoverLibrary = () => {
+    setImageLibraryTarget('cover');
+    setIsImageLibraryOpen(true);
+  };
+
+  const handleOpenGalleryLibrary = () => {
+    setImageLibraryTarget('gallery');
+    setIsImageLibraryOpen(true);
+  };
+
+  const handleSelectFromLibrary = (imageUrl: string) => {
+    if (imageLibraryTarget === 'cover') {
+      setPlaceForm((prev) => ({ ...prev, cover_image: imageUrl }));
+      notify('Đã cập nhật ảnh đại diện từ thư viện!');
+    } else {
+      setPlaceForm((prev) => ({
+        ...prev,
+        gallery: [...(prev.gallery || []), imageUrl],
+      }));
+      notify('Đã thêm ảnh vào bộ sưu tập từ thư viện!');
+    }
+  };
+
+  const handleDeviceUploadCover = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file hình ảnh (PNG, JPG, WEBP)!');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        setPlaceForm((prev) => ({ ...prev, cover_image: dataUrl }));
+        notify('Đã nạp ảnh đại diện từ thiết bị thành công!');
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleDeviceUploadGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        if (dataUrl) {
+          setPlaceForm((prev) => ({
+            ...prev,
+            gallery: [...(prev.gallery || []), dataUrl],
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    notify(`Đã nạp ${files.length} ảnh vào bộ sưu tập từ thiết bị!`);
+    e.target.value = '';
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    setPlaceForm((prev) => ({
+      ...prev,
+      gallery: (prev.gallery || []).filter((_, idx) => idx !== indexToRemove),
+    }));
+  };
+
+  const handleSetGalleryImageAsCover = (imgUrl: string) => {
+    setPlaceForm((prev) => ({ ...prev, cover_image: imgUrl }));
+    notify('Đã đặt làm ảnh đại diện chính!');
   };
 
   // --- PLACES HANDLERS ---
@@ -299,6 +383,29 @@ export default function AdminDashboard() {
     }
   };
 
+  // Import places.json specifically
+  const handleUploadPlacesJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (!content) {
+        alert('File không có nội dung hoặc không thể đọc!');
+        return;
+      }
+      const res = importPlacesJson(content);
+      if (res.success) {
+        notify(`Nạp thành công ${res.count} địa điểm từ file places.json!`);
+      } else {
+        alert(`Không thể nạp file places.json:\n${res.error}`);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  };
+
   const filteredPlaces = places.filter((p) => {
     const matchSearch =
       placeSearch === '' ||
@@ -350,6 +457,16 @@ export default function AdminDashboard() {
             <Download className="w-3.5 h-3.5" />
             <span>Xuất file JSON</span>
           </button>
+          <label className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer">
+            <Upload className="w-3.5 h-3.5" />
+            <span>Nạp file places.json</span>
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={handleUploadPlacesJson}
+            />
+          </label>
         </div>
       </div>
 
@@ -445,13 +562,26 @@ export default function AdminDashboard() {
               </select>
             </div>
 
-            <button
-              onClick={handleOpenAddPlace}
-              className="w-full sm:w-auto px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm Địa Điểm Mới</span>
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+              <label className="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                <Upload className="w-4 h-4" />
+                <span>Nạp file places.json</span>
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={handleUploadPlacesJson}
+                />
+              </label>
+
+              <button
+                onClick={handleOpenAddPlace}
+                className="w-full sm:w-auto px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm Địa Điểm Mới</span>
+              </button>
+            </div>
           </div>
 
           {/* Places Table / List */}
@@ -1140,14 +1270,141 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-700 uppercase mb-1">URL ảnh đại diện (Cover Image)</label>
-                  <input
-                    type="url"
-                    value={placeForm.cover_image || ''}
-                    onChange={(e) => setPlaceForm({ ...placeForm, cover_image: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200"
-                  />
+                {/* 1. Cover Image Section */}
+                <div className="sm:col-span-2 space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <label className="block font-bold text-xs uppercase tracking-wider text-slate-800">
+                      Ảnh đại diện chính (Cover Image)
+                    </label>
+                    <span className="text-[11px] text-teal-600 font-semibold">
+                      Hiển thị trên thẻ bài & bản đồ
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    {/* Visual Preview */}
+                    <div className="relative w-36 h-24 rounded-xl overflow-hidden border-2 border-slate-200 bg-slate-200 shrink-0 shadow-xs">
+                      {placeForm.cover_image ? (
+                        <img
+                          src={placeForm.cover_image}
+                          alt="Cover preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[10px]">
+                          <ImageIcon className="w-5 h-5 mb-1" />
+                          <span>Chưa có ảnh</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex-1 space-y-2 w-full">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleOpenCoverLibrary}
+                          className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Chọn từ thư viện ảnh</span>
+                        </button>
+
+                        <label className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Tải ảnh từ máy / điện thoại</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleDeviceUploadCover}
+                          />
+                        </label>
+                      </div>
+
+                      {/* Manual URL input fallback */}
+                      <input
+                        type="url"
+                        placeholder="Hoặc dán URL ảnh trực tiếp (https://...)"
+                        value={placeForm.cover_image || ''}
+                        onChange={(e) => setPlaceForm({ ...placeForm, cover_image: e.target.value })}
+                        className="w-full px-3 py-1.5 text-xs rounded-xl bg-white border border-slate-200 focus:outline-hidden focus:border-teal-500 font-mono text-[11px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Gallery Images Section */}
+                <div className="sm:col-span-2 space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block font-bold text-xs uppercase tracking-wider text-slate-800">
+                        Bộ sưu tập hình ảnh (Gallery - {(placeForm.gallery || []).length} ảnh)
+                      </label>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        Các góc chụp chi tiết của địa danh được xem trong trang chi tiết
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleOpenGalleryLibrary}
+                        className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm từ thư viện</span>
+                      </button>
+
+                      <label className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-xs transition-colors cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Tải từ máy</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={handleDeviceUploadGallery}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Gallery Thumbnails List */}
+                  {(placeForm.gallery || []).length === 0 ? (
+                    <div className="py-4 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl bg-white">
+                      Chưa có hình ảnh nào trong bộ sưu tập. Hãy chọn từ thư viện hoặc tải lên từ máy.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 pt-1">
+                      {(placeForm.gallery || []).map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs"
+                        >
+                          <img src={imgUrl} alt="Gallery item" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              title="Đặt làm ảnh đại diện"
+                              onClick={() => handleSetGalleryImageAsCover(imgUrl)}
+                              className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center hover:bg-teal-500 transition-colors"
+                            >
+                              <Star className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              title="Xóa ảnh"
+                              onClick={() => handleRemoveGalleryImage(idx)}
+                              className="w-7 h-7 rounded-lg bg-rose-600 text-white flex items-center justify-center hover:bg-rose-500 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1373,6 +1630,16 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* ======================================================== */}
+      {/* MODAL: IMAGE LIBRARY PICKER */}
+      {/* ======================================================== */}
+      <ImageLibraryModal
+        isOpen={isImageLibraryOpen}
+        onClose={() => setIsImageLibraryOpen(false)}
+        onSelect={handleSelectFromLibrary}
+        title={imageLibraryTarget === 'cover' ? 'Chọn Ảnh Đại Diện (Cover Image)' : 'Thêm Ảnh Vào Bộ Sưu Tập (Gallery)'}
+        currentImage={imageLibraryTarget === 'cover' ? placeForm.cover_image : undefined}
+      />
     </div>
   );
 }

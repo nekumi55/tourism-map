@@ -17,6 +17,7 @@ import {
 import { Category, District } from '@/types';
 import { useData } from '@/context/DataContext';
 import PlaceCard from '@/components/place/PlaceCard';
+import { matchSearchKeyword } from '@/utils/vietnamese';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -58,11 +59,11 @@ export default function ExploreContainer() {
     let result = places.filter((p) => {
       // Search keyword
       if (search.trim()) {
-        const query = search.toLowerCase().trim();
-        const matchName = p.name.toLowerCase().includes(query);
-        const matchDesc = p.description.toLowerCase().includes(query);
-        const matchAddress = p.address.toLowerCase().includes(query);
-        const matchTags = p.tags.some((t) => t.toLowerCase().includes(query));
+        const query = search.trim();
+        const matchName = matchSearchKeyword(p.name, query);
+        const matchDesc = matchSearchKeyword(p.description, query);
+        const matchAddress = matchSearchKeyword(p.address, query);
+        const matchTags = p.tags.some((t) => matchSearchKeyword(t, query));
         if (!matchName && !matchDesc && !matchAddress && !matchTags) return false;
       }
 

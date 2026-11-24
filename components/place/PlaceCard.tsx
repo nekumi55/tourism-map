@@ -9,6 +9,7 @@ import { CATEGORIES } from '@/data/categories';
 import { DISTRICTS } from '@/data/districts';
 import RatingStars from '@/components/common/RatingStars';
 import Badge from '@/components/common/Badge';
+import SpotlightCard from '@/components/ui/SpotlightCard/SpotlightCard';
 
 interface PlaceCardProps {
   place: Place;
@@ -22,8 +23,12 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
 
   if (viewMode === 'list') {
     return (
-      <div className="group bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col sm:flex-row">
-        {/* Image */}
+      <SpotlightCard
+        theme="light"
+        spotlightColor="rgba(20, 184, 166, 0.2)"
+        intensity={0.5}
+        className="group !p-0 bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col sm:flex-row"
+      >
         <div className="sm:w-64 sm:shrink-0 relative overflow-hidden h-48 sm:h-auto bg-slate-100 min-h-[192px]">
           <Image
             src={place.cover_image}
@@ -46,7 +51,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
           )}
         </div>
 
-        {/* Content */}
         <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between gap-2 mb-2">
@@ -94,14 +98,18 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
             </div>
           </div>
         </div>
-      </div>
+      </SpotlightCard>
     );
   }
 
   // Grid Card Mode
   return (
-    <div className="group bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col">
-      {/* Image Container */}
+    <SpotlightCard
+      theme="light"
+      spotlightColor="rgba(20, 184, 166, 0.2)"
+      intensity={0.5}
+      className="group !p-0 bg-white rounded-3xl border border-slate-200/80 hover:border-teal-500/50 shadow-soft hover:shadow-soft-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col h-full"
+    >
       <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
         <Image
           src={place.cover_image}
@@ -112,7 +120,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-90" />
 
-        {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
           <Badge variant="outline" size="sm" className="bg-white/95 text-slate-900 font-extrabold shadow-soft-sm backdrop-blur-md">
             {category?.name || 'Du lịch'}
@@ -124,7 +131,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
           )}
         </div>
 
-        {/* Bottom District & Status inside image */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs">
           <div className="flex items-center gap-1 drop-shadow-md font-semibold">
             <MapPin className="w-3.5 h-3.5 text-teal-300" />
@@ -140,7 +146,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
           <div className="mb-2">
@@ -169,7 +174,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
           <span className="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg truncate max-w-[150px]">
             {place.price_label}
@@ -191,6 +195,6 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
           </div>
         </div>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }

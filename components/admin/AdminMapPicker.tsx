@@ -179,22 +179,18 @@ export default function AdminMapPicker({
       const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
 
       const markerHtml = `
-        <div style="transform: translate(-50%, -50%); position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          ${
-            isSelected
-              ? '<span style="position: absolute; inset: -10px; border-radius: 9999px; background: rgba(245, 158, 11, 0.5); animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>'
-              : ''
-          }
+        <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
+          ${isSelected ? '<div class="marker-admin-selected-ring"></div>' : ''}
           <div style="width: ${isSelected ? '36px' : '26px'}; height: ${
             isSelected ? '36px' : '26px'
-          }; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 2.5px solid #ffffff; background: ${
+          }; border-radius: 50%; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 2.5px solid #ffffff; background: ${
             isSelected ? '#f59e0b' : '#0d9488'
           }; color: #ffffff;">
             <svg width="${isSelected ? '18' : '14'}" height="${
               isSelected ? '18' : '14'
             }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
-          <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; padding: 3px 8px; border-radius: 6px; background: ${
+          <div style="position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 3; padding: 3px 8px; border-radius: 6px; background: ${
             isSelected ? '#f59e0b' : 'rgba(15, 23, 42, 0.92)'
           }; color: ${
             isSelected ? '#0f172a' : '#ffffff'

@@ -77,10 +77,10 @@ export default function LeafletMap({
         delete (containerRef.current as any)._leaflet_id;
       }
 
-      // Initialize map centered at Quảng Ngãi
+      // Initialize map centered to cover both coastal and highland regions
       const map = L.map(containerRef.current, {
-        center: [15.1205, 108.8000],
-        zoom: 10,
+        center: [14.85, 108.40],
+        zoom: 9,
         zoomControl: true,
       });
 
@@ -212,26 +212,20 @@ export default function LeafletMap({
       const itineraryIdx = currentItinerary.findIndex((p) => p.id === place.id);
       const isItinerary = itineraryIdx !== -1;
       const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
+      const pinSize = isItinerary || isSelected ? 34 : 28;
+      const pinBg = isItinerary ? '#f59e0b' : isSelected ? '#0d9488' : '#0284c7';
 
       const markerHtml = `
-        <div style="transform: translate(-50%, -50%); position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          ${
-            isSelected
-              ? '<span style="position: absolute; inset: -8px; border-radius: 9999px; background: rgba(20, 184, 166, 0.45); animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>'
-              : ''
-          }
-          <div style="width: ${isItinerary || isSelected ? '34px' : '28px'}; height: ${
-            isItinerary || isSelected ? '34px' : '28px'
-          }; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2.5px solid #ffffff; background: ${
-            isItinerary ? '#f59e0b' : isSelected ? '#0d9488' : '#0284c7'
-          }; color: #ffffff;">
+        <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
+          ${isSelected ? '<div class="marker-selected-ring"></div>' : ''}
+          <div style="width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2.5px solid #ffffff; background: ${pinBg}; color: #ffffff;">
             ${
               isItinerary
                 ? `#${itineraryIdx + 1}`
                 : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`
             }
           </div>
-          <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; padding: 3px 8px; border-radius: 6px; background: rgba(15, 23, 42, 0.92); color: #ffffff; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.35); pointer-events: none; border: 1px solid rgba(255,255,255,0.15);">
+          <div style="position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 3; padding: 3px 8px; border-radius: 6px; background: rgba(15, 23, 42, 0.92); color: #ffffff; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.35); pointer-events: none; border: 1px solid rgba(255,255,255,0.15);">
             ${cleanName}
           </div>
         </div>
@@ -264,8 +258,8 @@ export default function LeafletMap({
   };
 
   return (
-    <div className="w-full h-full relative min-h-[450px]">
-      <div ref={containerRef} className="absolute inset-0 w-full h-full z-10" />
+    <div className="w-full h-full relative min-h-[450px]" data-lenis-prevent>
+      <div ref={containerRef} className="absolute inset-0 w-full h-full z-10" data-lenis-prevent />
     </div>
   );
 }

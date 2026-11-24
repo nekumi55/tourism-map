@@ -1,23 +1,23 @@
 import { SiteSettings } from '@/types/settings';
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  siteTitle: 'Quảng Ngãi Tourism Map',
-  siteSubtitle: 'Bản Đồ Số Du Lịch Tỉnh Quảng Ngãi',
-  heroBadge: 'Cổng thông tin & Bản đồ số du lịch thông minh',
-  heroHeading: 'Khám Phá Biển Đảo & Danh Thắng Tỉnh Quảng Ngãi',
+  siteTitle: 'Bản Đồ Di Sản & Du Lịch Tỉnh Quảng Ngãi',
+  siteSubtitle: 'Tổng Hợp Di Sản, Văn Hóa Và Danh Thắng Tỉnh Quảng Ngãi (Sau Sáp Nhập)',
+  heroBadge: 'Cơ sở dữ liệu Di sản, Văn hóa & Danh thắng Tỉnh Quảng Ngãi',
+  heroHeading: 'Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',
   heroSubheading:
-    'Hành trình khám phá thiên đường biển ngọc Lý Sơn, đệ nhất danh sơn Thiên Ấn, thác nước Minh Long và ẩm thực sông Trà đặc sắc với bản đồ số trực quan.',
+    'Hệ thống di tích lịch sử, danh lam thắng cảnh, di sản văn hóa phi vật thể và ẩm thực đặc trưng tỉnh Quảng Ngãi sau sáp nhập.',
   heroBgImage:
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=85',
+    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=2000&q=85',
   contactEmail: 'dulich@quangngai.gov.vn',
   contactPhone: '0255.3822.456',
-  contactOffice: 'Trung tâm Xúc tiến Du lịch Tỉnh Quảng Ngãi',
-  copyrightText: '© 2026 Cổng Thông Tin & Bản Đồ Số Du Lịch Quảng Ngãi.',
+  contactOffice: 'Cổng thông tin Di sản & Du lịch Tỉnh Quảng Ngãi',
+  copyrightText: '© 2026 Bản Đồ Di Sản, Văn Hóa Và Danh Thắng Tỉnh Quảng Ngãi (Sau Sáp Nhập).',
   showBanner: false,
   bannerText: '',
   stats: {
-    totalPlaces: '12+',
-    districtsCount: '5 Khu vực trọng điểm',
-    avgRating: '4.9 / 5.0 (Du khách tin chọn)',
+    totalPlaces: '20 Địa danh & Di sản',
+    districtsCount: '7 Khu vực hành chính',
+    avgRating: '4.9 / 5.0 (Đánh giá chuẩn xác)',
   },
 };
