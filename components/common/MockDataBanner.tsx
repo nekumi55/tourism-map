@@ -10,11 +10,15 @@ export default function MockDataBanner() {
   if (!settings.showBanner) return null;
 
   return (
-    <div suppressHydrationWarning className="bg-amber-500/10 border-b border-amber-500/20 text-amber-900 px-4 py-2 text-xs md:text-sm font-medium flex items-center justify-between">
+    <div
+      suppressHydrationWarning
+      className="bg-[var(--accent-ochre-soft)] border-b border-[var(--accent-ochre)]/25 text-[var(--ink-primary)] px-4 py-2 text-xs md:text-sm font-medium flex items-center justify-between"
+    >
       <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2">
-        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+        <AlertCircle className="w-4 h-4 text-[var(--accent-ochre)] shrink-0" aria-hidden="true" />
         <span>
-          <strong className="font-semibold text-amber-800">Thông báo hệ thống:</strong> {settings.bannerText}
+          <strong className="font-semibold text-[var(--accent-ochre-ink)]">Thông báo:</strong>{' '}
+          {settings.bannerText}
         </span>
       </div>
     </div>

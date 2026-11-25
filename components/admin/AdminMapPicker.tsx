@@ -179,7 +179,7 @@ export default function AdminMapPicker({
       const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
 
       const markerHtml = `
-        <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
+        <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
           ${isSelected ? '<div class="marker-admin-selected-ring"></div>' : ''}
           <div style="width: ${isSelected ? '36px' : '26px'}; height: ${
             isSelected ? '36px' : '26px'
@@ -203,7 +203,8 @@ export default function AdminMapPicker({
       const customIcon = L.divIcon({
         className: 'custom-pin-marker',
         html: markerHtml,
-        iconSize: [0, 0],
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       });
 
       const marker = L.marker([place.latitude, place.longitude], {

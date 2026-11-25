@@ -1,20 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import {
   MapPin,
   Clock,
   Phone,
   Globe,
-  Sparkles,
   Navigation,
   CheckCircle2,
   AlertCircle,
   ChevronRight,
   Compass,
-  Edit3,
+  ExternalLink,
 } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import { useData } from '@/context/DataContext';
 import { Place } from '@/types';
 import PlaceGallery from '@/components/place/PlaceGallery';
@@ -22,14 +24,16 @@ import PlaceCard from '@/components/place/PlaceCard';
 import RatingStars from '@/components/common/RatingStars';
 import Badge from '@/components/common/Badge';
 
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
 interface PlaceDetailClientProps {
   initialPlace: Place;
 }
 
 export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientProps) {
   const { places, categories, districts } = useData();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Find dynamic place from DataContext if modified by Admin
   const place = places.find((p) => p.id === initialPlace.id) || initialPlace;
 
   const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
@@ -43,28 +47,100 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
     )
     .slice(0, 3);
 
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const root = containerRef.current;
+        if (!root) return;
+
+        const gallery = root.querySelector('[data-detail-gallery]');
+        const headerCard = root.querySelector('[data-detail-header]');
+        const asideCards = root.querySelectorAll('[data-detail-aside-card]');
+        const introTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+        if (gallery) {
+          introTl.from(gallery, { y: 12, opacity: 0, duration: 0.36, clearProps: 'transform,opacity' }, 0);
+        }
+        if (headerCard) {
+          introTl.from(headerCard, { y: 14, opacity: 0, duration: 0.36, clearProps: 'transform,opacity' }, 0.08);
+        }
+        if (asideCards.length > 0) {
+          introTl.from(
+            asideCards,
+            { y: 14, opacity: 0, duration: 0.34, stagger: 0.06, clearProps: 'transform,opacity' },
+            0.12
+          );
+        }
+
+        const highlights = root.querySelectorAll('[data-highlight-card]');
+        const highlightsWrap = root.querySelector('[data-highlights-wrap]');
+        if (highlightsWrap && highlights.length > 0) {
+          gsap.from(highlights, {
+            opacity: 0,
+            y: 10,
+            duration: 0.3,
+            stagger: 0.04,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: highlightsWrap,
+              start: 'top 86%',
+              once: true,
+            },
+          });
+        }
+
+        const relatedSection = root.querySelector('[data-related-section]');
+        const relatedCards = root.querySelectorAll('[data-related-card]');
+        if (relatedSection && relatedCards.length > 0) {
+          gsap.from(relatedCards, {
+            opacity: 0,
+            y: 18,
+            duration: 0.38,
+            stagger: 0.06,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: relatedSection,
+              start: 'top 85%',
+              once: true,
+            },
+          });
+        }
+      });
+      return () => mm.revert();
+    },
+    { scope: containerRef }
+  );
+
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
+    <div ref={containerRef} className="bg-[var(--bg-canvas)] min-h-screen pb-20">
       {/* 1. BREADCRUMBS */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-teal-700 transition-colors">
+          <nav
+            aria-label="Đường dẫn trang"
+            className="flex items-center gap-2 text-xs sm:text-sm text-[var(--ink-muted)] font-medium overflow-x-auto whitespace-nowrap"
+          >
+            <Link href="/" className="hover:text-[var(--accent-jade)] transition-colors py-1">
               Trang chủ
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-            <Link href="/explore" className="hover:text-teal-700 transition-colors">
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--border-strong)] shrink-0" aria-hidden="true" />
+            <Link href="/explore" className="hover:text-[var(--accent-jade)] transition-colors py-1">
               Khám phá
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--border-strong)] shrink-0" aria-hidden="true" />
             <Link
               href={`/explore?category=${category?.id}`}
-              className="hover:text-teal-700 transition-colors"
+              className="hover:text-[var(--accent-jade)] transition-colors py-1"
             >
               {category?.name}
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-            <span className="text-slate-800 font-semibold truncate max-w-xs">
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--border-strong)] shrink-0" aria-hidden="true" />
+            <span className="text-[var(--ink-primary)] font-semibold truncate max-w-xs">
               {cleanName}
             </span>
           </nav>
@@ -73,84 +149,91 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
         {/* 2. GALLERY */}
-        <PlaceGallery images={place.gallery} placeName={place.name} />
+        <div data-detail-gallery>
+          <PlaceGallery images={place.gallery} placeName={cleanName} />
+        </div>
 
         {/* 3. MAIN HEADER & DETAILS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT 2 COLUMNS: CONTENT */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* LEFT 2 COLUMNS */}
+          <div className="lg:col-span-2 min-w-0 space-y-6">
             {/* Title & Metadata */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+            <div data-detail-header className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="primary" size="md">
                   {category?.name}
                 </Badge>
                 <Badge variant="outline" size="md">
-                  <MapPin className="w-3 h-3 text-teal-600" />
-                  {district?.name}
+                  <MapPin className="w-3.5 h-3.5 text-[var(--accent-jade)]" aria-hidden="true" />
+                  <span>{district?.name}</span>
                 </Badge>
                 {place.is_featured && (
-                  <Badge variant="accent" size="md">
-                    <Sparkles className="w-3 h-3 text-amber-500" /> Nổi bật
-                  </Badge>
+                  <span className="inline-flex items-center px-3 py-1 rounded-md bg-[#F59E0B] text-[#16201D] text-xs font-bold">
+                    Điểm tiêu biểu
+                  </span>
                 )}
                 <span
-                  className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                  className={`text-xs px-3 py-1 rounded-md font-semibold ${
                     place.is_open_now
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-slate-100 text-slate-600'
+                      ? 'bg-[#E5F2EC] text-[#0E563B] border border-[#0E563B]/20'
+                      : 'bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)]'
                   }`}
                 >
                   {place.is_open_now ? 'Đang mở cửa' : 'Tạm đóng cửa'}
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-snug">
+              <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[var(--ink-primary)] tracking-[-0.02em] leading-tight">
                 {cleanName}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-600 pt-1">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-[var(--ink-secondary)] pt-1">
                 <RatingStars rating={place.rating} reviews={place.review_count} size="md" />
-                <span className="text-slate-300">|</span>
-                <span className="font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg">
+                <span className="hidden sm:inline text-[var(--border-strong)]" aria-hidden="true">
+                  |
+                </span>
+                <span className="font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-3 py-1 rounded-md text-xs sm:text-sm">
                   {place.price_label}
                 </span>
               </div>
 
-              <div className="pt-2 text-xs text-slate-500 flex items-center gap-1.5 border-t border-slate-100">
-                <MapPin className="w-4 h-4 text-teal-600 shrink-0" />
-                <span>{place.address}</span>
+              <div className="pt-3 text-sm text-[var(--ink-secondary)] flex items-start gap-2 border-t border-[var(--border-subtle)] min-w-0">
+                <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="min-w-0">{place.address}</span>
               </div>
             </div>
 
             {/* Description & Story */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                Giới Thiệu Tổng Quan
+            <div className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
+              <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--ink-primary)]">
+                Giới Thiệu Địa Danh
               </h2>
-              <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
+              <p className="text-[var(--ink-primary)] text-base leading-relaxed font-medium">
                 {place.description}
               </p>
-              <div className="text-slate-600 text-sm sm:text-base leading-relaxed pt-2 border-t border-slate-100">
+              <div className="text-[var(--ink-secondary)] text-base leading-relaxed pt-3 border-t border-[var(--border-subtle)]">
                 {place.content}
               </div>
             </div>
 
             {/* Highlights Section */}
             {place.highlights && place.highlights.length > 0 && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-500" />
-                  <span>Trải Nghiệm & Điểm Nhấn Nổi Bật</span>
+              <div data-highlights-wrap className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
+                <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--ink-primary)]">
+                  Điểm Nhấn Trải Nghiệm
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   {place.highlights.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-100/80 text-xs sm:text-sm text-slate-700 flex items-start gap-2.5"
+                      data-highlight-card
+                      className="p-4 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-sm text-[var(--ink-primary)] flex items-start gap-2.5"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                      <span>{item}</span>
+                      <CheckCircle2
+                        aria-hidden="true"
+                        className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5"
+                      />
+                      <span className="min-w-0 leading-relaxed">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -159,15 +242,18 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
 
             {/* Tips Section */}
             {place.tips && place.tips.length > 0 && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-teal-600" />
-                  <span>Kinh Nghiệm & Lưu Ý Khi Tham Quan</span>
+              <div className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
+                <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--ink-primary)] flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-[var(--accent-ochre)]" aria-hidden="true" />
+                  <span>Lưu Ý Khi Tham Quan</span>
                 </h2>
-                <ul className="space-y-2.5 pt-1 text-xs sm:text-sm text-slate-600">
+                <ul className="space-y-3 pt-1 text-sm sm:text-base text-[var(--ink-secondary)]">
                   {place.tips.map((tip, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0 mt-2" />
+                    <li key={idx} className="flex items-start gap-2.5 leading-relaxed">
+                      <span
+                        aria-hidden="true"
+                        className="w-1.5 h-1.5 rounded-full bg-[var(--accent-jade)] shrink-0 mt-2.5"
+                      />
                       <span>{tip}</span>
                     </li>
                   ))}
@@ -177,18 +263,18 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
 
             {/* Amenities Section */}
             {place.amenities && place.amenities.length > 0 && (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                  Tiện Ích & Dịch Vụ Có Sẵn
+              <div className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
+                <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[var(--ink-primary)]">
+                  Tiện Ích Tại Điểm Đến
                 </h2>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {place.amenities.map((amenity, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-medium flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-[var(--ink-primary)] text-xs sm:text-sm font-medium inline-flex items-center gap-1.5"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
-                      {amenity}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[var(--accent-jade)]" aria-hidden="true" />
+                      <span>{amenity}</span>
                     </span>
                   ))}
                 </div>
@@ -196,43 +282,42 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
             )}
           </div>
 
-          {/* RIGHT COLUMN: ACTION & LOCATION WIDGET */}
-          <div className="space-y-6">
-            {/* Quick Info Card */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-              <h3 className="font-bold text-slate-900 text-base pb-3 border-b border-slate-100">
-                Thông Tin Chi Tiết
-              </h3>
+          {/* RIGHT COLUMN: INFO & COORDINATES */}
+          <aside className="min-w-0 space-y-6">
+            <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-5">
+              <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-lg pb-3 border-b border-[var(--border-subtle)]">
+                Thông Tin Tham Quan
+              </h2>
 
-              <div className="space-y-3.5 text-xs sm:text-sm">
+              <div className="space-y-4 text-sm">
                 <div className="flex items-start gap-3">
-                  <Clock className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-slate-800">Giờ hoạt động</div>
-                    <div className="text-slate-500 mt-0.5">{place.opening_hours}</div>
+                  <Clock className="w-4.5 h-4.5 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[var(--ink-primary)]">Giờ mở cửa</div>
+                    <div className="text-[var(--ink-secondary)] mt-0.5">{place.opening_hours}</div>
                   </div>
                 </div>
 
                 {place.phone && (
                   <div className="flex items-start gap-3">
-                    <Phone className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-semibold text-slate-800">Điện thoại liên hệ</div>
-                      <div className="text-slate-500 mt-0.5">{place.phone}</div>
+                    <Phone className="w-4.5 h-4.5 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[var(--ink-primary)]">Điện thoại</div>
+                      <div className="text-[var(--ink-secondary)] mt-0.5 tabular-nums">{place.phone}</div>
                     </div>
                   </div>
                 )}
 
                 {place.website && (
                   <div className="flex items-start gap-3">
-                    <Globe className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-semibold text-slate-800">Trang thông tin</div>
+                    <Globe className="w-4.5 h-4.5 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[var(--ink-primary)]">Trang thông tin</div>
                       <a
                         href={place.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-teal-600 hover:underline mt-0.5 inline-block break-all"
+                        className="text-[var(--accent-jade)] hover:underline mt-0.5 inline-block break-all"
                       >
                         {place.website}
                       </a>
@@ -241,96 +326,100 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
                 )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 space-y-2.5">
+              <div className="pt-4 border-t border-[var(--border-subtle)] space-y-2.5">
                 <Link
                   href={`/map?placeId=${place.id}`}
-                  className="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-md shadow-teal-600/20 transition-all active:scale-95"
+                  className="ui-interactive-press w-full min-h-12 px-4 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] font-semibold text-sm flex items-center justify-center gap-2"
                 >
-                  <Navigation className="w-4 h-4" />
-                  <span>Xem vị trí trên Bản Đồ Số</span>
+                  <Navigation className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>Xem vị trí trên bản đồ</span>
                 </Link>
 
-                <Link
-                  href="/admin"
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs flex items-center justify-center gap-2 transition-colors border border-amber-200"
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ui-interactive-press w-full min-h-11 px-4 rounded-lg bg-[var(--accent-ochre-soft)] hover:bg-[#F5E4C8] text-[var(--accent-ochre-ink)] font-semibold text-sm flex items-center justify-center gap-2 border border-[var(--accent-ochre)]/25"
                 >
-                  <Edit3 className="w-4 h-4 text-amber-700" />
-                  <span>Chỉnh sửa thông tin (Admin CMS)</span>
-                </Link>
+                  <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>Chỉ đường Google Maps</span>
+                </a>
 
                 <Link
                   href="/explore"
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+                  className="ui-interactive-press w-full min-h-11 px-4 rounded-lg border border-[var(--border-strong)] hover:bg-[var(--bg-surface-muted)] text-[var(--ink-primary)] font-semibold text-sm flex items-center justify-center gap-2"
                 >
-                  <Compass className="w-4 h-4" />
+                  <Compass className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span>Khám phá địa điểm khác</span>
                 </Link>
               </div>
             </div>
 
-            {/* MINI MAP & GPS WIDGET */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-teal-600" />
-                  <span>Tọa Độ Định Vị GPS</span>
-                </h3>
-                <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
-                  Mô phỏng
+            {/* GPS COORDINATE CARD */}
+            <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-4">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-base flex items-center gap-2 min-w-0">
+                  <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
+                  <span className="truncate">Tọa Độ Địa Lý</span>
+                </h2>
+                <span className="font-mono text-xs font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm shrink-0">
+                  WGS84
                 </span>
               </div>
 
-              {/* Mini Map Graphic Representation */}
-              <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center p-4 text-center">
-                <div className="absolute inset-0 bg-[radial-gradient(#14b8a6_1px,transparent_1px)] [background-size:12px_12px] opacity-30" />
+              <div className="relative h-40 rounded-lg overflow-hidden bg-[var(--bg-basalt)] border border-[#24332F] flex items-center justify-center p-4 text-center">
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center border border-teal-500/40 mb-2">
-                    <Navigation className="w-5 h-5 animate-pulse" />
+                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-jade)]/30 text-[#A3D9CE] flex items-center justify-center border border-[#7CC4B8]/40 mb-2.5">
+                    <Navigation className="w-4 h-4" aria-hidden="true" />
                   </div>
-                  <div className="font-mono text-xs text-white font-semibold">
-                    Lat: {place.latitude.toFixed(4)}°N
+                  <div className="font-mono text-sm text-[#FFFDF9] font-medium tabular-nums">
+                    {place.latitude.toFixed(4)}° N
                   </div>
-                  <div className="font-mono text-xs text-teal-300 font-semibold">
-                    Lng: {place.longitude.toFixed(4)}°E
+                  <div className="font-mono text-sm text-[#A3D9CE] font-medium tabular-nums mt-0.5">
+                    {place.longitude.toFixed(4)}° E
                   </div>
                 </div>
               </div>
 
-              <div className="text-[11px] text-slate-500 leading-relaxed">
-                Tọa độ GPS sẵn sàng chuyển tiếp vào ứng dụng Google Maps hoặc hệ cơ sở dữ liệu không gian Supabase PostGIS.
-              </div>
+              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                Hệ tọa độ chuẩn WGS84 dùng để định vị trên bản đồ số tương tác và dẫn đường GPS.
+              </p>
             </div>
-          </div>
+          </aside>
         </div>
 
         {/* 4. RELATED PLACES */}
         {relatedPlaces.length > 0 && (
-          <div className="pt-10 border-t border-slate-200 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                  Địa Điểm Lân Cận & Cùng Danh Mục
+          <section data-related-section className="pt-10 border-t border-[var(--border-subtle)] space-y-6">
+            <div className="flex items-end justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[var(--ink-primary)] tracking-[-0.02em]">
+                  Địa Điểm Lân Cận &amp; Cùng Danh Mục
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                  Gợi ý điểm dừng chân tiếp theo cho lịch trình của bạn
+                <p className="text-sm text-[var(--ink-secondary)] mt-1">
+                  Gợi ý điểm dừng tiếp theo cho hành trình khám phá Quảng Ngãi
                 </p>
               </div>
               <Link
                 href="/explore"
-                className="text-xs font-semibold text-teal-700 hover:underline flex items-center gap-1"
+                className="group text-sm font-semibold text-[var(--accent-jade)] hover:text-[var(--accent-jade-hover)] hover:underline inline-flex items-center gap-1 shrink-0 min-h-11 transition-colors"
               >
                 <span>Xem tất cả</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight
+                  className="w-4 h-4 motion-safe:group-hover:translate-x-0.5 transition-transform duration-200 motion-reduce:transition-none"
+                  aria-hidden="true"
+                />
               </Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedPlaces.map((relPlace) => (
-                <PlaceCard key={relPlace.id} place={relPlace} />
+                <div key={relPlace.id} data-related-card className="h-full min-w-0">
+                  <PlaceCard place={relPlace} />
+                </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
       </div>
     </div>

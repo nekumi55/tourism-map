@@ -33,9 +33,9 @@ export default function MapPage() {
       />
       <Suspense
         fallback={
-          <div className="w-full flex-1 min-h-[450px] lg:h-[calc(100vh-80px)] flex flex-col items-center justify-center bg-slate-900 text-teal-300 p-8 text-center">
-            <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-3" />
-            <span className="text-sm font-bold">Đang tải bản đồ số tương tác...</span>
+          <div className="w-full flex-1 min-h-[450px] lg:h-[calc(100vh-80px)] flex flex-col items-center justify-center bg-[var(--bg-basalt)] text-[#A3D9CE] p-8 text-center">
+            <div className="w-9 h-9 border-3 border-[#7CC4B8] border-t-transparent rounded-full animate-spin mb-3" />
+            <span className="text-sm font-semibold">Đang tải bản đồ số tương tác...</span>
           </div>
         }
       >

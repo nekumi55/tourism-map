@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Be_Vietnam_Pro, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -7,27 +7,37 @@ import MockDataBanner from '@/components/common/MockDataBanner';
 import { DataProvider } from '@/context/DataContext';
 import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: '--font-be-vietnam-pro',
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const playfairDisplay = Playfair_Display({
+  variable: '--font-playfair-display',
+  subsets: ['latin', 'vietnamese'],
+  weight: ['600', '700'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
-  title: 'Quảng Ngãi Tourism Map - Cổng Thông Tin & Bản Đồ Số Du Lịch Tỉnh Quảng Ngãi',
+  title: 'Bản Đồ Di Sản & Du Lịch Tỉnh Quảng Ngãi | Cổng Thông Tin Tương Tác',
   description:
-    'Khám phá danh lam thắng cảnh, vương quốc tỏi Lý Sơn, núi Thiên Ấn, bãi biển Mỹ Khê và văn hóa Sa Huỳnh tỉnh Quảng Ngãi với bản đồ số tương tác thông minh.',
+    'Khám phá danh lam thắng cảnh, đảo Lý Sơn, núi Thiên Ấn, cao nguyên Măng Đen và văn hóa Sa Huỳnh tỉnh Quảng Ngãi trên bản đồ số tương tác.',
   keywords: [
     'du lịch Quảng Ngãi',
     'bản đồ du lịch Quảng Ngãi',
     'bản đồ số',
     'địa điểm du lịch Quảng Ngãi',
     'Lý Sơn',
+    'Măng Đen',
     'Thiên Ấn',
+    'Sa Huỳnh',
   ],
 };
 
@@ -123,7 +133,7 @@ export default function RootLayout({
     <html
       lang="vi"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${beVietnamPro.variable} ${playfairDisplay.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -134,13 +144,18 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-slate-50 text-slate-800 selection:bg-teal-100 selection:text-teal-900 font-sans"
+        className="min-h-full flex flex-col bg-[var(--bg-canvas)] text-[var(--ink-primary)] font-sans"
       >
         <SmoothScrollProvider>
           <DataProvider>
+            <a href="#main-content" className="skip-link">
+              Bỏ qua đến nội dung chính
+            </a>
             <MockDataBanner />
             <Navbar />
-            <main className="flex-1 flex flex-col min-w-0">{children}</main>
+            <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col min-w-0 outline-none">
+              {children}
+            </main>
             <Footer />
           </DataProvider>
         </SmoothScrollProvider>

@@ -1,134 +1,500 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Compass, Info, Home, Menu, X, Compass as LogoIcon, Search, Route } from 'lucide-react';
+import { Map, Compass, Info, Home, Menu, X, Search, Route } from 'lucide-react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { useData } from '@/context/DataContext';
+
+gsap.registerPlugin(useGSAP);
 
 const NAV_LINKS = [
   { href: '/', label: 'Trang chủ', icon: Home },
   { href: '/explore', label: 'Khám phá', icon: Compass },
   { href: '/map', label: 'Bản đồ số', icon: Map },
-  { href: '/itinerary', label: 'Lịch trình tour', icon: Route },
+  { href: '/itinerary', label: 'Lịch trình', icon: Route },
   { href: '/about', label: 'Giới thiệu', icon: Info },
 ];
+
+const BASE_INDICATOR_WIDTH = 96;
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDrawerRendered, setIsDrawerRendered] = useState(false);
   const { settings } = useData();
 
-  return (
-    <header suppressHydrationWarning className="sticky top-0 z-50 w-full overflow-x-clip bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-soft-sm transition-all">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-2 sm:gap-3 h-16 md:h-20">
-          {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0 flex-1 lg:flex-initial lg:max-w-[250px] xl:max-w-[325px]">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20 group-hover:scale-105 group-hover:shadow-glow transition-all shrink-0">
-              <LogoIcon className="w-5 h-5 animate-spin-slow" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm sm:text-base xl:text-lg tracking-tight text-slate-900 group-hover:text-teal-700 transition-colors truncate">
-                {settings.siteTitle}
-              </span>
-              <span className="text-[10px] md:text-[11px] text-slate-500 uppercase tracking-wider font-semibold truncate">
-                {settings.siteSubtitle}
-              </span>
-            </div>
-          </Link>
+  const desktopNavRef = useRef<HTMLElement>(null);
+  const activeIndicatorRef = useRef<HTMLSpanElement>(null);
+  const navItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const hasPlacedIndicatorRef = useRef(false);
+  const indicatorTweenRef = useRef<gsap.core.Tween | null>(null);
 
-          {/* Desktop Navigation (Protected from wrapping) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0">
-            {NAV_LINKS.map((link) => {
+  const scrimRef = useRef<HTMLDivElement>(null);
+  const drawerPanelRef = useRef<HTMLDivElement>(null);
+  const drawerItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const drawerTlRef = useRef<gsap.core.Timeline | null>(null);
+  const wasDrawerMountedRef = useRef(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  const activeIndex = NAV_LINKS.findIndex(
+    (link) => pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+  );
+  const activeIndexRef = useRef(activeIndex);
+
+  useLayoutEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  const placeIndicator = useCallback((targetIndex: number, animate: boolean) => {
+    const navEl = desktopNavRef.current;
+    const indicatorEl = activeIndicatorRef.current;
+    if (!navEl || !indicatorEl) return;
+
+    const targetEl = targetIndex >= 0 ? navItemRefs.current[targetIndex] : null;
+    const reduce = prefersReducedMotion();
+
+    if (!targetEl || targetEl.offsetWidth === 0 || navEl.offsetWidth === 0) {
+      indicatorTweenRef.current?.kill();
+      if (targetIndex < 0 && hasPlacedIndicatorRef.current && animate && !reduce) {
+        indicatorTweenRef.current = gsap.to(indicatorEl, {
+          autoAlpha: 0,
+          scaleX: 0.3,
+          duration: 0.18,
+          ease: 'power2.out',
+          overwrite: true,
+          onComplete: () => {
+            gsap.set(indicatorEl, { clearProps: 'willChange' });
+          },
+        });
+      } else {
+        gsap.set(indicatorEl, { autoAlpha: 0 });
+      }
+      hasPlacedIndicatorRef.current = false;
+      return;
+    }
+
+    const inset = 12;
+    const barWidth = Math.max(24, targetEl.offsetWidth - inset * 2);
+    const targetX = targetEl.offsetLeft + inset;
+    const targetScaleX = barWidth / BASE_INDICATOR_WIDTH;
+
+    indicatorTweenRef.current?.kill();
+
+    if (!hasPlacedIndicatorRef.current || !animate || reduce) {
+      hasPlacedIndicatorRef.current = true;
+      gsap.set(indicatorEl, {
+        x: targetX,
+        scaleX: targetScaleX,
+        autoAlpha: 1,
+        transformOrigin: 'left center',
+        clearProps: 'willChange',
+      });
+      return;
+    }
+
+    indicatorTweenRef.current = gsap.to(indicatorEl, {
+      x: targetX,
+      scaleX: targetScaleX,
+      autoAlpha: 1,
+      duration: 0.32,
+      ease: 'power3.out',
+      willChange: 'transform, opacity',
+      overwrite: true,
+      onComplete: () => {
+        gsap.set(indicatorEl, { clearProps: 'willChange' });
+      },
+    });
+  }, []);
+
+  const openDrawer = useCallback(() => {
+    setIsDrawerRendered(true);
+    setIsMobileMenuOpen(true);
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  const toggleDrawer = useCallback(() => {
+    if (isMobileMenuOpen) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  }, [isMobileMenuOpen, closeDrawer, openDrawer]);
+
+  useGSAP(
+    () => {
+      placeIndicator(activeIndex, true);
+    },
+    { scope: desktopNavRef, dependencies: [activeIndex, placeIndicator] }
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      placeIndicator(activeIndexRef.current, false);
+    };
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [placeIndicator]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return undefined;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDrawer();
+        menuButtonRef.current?.focus();
+      }
+    };
+
+    const handlePopState = () => {
+      closeDrawer();
+    };
+
+    const lgQuery = window.matchMedia('(min-width: 1024px)');
+    const handleBreakpointChange = (e: MediaQueryListEvent) => {
+      if (e.matches) closeDrawer();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('popstate', handlePopState);
+    lgQuery.addEventListener('change', handleBreakpointChange);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handlePopState);
+      lgQuery.removeEventListener('change', handleBreakpointChange);
+    };
+  }, [isMobileMenuOpen, closeDrawer]);
+
+  useGSAP(
+    (_context, contextSafe) => {
+      if (!isDrawerRendered) {
+        wasDrawerMountedRef.current = false;
+        return;
+      }
+
+      const scrim = scrimRef.current;
+      const panel = drawerPanelRef.current;
+      const items = drawerItemRefs.current.filter(
+        (el): el is HTMLAnchorElement => el !== null
+      );
+      if (!scrim || !panel) return;
+
+      drawerTlRef.current?.kill();
+      const reduce = prefersReducedMotion();
+
+      const finalizeClose = contextSafe
+        ? contextSafe(() => {
+            wasDrawerMountedRef.current = false;
+            setIsDrawerRendered(false);
+          })
+        : () => {
+            wasDrawerMountedRef.current = false;
+            setIsDrawerRendered(false);
+          };
+
+      if (isMobileMenuOpen) {
+        if (!wasDrawerMountedRef.current) {
+          wasDrawerMountedRef.current = true;
+          gsap.set(scrim, { autoAlpha: 0 });
+          gsap.set(panel, { autoAlpha: 0, y: reduce ? 0 : -10 });
+          gsap.set(items, { autoAlpha: 0, y: reduce ? 0 : -6 });
+        }
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            gsap.set([panel, ...items], { clearProps: 'willChange' });
+          },
+        });
+
+        if (reduce) {
+          tl.to(scrim, { autoAlpha: 1, duration: 0.1, ease: 'power1.out' }, 0)
+            .to(panel, { autoAlpha: 1, y: 0, duration: 0.1, ease: 'power1.out' }, 0)
+            .to(items, { autoAlpha: 1, y: 0, duration: 0.08, ease: 'power1.out' }, 0);
+        } else {
+          tl.to(scrim, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' }, 0)
+            .to(
+              panel,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.26,
+                ease: 'power3.out',
+                willChange: 'transform, opacity',
+              },
+              0
+            )
+            .to(
+              items,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.22,
+                stagger: 0.035,
+                ease: 'power3.out',
+                willChange: 'transform, opacity',
+              },
+              0.04
+            );
+        }
+
+        drawerTlRef.current = tl;
+      } else {
+        const tl = gsap.timeline({
+          onComplete: finalizeClose,
+        });
+
+        if (reduce) {
+          tl.to(items, { autoAlpha: 0, duration: 0.08, ease: 'power1.in' }, 0)
+            .to(panel, { autoAlpha: 0, duration: 0.09, ease: 'power1.in' }, 0)
+            .to(scrim, { autoAlpha: 0, duration: 0.09, ease: 'power1.out' }, 0);
+        } else {
+          tl.to(
+            items,
+            {
+              autoAlpha: 0,
+              y: -4,
+              duration: 0.12,
+              stagger: { each: 0.02, from: 'end' },
+              ease: 'power2.in',
+              willChange: 'transform, opacity',
+            },
+            0
+          )
+            .to(
+              panel,
+              {
+                autoAlpha: 0,
+                y: -8,
+                duration: 0.18,
+                ease: 'power2.in',
+                willChange: 'transform, opacity',
+              },
+              0.03
+            )
+            .to(
+              scrim,
+              {
+                autoAlpha: 0,
+                duration: 0.18,
+                ease: 'power2.out',
+              },
+              0.02
+            );
+        }
+
+        drawerTlRef.current = tl;
+      }
+    },
+    { dependencies: [isMobileMenuOpen, isDrawerRendered] }
+  );
+
+  return (
+    <>
+      <header
+        suppressHydrationWarning
+        className="sticky top-0 z-50 w-full overflow-x-clip border-b border-[var(--border-subtle)] bg-[#FFFDF9]/95 backdrop-blur-md"
+      >
+        <div className="relative z-10 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between gap-3 h-16 md:h-20">
+              {/* Architectural Brand Lockup */}
+              <Link
+                href="/"
+                onClick={isMobileMenuOpen ? closeDrawer : undefined}
+                className="flex items-center gap-3 group min-w-0 flex-1 lg:flex-initial lg:max-w-[260px] xl:max-w-[320px] py-1 rounded-lg"
+              >
+                <div
+                  aria-hidden="true"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-[var(--accent-jade)] text-[#FFFDF9] flex items-center justify-center shrink-0 transition-transform duration-200 ease-[var(--motion-ease-out)] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="w-5 h-5"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <polygon points="15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6 15.5 8.5" fill="currentColor" stroke="none" />
+                  </svg>
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-sans font-extrabold text-sm md:text-base tracking-tight text-[var(--ink-primary)] group-hover:text-[var(--accent-jade)] transition-colors duration-200 truncate">
+                    {settings.siteTitle}
+                  </span>
+                  <span className="hidden sm:block text-[11px] text-[var(--ink-muted)] font-medium truncate">
+                    Tỉnh Quảng Ngãi · Bản đồ Di sản & Du lịch
+                  </span>
+                </div>
+              </Link>
+
+              {/* Desktop Navigation */}
+              <nav
+                ref={desktopNavRef}
+                aria-label="Điều hướng chính"
+                className="hidden lg:flex items-center gap-1 shrink-0 relative p-1 rounded-xl bg-[var(--bg-surface-muted)]/80 border border-[var(--border-subtle)]"
+              >
+                <span
+                  ref={activeIndicatorRef}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-0 bottom-1 h-[2.5px] w-24 rounded-full bg-[var(--accent-jade)] invisible opacity-0 z-20"
+                />
+                {NAV_LINKS.map((link, index) => {
+                  const Icon = link.icon;
+                  const isActive = index === activeIndex;
+                  return (
+                    <Link
+                      key={link.href}
+                      ref={(el) => {
+                        navItemRefs.current[index] = el;
+                      }}
+                      href={link.href}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`relative z-10 flex items-center gap-1.5 px-3 xl:px-3.5 min-h-9 rounded-lg text-[13px] xl:text-sm whitespace-nowrap transition-[color,background-color,box-shadow] duration-200 motion-reduce:transition-none shrink-0 border ${
+                        isActive
+                          ? 'bg-[var(--bg-surface)] text-[var(--accent-jade)] font-bold border-[var(--border-subtle)] shadow-soft-sm'
+                          : 'text-[var(--ink-secondary)] font-medium border-transparent hover:text-[var(--ink-primary)] hover:bg-[var(--bg-surface)]/65'
+                      }`}
+                    >
+                      <Icon
+                        aria-hidden="true"
+                        className={`w-4 h-4 shrink-0 ${
+                          isActive ? 'text-[var(--accent-jade)]' : 'text-[var(--ink-muted)]'
+                        }`}
+                      />
+                      <span>{link.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Right Action Controls */}
+              <div className="hidden lg:flex items-center gap-2 shrink-0">
+                <Link
+                  href="/explore"
+                  className="ui-interactive-press min-h-11 min-w-11 px-2.5 rounded-lg text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:bg-[var(--bg-surface-muted)]/70 flex items-center justify-center motion-reduce:transition-none shrink-0"
+                  title="Tìm kiếm địa điểm"
+                  aria-label="Tìm kiếm địa điểm"
+                >
+                  <Search className="w-4.5 h-4.5" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/map"
+                  className="ui-interactive-press flex items-center gap-2 px-4 min-h-11 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] text-sm font-semibold whitespace-nowrap shrink-0"
+                >
+                  <Map className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>Mở bản đồ</span>
+                </Link>
+              </div>
+
+              {/* Mobile & Tablet (< lg) Controls */}
+              <div className="flex lg:hidden items-center gap-2 shrink-0">
+                <Link
+                  href="/map"
+                  onClick={isMobileMenuOpen ? closeDrawer : undefined}
+                  className="ui-interactive-press min-h-11 px-3.5 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] text-xs sm:text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  <Map className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>Bản đồ</span>
+                </Link>
+                <button
+                  ref={menuButtonRef}
+                  type="button"
+                  onClick={toggleDrawer}
+                  className="ui-interactive-press min-h-11 min-w-11 flex items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--ink-primary)] hover:bg-[var(--bg-surface-muted)] cursor-pointer"
+                  aria-label={isMobileMenuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-nav-drawer"
+                >
+                  <span className="relative flex items-center justify-center w-5 h-5" aria-hidden="true">
+                    <Menu
+                      className={`w-5 h-5 absolute transition-[opacity,transform] duration-200 ease-[var(--motion-ease-out)] motion-reduce:duration-75 motion-reduce:rotate-0 motion-reduce:scale-100 ${
+                        isMobileMenuOpen
+                          ? 'opacity-0 rotate-90 scale-75'
+                          : 'opacity-100 rotate-0 scale-100'
+                      }`}
+                    />
+                    <X
+                      className={`w-5 h-5 absolute transition-[opacity,transform] duration-200 ease-[var(--motion-ease-out)] motion-reduce:duration-75 motion-reduce:rotate-0 motion-reduce:scale-100 ${
+                        isMobileMenuOpen
+                          ? 'opacity-100 rotate-0 scale-100'
+                          : 'opacity-0 -rotate-90 scale-75'
+                      }`}
+                    />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Drawer */}
+        {isDrawerRendered && (
+          <div
+            id="mobile-nav-drawer"
+            ref={drawerPanelRef}
+            role="dialog"
+            aria-modal="false"
+            aria-label="Menu điều hướng"
+            className="lg:hidden absolute top-full left-0 right-0 z-0 border-t border-[var(--border-subtle)] bg-[#FFFDF9] px-4 pt-3 pb-6 space-y-1.5 shadow-soft-2xl max-h-[calc(100dvh-4rem)] overflow-y-auto invisible opacity-0"
+          >
+            {NAV_LINKS.map((link, index) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+              const isActive = index === activeIndex;
               return (
                 <Link
                   key={link.href}
+                  ref={(el) => {
+                    drawerItemRefs.current[index] = el;
+                  }}
                   href={link.href}
-                  className={`flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all shrink-0 ${
+                  onClick={closeDrawer}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex items-center gap-3 px-4 min-h-12 rounded-lg text-base font-medium min-w-0 transition-colors duration-150 border ${
                     isActive
-                      ? 'text-teal-800 bg-teal-50/90 shadow-soft-sm font-bold border border-teal-200/60'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                      ? 'text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] font-semibold border-[var(--accent-jade)]/25'
+                      : 'text-[var(--ink-primary)] border-transparent hover:bg-[var(--bg-surface-muted)]/70'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-teal-600' : 'text-slate-400'} shrink-0`} />
-                  <span>{link.label}</span>
+                  <Icon
+                    aria-hidden="true"
+                    className={`w-5 h-5 shrink-0 ${
+                      isActive ? 'text-[var(--accent-jade)]' : 'text-[var(--ink-muted)]'
+                    }`}
+                  />
+                  <span className="truncate">{link.label}</span>
                 </Link>
               );
             })}
-          </nav>
-
-          {/* Right Action Buttons */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
-            <Link
-              href="/explore"
-              className="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-slate-100 transition-colors shrink-0"
-              title="Tìm kiếm địa điểm"
-            >
-              <Search className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/itinerary"
-              className="hidden xl:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-200 text-teal-700 hover:bg-teal-50 text-xs font-bold transition-all shadow-soft-sm whitespace-nowrap shrink-0"
-            >
-              <Route className="w-4 h-4 text-teal-600 shrink-0" />
-              <span>Lên Lịch Trình</span>
-            </Link>
-            <Link
-              href="/map"
-              className="flex items-center gap-1.5 px-3.5 xl:px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs xl:text-sm font-bold shadow-soft transition-all hover:shadow-soft-xl active:scale-95 whitespace-nowrap shrink-0"
-            >
-              <Map className="w-4 h-4 shrink-0" />
-              <span>Mở Bản Đồ</span>
-            </Link>
           </div>
+        )}
+      </header>
 
-          {/* Mobile & Tablet (< lg) Menu Button */}
-          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
-            <Link
-              href="/map"
-              className="px-3 py-1.5 rounded-xl bg-teal-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap"
-            >
-              <Map className="w-3.5 h-3.5" />
-              <span>Bản đồ</span>
-            </Link>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-hidden"
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top duration-200 shadow-xl">
-          {NAV_LINKS.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-base font-semibold transition-colors ${
-                  isActive
-                    ? 'text-teal-800 bg-teal-50 font-bold border border-teal-200/60'
-                    : 'text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-teal-600' : 'text-slate-400'}`} />
-                {link.label}
-              </Link>
-            );
-          })}
-        </div>
+      {/* Mobile Drawer Scrim */}
+      {isDrawerRendered && (
+        <div
+          ref={scrimRef}
+          onClick={closeDrawer}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 lg:hidden bg-[#111A18]/40 backdrop-blur-[2px] invisible opacity-0"
+        />
       )}
-    </header>
+    </>
   );
 }

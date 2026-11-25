@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!place) return { title: 'Không tìm thấy địa điểm' };
 
   return {
-    title: `${place.name} | Du Lịch Tỉnh`,
+    title: `${place.name} | Du Lịch Quảng Ngãi`,
     description: place.description,
   };
 }

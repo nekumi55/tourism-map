@@ -416,7 +416,7 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 min-w-0">
       {/* Toast Notification */}
       {notification && (
         <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-teal-600 text-white font-semibold text-xs shadow-2xl flex items-center gap-2 animate-in slide-in-from-bottom duration-300">
@@ -426,10 +426,10 @@ export default function AdminDashboard() {
       )}
 
       {/* Main Admin Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div className="min-w-0">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-600 mb-1">
-            <Sliders className="w-4 h-4" />
+            <Sliders className="w-4 h-4 shrink-0" />
             <span>Trung Tâm Điều Hành & Chỉnh Sửa Trực Quan</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -440,25 +440,25 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Link
             href="/"
             target="_blank"
-            className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 shrink-0" />
             <span>Xem trang chủ khách</span>
-            <ExternalLink className="w-3 h-3 text-slate-400" />
+            <ExternalLink className="w-3 h-3 text-slate-400 shrink-0" />
           </Link>
           <button
             onClick={handleDownloadBackup}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 shrink-0" />
             <span>Xuất file JSON</span>
           </button>
-          <label className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer">
-            <Upload className="w-3.5 h-3.5" />
+          <label className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm transition-colors cursor-pointer">
+            <Upload className="w-3.5 h-3.5 shrink-0" />
             <span>Nạp file places.json</span>
             <input
               type="file"
@@ -471,64 +471,64 @@ export default function AdminDashboard() {
       </div>
 
       {/* Navigation Tabs Bar */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-none">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
         <button
           onClick={() => setActiveTab('places')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'places'
               ? 'bg-teal-600 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <MapPin className="w-4 h-4" />
+          <MapPin className="w-4 h-4 shrink-0" />
           <span>1. Địa Điểm Du Lịch ({places.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('map-picker')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'map-picker'
               ? 'bg-teal-600 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Map className="w-4 h-4" />
+          <Map className="w-4 h-4 shrink-0" />
           <span>2. Chỉnh Tọa Độ Trên Bản Đồ</span>
         </button>
 
         <button
           onClick={() => setActiveTab('categories')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'categories'
               ? 'bg-teal-600 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Grid className="w-4 h-4" />
+          <Grid className="w-4 h-4 shrink-0" />
           <span>3. Danh Mục Trải Nghiệm ({categories.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('districts')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'districts'
               ? 'bg-teal-600 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Layers className="w-4 h-4" />
+          <Layers className="w-4 h-4 shrink-0" />
           <span>4. Khu Vực Hành Chính ({districts.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('settings')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'settings'
               ? 'bg-teal-600 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-4 h-4 shrink-0" />
           <span>5. Thông Tin Toàn Bộ Trang Web</span>
         </button>
       </div>
@@ -539,19 +539,19 @@ export default function AdminDashboard() {
       {activeTab === 'places' && (
         <div className="space-y-6">
           {/* Action & Filter Bar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex flex-1 w-full sm:w-auto items-center gap-3">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row flex-1 min-w-0 items-stretch sm:items-center gap-3">
               <input
                 type="text"
                 value={placeSearch}
                 onChange={(e) => setPlaceSearch(e.target.value)}
                 placeholder="Tìm kiếm địa điểm theo tên hoặc địa chỉ..."
-                className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500"
+                className="flex-1 min-w-0 px-3.5 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500"
               />
               <select
                 value={placeCatFilter}
                 onChange={(e) => setPlaceCatFilter(e.target.value)}
-                className="px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800"
+                className="px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-800 shrink-0"
               >
                 <option value="all">Tất cả danh mục</option>
                 {categories.map((c) => (

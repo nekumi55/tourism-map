@@ -48,6 +48,9 @@ export default function LeafletMap({
   const polylineRef = useRef<LType.Polyline | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const hasFittedInitialRef = useRef(false);
+  const mapClickedIdRef = useRef<string | null>(null);
+  const lastHandledSelectedIdRef = useRef<string | null>(selectedPlace?.id ?? null);
+  const prevSelectedIdRef = useRef<string | null>(selectedPlace?.id ?? null);
 
   // Store latest props in refs to avoid re-triggering map initialization
   const placesRef = useRef(places);
@@ -136,6 +139,9 @@ export default function LeafletMap({
       // 2. Draw Markers
       const currentPlaces = placesRef.current;
       const currentSelected = selectedPlaceRef.current;
+      const selectedChanged =
+        Boolean(currentSelected?.id) && prevSelectedIdRef.current !== currentSelected?.id;
+      prevSelectedIdRef.current = currentSelected?.id ?? null;
 
       currentPlaces.forEach((place) => {
         const isSelected = currentSelected?.id === place.id;
@@ -144,11 +150,18 @@ export default function LeafletMap({
         const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
         const pinSize = isItinerary || isSelected ? 34 : 28;
         const pinBg = isItinerary ? '#f59e0b' : isSelected ? '#0d9488' : '#0284c7';
+        const dotClasses = [
+          'map-pin-dot',
+          isSelected ? 'map-pin-dot--selected' : '',
+          isSelected && selectedChanged ? 'map-pin-dot--entering' : '',
+        ]
+          .filter(Boolean)
+          .join(' ');
 
         const markerHtml = `
-          <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
+          <div class="map-pin-wrap">
             ${isSelected ? '<div class="marker-selected-ring"></div>' : ''}
-            <div style="width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2.5px solid #ffffff; background: ${pinBg}; color: #ffffff;">
+            <div class="${dotClasses}" style="width: ${pinSize}px; height: ${pinSize}px; background: ${pinBg};">
               ${
                 isItinerary
                   ? `#${itineraryIdx + 1}`
@@ -164,31 +177,53 @@ export default function LeafletMap({
         const customIcon = L.divIcon({
           className: 'custom-pin-marker',
           html: markerHtml,
-          iconSize: [0, 0],
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
         });
 
         const marker = L.marker([place.latitude, place.longitude], {
           icon: customIcon,
+          title: cleanName,
+          alt: cleanName,
           zIndexOffset: isSelected ? 1000 : isItinerary ? 500 : 0,
         });
 
         marker.on('click', () => {
+          if (selectedPlaceRef.current?.id !== place.id) {
+            mapClickedIdRef.current = place.id;
+          }
           onSelectPlaceRef.current(place);
         });
 
         markersGroup.addLayer(marker);
       });
 
-      // Pan smoothly if a place is selected and container is visible
+      const currentSelectedId = currentSelected?.id ?? null;
+      const selectionChanged = currentSelectedId !== lastHandledSelectedIdRef.current;
+      lastHandledSelectedIdRef.current = currentSelectedId;
+
+      const wasClickedOnMap =
+        currentSelectedId !== null && mapClickedIdRef.current === currentSelectedId;
+      if (wasClickedOnMap || currentSelectedId === null) {
+        mapClickedIdRef.current = null;
+      }
+
+      // Pan only when a different place is chosen outside the map (e.g. sidebar list)
       if (
+        selectionChanged &&
+        !wasClickedOnMap &&
         currentSelected &&
         hasFittedInitialRef.current &&
         containerRef.current &&
         containerRef.current.clientWidth > 0
       ) {
+        const reduceMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
         map.panTo([currentSelected.latitude, currentSelected.longitude], {
-          animate: true,
-          duration: 0.8,
+          animate: !reduceMotion,
+          duration: reduceMotion ? 0 : 0.65,
+          easeLinearity: 0.25,
         });
       }
     },

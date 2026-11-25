@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import ImageManager from '@/components/admin/ImageManager';
 
 export const metadata: Metadata = {
-  title: 'Công Cụ Quản Lý & Chỉnh Sửa Hình Ảnh Trực Quan | Non Xanh Map',
+  title: 'Quản Lý Hình Ảnh Địa Điểm | Quảng Ngãi Atlas',
   description:
     'Giao diện trực quan cho phép thêm mới, xóa, thay đổi thứ tự và chọn ảnh đại diện cho các địa điểm du lịch.',
 };

@@ -5,15 +5,15 @@ import ItineraryPageContent from '@/components/itinerary/ItineraryPageContent';
 export const metadata: Metadata = {
   title: 'Lập Lịch Trình Du Lịch Quảng Ngãi & Chỉ Dẫn Bản Đồ Trực Quan',
   description:
-    'Công cụ tự động lên lịch trình du lịch Quảng Ngãi: chọn thứ tự các điểm dừng, thống kê tổng cự ly di chuyển (km), thời gian và chỉ dẫn đường đi trên bản đồ số.',
+    'Công cụ lên lịch trình du lịch Quảng Ngãi: sắp xếp thứ tự các điểm dừng, tính tổng cự ly di chuyển (km), thời gian dự kiến và chỉ đường trên bản đồ số.',
 };
 
 export default function ItineraryPage() {
   return (
-    <div className="w-full flex-1 bg-slate-50 min-h-screen">
+    <div className="w-full flex-1 bg-[var(--bg-canvas)] min-h-screen">
       <Suspense
         fallback={
-          <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-500 text-sm">
+          <div className="max-w-7xl mx-auto px-4 py-16 text-center text-[var(--ink-muted)] text-sm">
             Đang tải công cụ lập lịch trình du lịch...
           </div>
         }

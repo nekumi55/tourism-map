@@ -2,7 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Category } from '@/types';
 import { Trees, Palmtree, Landmark, Utensils, Compass, ChevronRight } from 'lucide-react';
-import SpotlightCard from '@/components/ui/SpotlightCard/SpotlightCard';
 
 interface CategoryCardProps {
   category: Category;
@@ -19,70 +18,60 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 export default function CategoryCard({ category }: CategoryCardProps) {
   const IconComponent = ICON_MAP[category.icon] || Compass;
 
-  const colorVariants: Record<string, { bg: string; text: string; border: string; glow: string }> = {
+  const toneVariants: Record<string, { iconBg: string; iconText: string }> = {
     emerald: {
-      bg: 'bg-emerald-500/10 hover:bg-emerald-500/20',
-      text: 'text-emerald-700',
-      border: 'border-emerald-200',
-      glow: 'group-hover:shadow-emerald-500/10',
+      iconBg: 'bg-[var(--accent-jade-soft)]',
+      iconText: 'text-[var(--accent-jade)]',
     },
     cyan: {
-      bg: 'bg-cyan-500/10 hover:bg-cyan-500/20',
-      text: 'text-cyan-700',
-      border: 'border-cyan-200',
-      glow: 'group-hover:shadow-cyan-500/10',
+      iconBg: 'bg-[#E1EFEF]',
+      iconText: 'text-[#0E5A63]',
     },
     amber: {
-      bg: 'bg-amber-500/10 hover:bg-amber-500/20',
-      text: 'text-amber-700',
-      border: 'border-amber-200',
-      glow: 'group-hover:shadow-amber-500/10',
+      iconBg: 'bg-[var(--accent-ochre-soft)]',
+      iconText: 'text-[var(--accent-ochre)]',
     },
     rose: {
-      bg: 'bg-rose-500/10 hover:bg-rose-500/20',
-      text: 'text-rose-700',
-      border: 'border-rose-200',
-      glow: 'group-hover:shadow-rose-500/10',
+      iconBg: 'bg-[#F6EAE6]',
+      iconText: 'text-[#9A3412]',
     },
     indigo: {
-      bg: 'bg-indigo-500/10 hover:bg-indigo-500/20',
-      text: 'text-indigo-700',
-      border: 'border-indigo-200',
-      glow: 'group-hover:shadow-indigo-500/10',
+      iconBg: 'bg-[var(--bg-surface-muted)]',
+      iconText: 'text-[var(--ink-primary)]',
     },
   };
 
-  const colors = colorVariants[category.color] || colorVariants.emerald;
+  const tone = toneVariants[category.color] || toneVariants.emerald;
 
   return (
     <Link
       href={`/explore?category=${category.id}`}
-      className="group block h-full focus:outline-hidden"
+      className="group block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-[var(--accent-jade)]"
     >
-      <SpotlightCard
-        theme="light"
-        spotlightColor="rgba(20, 184, 166, 0.25)"
-        intensity={0.5}
-        className={`h-full p-6 rounded-3xl border shadow-soft group-hover:shadow-soft-xl group-hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between ${colors.border} ${colors.glow}`}
-      >
+      <div className="atlas-card h-full p-6 flex flex-col justify-between">
         <div>
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${colors.bg} ${colors.text}`}>
-            <IconComponent className="w-6 h-6" />
+            <div
+              className={`w-11 h-11 rounded-lg flex items-center justify-center mb-4 transition-transform duration-250 ease-[var(--motion-ease-out)] group-hover:scale-105 ${tone.iconBg} ${tone.iconText}`}
+            >
+            <IconComponent className="w-5 h-5" aria-hidden="true" />
           </div>
-          <h4 className="font-bold text-slate-900 group-hover:text-teal-700 transition-colors text-base">
+          <h3 className="font-sans font-bold text-lg text-[var(--ink-primary)] tracking-tight group-hover:text-[var(--accent-jade)] transition-colors">
             {category.name}
-          </h4>
+          </h3>
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)] font-normal line-clamp-2 leading-relaxed">
+            {category.description}
+          </p>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-          <span className="font-semibold text-slate-600">
+        <div className="mt-5 pt-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+          <span className="font-semibold text-[var(--ink-secondary)] bg-[var(--bg-canvas)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-md tabular-nums">
             {category.count} địa điểm
           </span>
-          <span className="inline-flex items-center text-teal-600 font-medium group-hover:translate-x-1 transition-transform">
-            Khám phá <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+          <span className="inline-flex items-center text-[var(--accent-jade)] font-bold group-hover:translate-x-0.5 transition-transform duration-200">
+            Xem danh mục <ChevronRight className="w-3.5 h-3.5 ml-0.5" aria-hidden="true" />
           </span>
         </div>
-      </SpotlightCard>
+      </div>
     </Link>
   );
 }

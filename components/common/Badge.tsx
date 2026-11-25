@@ -14,21 +14,27 @@ export default function Badge({
   className = '',
 }: BadgeProps) {
   const variantStyles = {
-    primary: 'bg-teal-50 text-teal-700 border border-teal-200/80',
-    secondary: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80',
-    accent: 'bg-amber-50 text-amber-800 border border-amber-200/80',
-    success: 'bg-green-50 text-green-700 border border-green-200/80',
-    warning: 'bg-orange-50 text-orange-700 border border-orange-200/80',
-    outline: 'bg-white/80 text-slate-700 border border-slate-200 backdrop-blur-xs',
+    primary:
+      'bg-[var(--accent-jade-soft)] text-[var(--accent-jade-ink)] border border-[var(--accent-jade)]/20',
+    secondary:
+      'bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)] border border-[var(--border-subtle)]',
+    accent:
+      'bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)] border border-[var(--accent-ochre)]/25',
+    success:
+      'bg-[#E5F2EC] text-[#0E563B] border border-[#0E563B]/20',
+    warning:
+      'bg-[#FBF2E4] text-[#7C3A06] border border-[#B45309]/25',
+    outline:
+      'bg-[var(--bg-surface)]/95 text-[var(--ink-primary)] border border-[var(--border-subtle)] backdrop-blur-xs',
   };
 
   const sizeStyles = {
-    sm: 'text-[11px] px-2 py-0.5 rounded-full font-medium',
-    md: 'text-xs px-2.5 py-1 rounded-full font-medium',
+    sm: 'text-xs px-2.5 py-0.5 rounded-md font-semibold',
+    md: 'text-xs px-3 py-1 rounded-md font-semibold',
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
       {children}
     </span>
   );

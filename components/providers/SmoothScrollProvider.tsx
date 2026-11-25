@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { ReactLenis, useLenis } from 'lenis/react';
 import type { LenisRef } from 'lenis/react';
 import 'lenis/dist/lenis.css';
@@ -14,16 +15,34 @@ interface SmoothScrollProviderProps {
 }
 
 function LenisScrollTriggerBridge() {
-  useLenis(() => {
+  const pathname = usePathname();
+  const lenis = useLenis(() => {
     ScrollTrigger.update();
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    const refresh = () => {
+      if (cancelled) return;
+      lenis?.resize();
       ScrollTrigger.refresh();
-    }, 150);
-    return () => clearTimeout(timer);
-  }, []);
+    };
+
+    const rafId = requestAnimationFrame(refresh);
+    const timer = setTimeout(refresh, 180);
+
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (!cancelled) ScrollTrigger.refresh();
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
+  }, [pathname, lenis]);
 
   return null;
 }
@@ -51,8 +70,10 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
       root
       options={{
         lerp: 0.12,
-        duration: 1.0,
         smoothWheel: true,
+        respectReducedMotion: true,
+        stopInertiaOnNavigate: true,
+        anchors: { offset: -88 },
       }}
     >
       <LenisScrollTriggerBridge />

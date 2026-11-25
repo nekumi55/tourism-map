@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-25T21:12:00+07:00",
+  "title": "Design System: Quảng Ngãi Atlas",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Coastal Jade",
+        "canonical": "#0d5c53",
+        "tonalRamp": ["#062e29", "#094740", "#0d5c53", "#1b786d", "#4ca398", "#8bc6be", "#cbe5e1", "#e3f0ed"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Burnt Ochre",
+        "canonical": "#b45309",
+        "tonalRamp": ["#451a03", "#7c3a06", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a", "#fbf2e4"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Warm Limestone Canvas",
+        "canonical": "#f7f4ee",
+        "tonalRamp": ["#111a18", "#16201d", "#43504b", "#596661", "#cbc3b3", "#e3ddd1", "#efece4", "#fffdf9"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Source Serif 4", "purpose": "Editorial hero and page headlines." },
+      "body": { "displayName": "Be Vietnam Pro", "purpose": "UI controls, descriptions, and navigation." },
+      "mono": { "displayName": "JetBrains Mono", "purpose": "WGS84 coordinates, distances, and tabular counters." }
+    },
+    "shadows": [
+      {
+        "name": "elevated",
+        "value": "0 14px 32px -10px rgba(17, 26, 24, 0.12), 0 2px 6px -1px rgba(17, 26, 24, 0.05)",
+        "purpose": "Card hover lift and floating map controls."
+      },
+      {
+        "name": "overlay",
+        "value": "0 22px 48px -12px rgba(17, 26, 24, 0.18), 0 6px 16px -4px rgba(17, 26, 24, 0.08)",
+        "purpose": "Search bar, autocomplete dropdown, dialogs, and map popups."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Responsive UI entrances and hover feedback."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action control across navbar, hero search, and map actions.",
+      "html": "<button class=\"ds-btn-primary\">Mở bản đồ</button>",
+      "css": ".ds-btn-primary { background: #0d5c53; color: #fffdf9; min-height: 44px; padding: 0 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; transition: background-color 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.15s cubic-bezier(0.16,1,0.3,1); cursor: pointer; } .ds-btn-primary:hover { background: #094740; } .ds-btn-primary:active { transform: scale(0.97); } .ds-btn-primary:focus-visible { outline: 2px solid #0d5c53; outline-offset: 2px; }"
+    },
+    {
+      "name": "Atlas Card",
+      "kind": "card",
+      "refersTo": "card-atlas",
+      "description": "Editorial destination card with warm hairline border at rest and offset elevation on hover.",
+      "html": "<article class=\"ds-card-atlas\"><h3>Đảo Lý Sơn</h3><p>Quảng Ngãi</p></article>",
+      "css": ".ds-card-atlas { background: #fffdf9; color: #16201d; border: 1px solid #e3ddd1; border-radius: 12px; padding: 20px; transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), border-color 0.22s, box-shadow 0.22s; } .ds-card-atlas:hover { transform: translateY(-2px); border-color: rgba(13,92,83,0.42); box-shadow: 0 14px 32px -10px rgba(17,26,24,0.12); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Limestone Field Atlas",
+    "overview": "Quảng Ngãi Atlas combines archival Vietnamese heritage typography with daylight field-guide clarity on warm limestone paper, deep basalt stages, and coastal jade accents.",
+    "keyCharacteristics": [
+      "Warm limestone canvas (#f7f4ee) with crisp 1px warm borders (#e3ddd1).",
+      "Vietnamese-subset Source Serif 4, Be Vietnam Pro, and JetBrains Mono.",
+      "Flat cards at rest with structural elevation only on hover or floating overlays.",
+      "Full prefers-reduced-motion parity across CSS, GSAP, and Lenis."
+    ],
+    "rules": [
+      { "name": "The Accessible Amber Rule", "body": "Amber fills (#f59e0b) always pair with Deep Basalt Ink (#16201d).", "section": "colors" },
+      { "name": "The Honest Mono Rule", "body": "Monospace is reserved strictly for WGS84 coordinates, numeric distances, and tabular counters.", "section": "typography" },
+      { "name": "The Single-Elevation Rule", "body": "Never stack a 1px border beneath a permanent blurry shadow on static cards.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do preserve vietnamese font subsets and tabular-nums on coordinates and distances.",
+      "Do enforce minimum 44px touch targets on interactive controls."
+    ],
+    "donts": [
+      "Don't place eyebrow kickers above section headings or decorative 01/02/03 badges.",
+      "Don't use gradient text fills, glowing shadows, or internal CMS labels on tourist pages."
+    ]
+  }
+}

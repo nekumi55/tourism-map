@@ -1,27 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Lock, KeyRound, ShieldAlert, ArrowRight } from 'lucide-react';
 
 const ADMIN_STORAGE_KEY = 'tourism_map_admin_auth_v1';
+const ADMIN_AUTH_EVENT = 'tourism-map-admin-auth';
 const ADMIN_PIN = process.env.ADMIN_PIN ?? '888888';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123';
+
+function subscribeAuth(onStoreChange: () => void) {
+  window.addEventListener('storage', onStoreChange);
+  window.addEventListener(ADMIN_AUTH_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener('storage', onStoreChange);
+    window.removeEventListener(ADMIN_AUTH_EVENT, onStoreChange);
+  };
+}
+
+function getClientAuthSnapshot(): 'authed' | 'guest' {
+  try {
+    return sessionStorage.getItem(ADMIN_STORAGE_KEY) === 'true' ? 'authed' : 'guest';
+  } catch {
+    return 'guest';
+  }
+}
+
+function getServerAuthSnapshot(): 'loading' {
+  return 'loading';
+}
 
 interface AdminAuthGateProps {
   children: React.ReactNode;
 }
 
 export default function AdminAuthGate({ children }: AdminAuthGateProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        return sessionStorage.getItem(ADMIN_STORAGE_KEY) === 'true';
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return false;
-  });
+  const authState = useSyncExternalStore(
+    subscribeAuth,
+    getClientAuthSnapshot,
+    getServerAuthSnapshot
+  );
   const [inputCode, setInputCode] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
@@ -29,7 +46,7 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
     e.preventDefault();
     if (inputCode === ADMIN_PIN || inputCode === ADMIN_PASSWORD) {
       sessionStorage.setItem(ADMIN_STORAGE_KEY, 'true');
-      setIsAuthenticated(true);
+      window.dispatchEvent(new Event(ADMIN_AUTH_EVENT));
       setErrorMsg('');
     } else {
       setErrorMsg('Mã PIN hoặc mật khẩu quản trị viên không chính xác!');
@@ -38,12 +55,20 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
 
   const handleLogout = () => {
     sessionStorage.removeItem(ADMIN_STORAGE_KEY);
-    setIsAuthenticated(false);
+    window.dispatchEvent(new Event(ADMIN_AUTH_EVENT));
     setInputCode('');
   };
 
+  if (authState === 'loading') {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   // Not authenticated: Show Login Screen
-  if (!isAuthenticated) {
+  if (authState !== 'authed') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl space-y-6">
@@ -104,23 +129,25 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Admin Status Bar */}
-      <div className="bg-slate-900 text-white px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs border-b border-slate-800 sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-bold tracking-wide">CHẾ ĐỘ QUẢN TRỊ VIÊN TOÀN QUYỀN (ADMIN CMS)</span>
+      <div className="bg-slate-900 text-white px-4 sm:px-8 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-800 relative z-20">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="font-bold tracking-wide truncate">
+            CHẾ ĐỘ QUẢN TRỊ VIÊN TOÀN QUYỀN (ADMIN CMS)
+          </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <span className="text-slate-400 hidden sm:inline">Phiên làm việc: Quyền cao nhất</span>
           <button
             onClick={handleLogout}
-            className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-900 text-slate-200 hover:text-white font-semibold transition-colors"
+            className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-rose-900 text-slate-200 hover:text-white font-semibold transition-colors cursor-pointer"
           >
             Đăng xuất
           </button>
         </div>
       </div>
 
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }

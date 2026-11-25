@@ -136,6 +136,27 @@ const SplitText = ({
     () => {
       const el = ref.current;
       if (!el || !text) return;
+      if (
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ) {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 8 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.42,
+            ease: 'power2.out',
+            clearProps: 'transform,opacity',
+            onComplete: () => {
+              completedTextRef.current = text;
+              onCompleteRef.current?.();
+            },
+          }
+        );
+        return;
+      }
       el.getBoundingClientRect();
 
       const finish = () => {

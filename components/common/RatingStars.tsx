@@ -27,26 +27,26 @@ export default function RatingStars({
   };
 
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex items-center text-amber-500">
+    <div className="flex items-center gap-1.5 tabular-nums">
+      <div className="flex items-center text-[var(--accent-ochre-bright)]" aria-hidden="true">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             className={`${iconSizes[size]} ${
               star <= Math.round(rating)
-                ? 'fill-amber-400 text-amber-400'
-                : 'text-slate-300'
+                ? 'fill-[var(--accent-ochre-bright)] text-[var(--accent-ochre-bright)]'
+                : 'text-[var(--border-strong)]'
             }`}
           />
         ))}
       </div>
       {showNumber && (
-        <span className={`${textSizes[size]} font-medium text-slate-700`}>
+        <span className={`${textSizes[size]} font-semibold text-[var(--ink-primary)]`}>
           {rating.toFixed(1)}
         </span>
       )}
       {reviews !== undefined && (
-        <span className={`${textSizes[size]} text-slate-500`}>
+        <span className={`${textSizes[size]} text-[var(--ink-muted)]`}>
           ({reviews})
         </span>
       )}

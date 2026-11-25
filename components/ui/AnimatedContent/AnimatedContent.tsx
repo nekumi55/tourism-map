@@ -55,10 +55,10 @@ const WIPES: Record<string, string> = {
 const AnimatedContent = ({
   children,
   container,
-  distance = 100,
+  distance = 24,
   direction = 'vertical',
   reverse = false,
-  duration = 0.55,
+  duration = 0.45,
   ease = 'power3.out',
   initialOpacity = 0,
   animateOpacity = true,
@@ -86,16 +86,63 @@ const AnimatedContent = ({
 }: AnimatedContentProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const callbacksRef = useRef({ onStart, onComplete, onDisappearanceComplete });
-  callbacksRef.current = { onStart, onComplete, onDisappearanceComplete };
+
+  useIsomorphicLayoutEffect(() => {
+    callbacksRef.current = { onStart, onComplete, onDisappearanceComplete };
+  });
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
 
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduce) {
+      const ctx = gsap.context(() => {
+        const targets: Element[] = stagger > 0 && el.children.length ? Array.from(el.children) : [el];
+        const rect = el.getBoundingClientRect();
+        const inViewNow = trigger === 'mount' || rect.top <= window.innerHeight * (1 - threshold);
+        if (inViewNow) {
+          gsap.fromTo(
+            targets,
+            { opacity: 0, y: 8 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.34,
+              stagger: stagger > 0 ? Math.min(stagger, 0.05) : 0,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity',
+              onComplete: () => callbacksRef.current.onComplete?.(),
+            }
+          );
+          return;
+        }
+        gsap.set(targets, { opacity: 0, y: 8 });
+        ScrollTrigger.create({
+          trigger: el,
+          start: `top ${(1 - threshold) * 100}%`,
+          once: true,
+          onEnter: () => {
+            gsap.to(targets, {
+              opacity: 1,
+              y: 0,
+              duration: 0.36,
+              stagger: stagger > 0 ? Math.min(stagger, 0.05) : 0,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity',
+              onComplete: () => callbacksRef.current.onComplete?.(),
+            });
+          },
+        });
+      }, el);
+      return () => ctx.revert();
+    }
+
     let scroller: Element | string | null = container || null;
     if (typeof scroller === 'string') scroller = document.querySelector(scroller);
-
-    const reduce = false; // Always provide smooth animations on both desktop and mobile
 
     const ctx = gsap.context(() => {
       const targets: Element[] = stagger > 0 && el.children.length ? Array.from(el.children) : [el];
@@ -103,8 +150,6 @@ const AnimatedContent = ({
       const axis = horizontal ? 'x' : 'y';
       const sign = reverse ? -1 : 1;
       const mask = WIPES[wipe];
-
-      gsap.set(el, { visibility: 'visible' });
 
       const from: gsap.TweenVars = {
         [axis]: distance * sign,
@@ -115,7 +160,7 @@ const AnimatedContent = ({
         [axis]: 0,
         scale: 1,
         opacity: 1,
-        duration: Math.max(0.25, duration),
+        duration: Math.max(0.2, duration),
         ease
       };
 
@@ -143,7 +188,9 @@ const AnimatedContent = ({
 
       const settle = () => {
         if (scrub) return;
-        gsap.set(targets, { clearProps: mask ? 'filter,transform,maskImage,webkitMaskImage' : 'filter,transform' });
+        gsap.set(targets, {
+          clearProps: mask ? 'filter,transform,opacity,maskImage,webkitMaskImage' : 'filter,transform,opacity'
+        });
       };
 
       const disappear = () => {
@@ -162,25 +209,24 @@ const AnimatedContent = ({
         gsap.to(targets, out);
       };
 
-      const tl = gsap.timeline({
-        paused: true,
-        onStart: () => callbacksRef.current.onStart?.(),
-        onComplete: () => {
-          callbacksRef.current.onComplete?.();
-          settle();
-          if (once && !scrub) disappear();
-        }
-      });
-      tl.fromTo(targets, from, to, scrub ? 0 : Math.max(delay, 0));
-
       if (trigger === 'mount') {
-        tl.play();
+        const tl = gsap.timeline({
+          onStart: () => callbacksRef.current.onStart?.(),
+          onComplete: () => {
+            callbacksRef.current.onComplete?.();
+            settle();
+            if (once && !scrub) disappear();
+          }
+        });
+        tl.fromTo(targets, from, to, Math.max(delay, 0));
         return;
       }
 
       const start = `top ${(1 - threshold) * 100}%`;
 
       if (scrub) {
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo(targets, from, to, 0);
         ScrollTrigger.create({
           trigger: el,
           scroller,
@@ -191,6 +237,32 @@ const AnimatedContent = ({
         });
         return;
       }
+
+      // Only animate from offset when entering; keep elements visible above fold or if trigger already passed
+      const rect = el.getBoundingClientRect();
+      const inViewNow = rect.top <= window.innerHeight * (1 - threshold);
+      if (inViewNow) {
+        const tl = gsap.timeline({
+          onStart: () => callbacksRef.current.onStart?.(),
+          onComplete: () => {
+            callbacksRef.current.onComplete?.();
+            settle();
+          }
+        });
+        tl.fromTo(targets, from, to, Math.max(delay, 0));
+        return;
+      }
+
+      const tl = gsap.timeline({
+        paused: true,
+        onStart: () => callbacksRef.current.onStart?.(),
+        onComplete: () => {
+          callbacksRef.current.onComplete?.();
+          settle();
+          if (once) disappear();
+        }
+      });
+      tl.fromTo(targets, from, to, Math.max(delay, 0));
 
       ScrollTrigger.create({
         trigger: el,
@@ -235,7 +307,7 @@ const AnimatedContent = ({
   ]);
 
   return (
-    <div ref={ref} className={['invisible', className].filter(Boolean).join(' ')} style={style} {...props}>
+    <div ref={ref} className={className} style={style} {...props}>
       {children}
     </div>
   );

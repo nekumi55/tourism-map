@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Image as ImageIcon,
-  Check,
-  X,
-  Sparkles,
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { Image as ImageIcon, Check, X } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 
 export const HERO_TEMPLATES = [
+  {
+    id: 'thien-an',
+    name: 'Núi Thiên Ấn & Sông Trà',
+    desc: 'Đệ nhất thắng cảnh thiêng liêng Quảng Ngãi',
+    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=85',
+    thumbnail:
+      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80',
+  },
   {
     id: 'ly-son-sea',
     name: 'Biển Ngọc Lý Sơn',
@@ -36,25 +40,17 @@ export const HERO_TEMPLATES = [
   },
   {
     id: 'thac-trang',
-    name: 'Thác Trắng Minh Long',
-    desc: 'Dòng thác bạc giữa núi rừng đại ngàn',
+    name: 'Rừng Đại Ngàn Măng Đen',
+    desc: 'Sương mù và rừng thông xứ lạnh 1.200m',
     url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=2000&q=85',
     thumbnail:
       'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=400&q=80',
   },
   {
-    id: 'thien-an',
-    name: 'Núi Thiên Ấn & Sông Trà',
-    desc: 'Đệ nhất thắng cảnh thiêng liêng Quảng Ngãi',
-    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=85',
-    thumbnail:
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80',
-  },
-  {
     id: 'ocean-gradient',
-    name: 'Dải Màu Biển Ngọc (Mặc định)',
-    desc: 'Sắc xanh ngọc bích êm dịu, không lo chậm mạng',
-    url: 'linear-gradient(135deg, #0f766e 0%, #0891b2 50%, #0369a1 100%)',
+    name: 'Nền Ngọc Bích Tối Giản',
+    desc: 'Dải màu tĩnh êm dịu, tải tức thì',
+    url: 'linear-gradient(135deg, #0D5C53 0%, #111A18 100%)',
     thumbnail: '',
     isGradient: true,
   },
@@ -68,123 +64,136 @@ export default function HeroBackgroundPicker({ buttonVariant = 'floating' }: Her
   const { settings, updateSettings } = useData();
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   const handleSelectTemplate = (url: string) => {
     updateSettings({ heroBgImage: url });
   };
 
   return (
     <>
-      {/* Trigger Button: Floating or Inline */}
       {buttonVariant === 'floating' ? (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 px-3.5 py-2 rounded-2xl bg-white/20 hover:bg-white/35 backdrop-blur-md border border-white/40 text-white text-xs font-bold flex items-center gap-2 shadow-soft-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
-          title="Chọn mẫu ảnh nền"
+          className="ui-interactive-press absolute top-4 right-4 sm:top-6 sm:right-6 z-30 min-h-11 px-3.5 py-2 rounded-lg bg-[#111A18]/75 hover:bg-[#111A18]/90 backdrop-blur-md border border-white/25 text-[#F5F2EB] text-xs font-semibold flex items-center gap-2 cursor-pointer"
+          title="Đổi khung cảnh trang chủ"
+          aria-label="Đổi khung cảnh trang chủ"
         >
-          <ImageIcon className="w-4 h-4 text-teal-300" />
-          <span className="hidden sm:inline">Chọn mẫu ảnh nền</span>
+          <ImageIcon className="w-4 h-4 text-[#A3D9CE]" aria-hidden="true" />
+          <span className="hidden sm:inline">Đổi khung cảnh</span>
         </button>
       ) : (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/35 border border-white/30 text-white text-xs font-bold flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer shadow-xs"
+          className="ui-interactive-press min-h-10 px-3 py-1.5 rounded-lg bg-[#111A18]/70 hover:bg-[#111A18]/90 border border-white/25 text-[#F5F2EB] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
         >
-          <ImageIcon className="w-3.5 h-3.5 text-teal-300" />
-          <span>Mẫu nền</span>
+          <ImageIcon className="w-3.5 h-3.5 text-[#A3D9CE]" aria-hidden="true" />
+          <span>Khung cảnh</span>
         </button>
       )}
 
-      {/* Modal / Dialog (Only Curated Samples) */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-2xl animate-in fade-in duration-200 border border-slate-100">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">
-                    Chọn Mẫu Ảnh Nền Trang Chủ
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Bấm chọn một trong các mẫu cảnh đẹp tiêu biểu của Quảng Ngãi
-                  </p>
-                </div>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hero-picker-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
+          className="fixed inset-0 z-50 bg-[#111A18]/75 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div className="bg-[var(--bg-surface)] rounded-xl max-w-lg w-full p-6 space-y-5 shadow-soft-2xl animate-in fade-in duration-200 border border-[var(--border-subtle)]">
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+              <div>
+                <h2
+                  id="hero-picker-title"
+                  className="font-serif font-semibold text-[var(--ink-primary)] text-xl"
+                >
+                  Chọn Khung Cảnh Trang Chủ
+                </h2>
+                <p className="text-sm text-[var(--ink-muted)] mt-0.5">
+                  Lựa chọn cảnh sắc tiêu biểu của Quảng Ngãi làm ảnh nền đầu trang
+                </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors"
+                aria-label="Đóng hộp thoại chọn ảnh nền"
+                className="min-h-11 min-w-11 rounded-lg hover:bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)] flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
-            {/* Curated Templates Grid (No Custom Upload or URL Input) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
               {HERO_TEMPLATES.map((tmpl) => {
                 const isSelected = settings.heroBgImage === tmpl.url;
 
                 return (
-                  <div
+                  <button
                     key={tmpl.id}
+                    type="button"
                     onClick={() => handleSelectTemplate(tmpl.url)}
-                    className={`relative rounded-2xl overflow-hidden border-2 cursor-pointer transition-all flex flex-col group p-3 ${
+                    aria-pressed={isSelected}
+                    className={`relative rounded-lg overflow-hidden border text-left cursor-pointer transition-all flex flex-col group p-2.5 ${
                       isSelected
-                        ? 'border-teal-600 ring-4 ring-teal-500/20 bg-teal-50/40 shadow-md'
-                        : 'border-slate-200 hover:border-teal-300 bg-slate-50/50 hover:bg-white'
+                        ? 'border-[var(--accent-jade)] ring-2 ring-[var(--accent-jade)]/20 bg-[var(--accent-jade-soft)]/50'
+                        : 'border-[var(--border-subtle)] hover:border-[var(--border-strong)] bg-[var(--bg-surface)]'
                     }`}
                   >
-                    {/* Visual Preview */}
-                    <div className="relative w-full h-24 rounded-xl overflow-hidden mb-2.5 bg-slate-800">
+                    <div className="relative w-full h-24 rounded-md overflow-hidden mb-2.5 bg-[var(--bg-basalt)]">
                       {tmpl.isGradient ? (
-                        <div
-                          className="w-full h-full"
-                          style={{ background: tmpl.url }}
-                        />
+                        <div className="w-full h-full" style={{ background: tmpl.url }} />
                       ) : (
-                        <img
+                        <Image
                           src={tmpl.thumbnail}
                           alt={tmpl.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="220px"
+                          className="object-cover group-hover:scale-103 transition-transform duration-300"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center shadow-md">
-                          <Check className="w-3.5 h-3.5 stroke-3" />
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[var(--accent-jade)] text-[#FFFDF9] flex items-center justify-center shadow-sm">
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
                         </div>
                       )}
                     </div>
 
-                    {/* Information */}
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-900 text-xs truncate">
+                    <div className="flex items-center justify-between gap-2 w-full">
+                      <span className="font-semibold text-[var(--ink-primary)] text-sm truncate">
                         {tmpl.name}
                       </span>
-                      {isSelected ? (
-                        <span className="text-[10px] font-black text-teal-700 bg-teal-100/70 px-2 py-0.5 rounded-md shrink-0">
-                          Đang dùng
+                      {isSelected && (
+                        <span className="text-xs font-semibold text-[var(--accent-jade-ink)] shrink-0">
+                          Đang chọn
                         </span>
-                      ) : null}
+                      )}
                     </div>
-                    <span className="text-[11px] text-slate-500 truncate mt-0.5">
+                    <span className="text-xs text-[var(--ink-muted)] truncate mt-0.5 w-full">
                       {tmpl.desc}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
 
-            {/* Footer */}
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <div className="pt-3 border-t border-[var(--border-subtle)] flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors"
+                className="ui-interactive-press min-h-11 px-5 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] font-semibold text-sm cursor-pointer"
               >
-                Đóng & Xem Trang Chủ
+                Xong
               </button>
             </div>
           </div>
