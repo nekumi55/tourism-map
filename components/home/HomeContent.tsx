@@ -52,15 +52,16 @@ export default function HomeContent() {
           <div suppressHydrationWarning className="absolute inset-0 bg-gradient-to-t from-slate-900/35 via-transparent to-black/20" />
         </div>
 
-        <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
+        <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
           <AnimatedContent
             distance={20}
             direction="vertical"
             duration={0.35}
             trigger="mount"
+            className="max-w-full"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-md border border-white/30 text-teal-200 text-xs sm:text-sm font-semibold mb-6 shadow-glow transition-all">
-              <Sparkles className="w-4 h-4 text-teal-300 animate-pulse" />
+            <div className="inline-flex max-w-full items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/25 backdrop-blur-md border border-white/30 text-teal-200 text-xs sm:text-sm font-semibold mb-6 shadow-glow transition-all">
+              <Sparkles className="w-4 h-4 text-teal-300 animate-pulse shrink-0" />
               <span>{settings.heroBadge}</span>
             </div>
           </AnimatedContent>

@@ -103,9 +103,9 @@ export default function HeroSearch() {
         className="w-full bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-3xl shadow-2xl border border-white/40 flex flex-col md:flex-row items-center gap-3 transition-all"
       >
         {/* Keyword input */}
-        <div className="flex-1 w-full flex items-center gap-3 px-3 py-2 border-b md:border-b-0 md:border-r border-slate-200 relative">
+        <div className="flex-1 w-full min-w-0 flex items-center gap-3 px-3 py-2 border-b md:border-b-0 md:border-r border-slate-200 relative">
           <Search className="w-5 h-5 text-teal-600 shrink-0" />
-          <div className="w-full">
+          <div className="w-full min-w-0 flex-1">
             <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               Bạn muốn đi đâu?
             </label>
@@ -120,7 +120,7 @@ export default function HeroSearch() {
                 if (keyword.trim()) setIsDropdownOpen(true);
               }}
               placeholder="Nhập tên địa danh (Lý Sơn, Măng Đen, Sa Huỳnh...)"
-              className="w-full text-sm text-slate-800 placeholder-slate-400 bg-transparent outline-hidden font-medium"
+              className="w-full min-w-0 text-sm text-slate-800 placeholder-slate-400 bg-transparent outline-hidden font-medium"
             />
           </div>
           {keyword && (
@@ -130,7 +130,7 @@ export default function HeroSearch() {
                 setKeyword('');
                 setIsDropdownOpen(false);
               }}
-              className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+              className="p-1 text-slate-400 hover:text-slate-600 transition-colors shrink-0"
               title="Xóa từ khóa"
             >
               <X className="w-4 h-4" />
@@ -139,17 +139,17 @@ export default function HeroSearch() {
         </div>
 
         {/* Category selector */}
-        <div className="w-full md:w-52 flex items-center gap-2.5 px-3 py-2 border-b md:border-b-0 md:border-r border-slate-200">
+        <div className="w-full md:w-52 min-w-0 flex items-center gap-2.5 px-3 py-2 border-b md:border-b-0 md:border-r border-slate-200">
           <Grid className="w-5 h-5 text-teal-600 shrink-0" />
-          <div className="w-full relative">
+          <div className="w-full min-w-0 flex-1 relative">
             <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               Danh mục
             </label>
-            <div className="relative">
+            <div className="relative w-full min-w-0">
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
+                className="w-full min-w-0 max-w-full truncate text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
               >
                 <option value="" className="text-slate-800 bg-white">
                   Tất cả danh mục
@@ -166,17 +166,17 @@ export default function HeroSearch() {
         </div>
 
         {/* District selector */}
-        <div className="w-full md:w-52 flex items-center gap-2.5 px-3 py-2">
+        <div className="w-full md:w-52 min-w-0 flex items-center gap-2.5 px-3 py-2">
           <MapPin className="w-5 h-5 text-teal-600 shrink-0" />
-          <div className="w-full relative">
+          <div className="w-full min-w-0 flex-1 relative">
             <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               Khu vực
             </label>
-            <div className="relative">
+            <div className="relative w-full min-w-0">
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
-                className="w-full text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
+                className="w-full min-w-0 max-w-full truncate text-sm text-slate-800 bg-transparent outline-hidden font-medium cursor-pointer appearance-none pr-6 hover:text-teal-700 transition-colors"
               >
                 <option value="" className="text-slate-800 bg-white">
                   Toàn bộ tỉnh
@@ -205,12 +205,12 @@ export default function HeroSearch() {
       {/* AUTOCOMPLETE SUGGESTIONS DROPDOWN */}
       {isDropdownOpen && keyword.trim().length > 0 && (
         <div className="absolute top-[calc(100%+8px)] left-0 right-0 w-full bg-white/98 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="p-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-semibold">
-            <span className="flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-teal-600" />
-              <span>Gợi ý địa điểm khớp với: &quot;{keyword}&quot;</span>
+          <div className="p-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-500 font-semibold">
+            <span className="flex items-center gap-1.5 min-w-0">
+              <Compass className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+              <span className="truncate">Gợi ý địa điểm khớp với: &quot;{keyword}&quot;</span>
             </span>
-            <span className="text-[11px] text-teal-700 font-bold">
+            <span className="text-[11px] text-teal-700 font-bold shrink-0">
               {suggestedPlaces.length > 0 ? `${suggestedPlaces.length} gợi ý nhanh` : '0 kết quả'}
             </span>
           </div>

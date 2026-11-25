@@ -76,11 +76,11 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg truncate min-w-0 max-w-[150px] sm:max-w-xs">
               {place.price_label}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Link
                 href={`/map?placeId=${place.id}`}
                 className="p-2 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors text-xs flex items-center gap-1 font-bold"

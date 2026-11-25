@@ -306,7 +306,7 @@ export default function ExploreContainer() {
         </aside>
 
         {/* 2. MAIN CONTENT AREA */}
-        <main className="lg:col-span-3 space-y-6">
+        <main className="lg:col-span-3 min-w-0 space-y-6">
           {/* Active Filter Indicators & Sorting Bar */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-xs text-slate-600 font-medium">
@@ -322,13 +322,13 @@ export default function ExploreContainer() {
               trên tổng số <strong className="text-slate-900 font-bold">{totalItems}</strong> địa điểm
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">Sắp xếp:</span>
-              <div className="relative">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs text-slate-500 font-medium shrink-0">Sắp xếp:</span>
+              <div className="relative min-w-0 max-w-full">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg focus:outline-hidden focus:border-teal-500 appearance-none pr-7 cursor-pointer hover:border-teal-300 transition-colors"
+                  className="max-w-full min-w-0 truncate text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg focus:outline-hidden focus:border-teal-500 appearance-none pr-7 cursor-pointer hover:border-teal-300 transition-colors"
                 >
                   <option value="featured">Nổi bật nhất</option>
                   <option value="rating-desc">Đánh giá cao nhất</option>
@@ -452,11 +452,11 @@ export default function ExploreContainer() {
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
                   Danh mục
                 </label>
-                <div className="relative">
+                <div className="relative w-full min-w-0">
                   <select
                     value={category}
                     onChange={(e) => handleFilterChange(() => setCategory(e.target.value))}
-                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
+                    className="w-full min-w-0 max-w-full truncate px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
                   >
                     <option value="all">Tất cả danh mục</option>
                     {categories.map((c: Category) => (
@@ -474,11 +474,11 @@ export default function ExploreContainer() {
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
                   Khu vực
                 </label>
-                <div className="relative">
+                <div className="relative w-full min-w-0">
                   <select
                     value={district}
                     onChange={(e) => handleFilterChange(() => setDistrict(e.target.value))}
-                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
+                    className="w-full min-w-0 max-w-full truncate px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-hidden focus:border-teal-500 focus:bg-white appearance-none pr-8 cursor-pointer"
                   >
                     <option value="all">Toàn bộ tỉnh Quảng Ngãi</option>
                     {districts.map((d: District) => (

@@ -13,10 +13,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  overflow-x: hidden;
 }
 
 /* Custom Soft Depth & Layered Shadows */
@@ -47,6 +52,52 @@ body {
 .leaflet-div-icon.custom-pin-marker {
   background: transparent !important;
   border: none !important;
+}
+
+.map-pin-label {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  max-width: 116px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.map-pin-label--selected {
+  background: rgba(13, 148, 136, 0.96);
+  max-width: 175px;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+@media (min-width: 640px) {
+  .map-pin-label {
+    padding: 3px 8px;
+    font-size: 11px;
+    max-width: 185px;
+  }
+
+  .map-pin-label--selected {
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .map-viewer-shell .leaflet-top {
+    top: 52px;
+  }
 }
 
 /* Perfect Circular Marker Selected Wave Animation */

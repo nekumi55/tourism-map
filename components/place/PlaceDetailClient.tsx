@@ -232,7 +232,7 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
                         href={place.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-teal-600 hover:underline mt-0.5 inline-block"
+                        className="text-teal-600 hover:underline mt-0.5 inline-block break-all"
                       >
                         {place.website}
                       </a>

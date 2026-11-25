@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import type * as LType from 'leaflet';
 import { Place } from '@/types';
 
@@ -47,45 +47,185 @@ export default function LeafletMap({
   const markersLayerRef = useRef<LType.LayerGroup | null>(null);
   const polylineRef = useRef<LType.Polyline | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const hasFittedInitialRef = useRef(false);
 
   // Store latest props in refs to avoid re-triggering map initialization
   const placesRef = useRef(places);
-  placesRef.current = places;
   const selectedPlaceRef = useRef(selectedPlace);
-  selectedPlaceRef.current = selectedPlace;
   const itineraryPlacesRef = useRef(itineraryPlaces);
-  itineraryPlacesRef.current = itineraryPlaces;
   const onSelectPlaceRef = useRef(onSelectPlace);
-  onSelectPlaceRef.current = onSelectPlace;
+  const mapLayerRef = useRef(mapLayer);
+
+  useEffect(() => {
+    placesRef.current = places;
+    selectedPlaceRef.current = selectedPlace;
+    itineraryPlacesRef.current = itineraryPlaces;
+    onSelectPlaceRef.current = onSelectPlace;
+    mapLayerRef.current = mapLayer;
+  }, [places, selectedPlace, itineraryPlaces, onSelectPlace, mapLayer]);
+
+  const applyInitialViewport = useCallback(
+    (L: typeof LType, map: LType.Map, container: HTMLDivElement) => {
+      if (hasFittedInitialRef.current) return;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (width === 0 || height === 0) return;
+
+      map.invalidateSize({ animate: false });
+
+      const currentSelected = selectedPlaceRef.current;
+      const currentPlaces = placesRef.current;
+
+      if (currentSelected) {
+        map.setView(
+          [currentSelected.latitude, currentSelected.longitude],
+          width < 640 ? 10 : 10.5,
+          { animate: false }
+        );
+        hasFittedInitialRef.current = true;
+        return;
+      }
+
+      if (currentPlaces.length > 0) {
+        const bounds = L.latLngBounds(
+          currentPlaces.map((p) => [p.latitude, p.longitude] as [number, number])
+        );
+        if (bounds.isValid()) {
+          const isCompact = width < 640;
+          map.fitBounds(bounds, {
+            paddingTopLeft: isCompact ? [36, 68] : [60, 56],
+            paddingBottomRight: isCompact ? [36, 50] : [60, 56],
+            maxZoom: isCompact ? 9.5 : 9.25,
+            animate: false,
+          });
+          hasFittedInitialRef.current = true;
+        }
+      }
+    },
+    []
+  );
+
+  // Helper: Draw markers and route polyline
+  const drawMarkersAndRoute = useCallback(
+    (L: typeof LType, map: LType.Map, markersGroup: LType.LayerGroup) => {
+      markersGroup.clearLayers();
+
+      // 1. Draw Route Polyline
+      if (polylineRef.current) {
+        map.removeLayer(polylineRef.current);
+        polylineRef.current = null;
+      }
+
+      const currentItinerary = itineraryPlacesRef.current;
+      if (currentItinerary.length >= 2) {
+        const latlngs: [number, number][] = currentItinerary.map((p) => [
+          p.latitude,
+          p.longitude,
+        ]);
+
+        const polyline = L.polyline(latlngs, {
+          color: '#0d9488',
+          weight: 5,
+          opacity: 0.95,
+          dashArray: '8, 8',
+        }).addTo(map);
+
+        polylineRef.current = polyline;
+      }
+
+      // 2. Draw Markers
+      const currentPlaces = placesRef.current;
+      const currentSelected = selectedPlaceRef.current;
+
+      currentPlaces.forEach((place) => {
+        const isSelected = currentSelected?.id === place.id;
+        const itineraryIdx = currentItinerary.findIndex((p) => p.id === place.id);
+        const isItinerary = itineraryIdx !== -1;
+        const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
+        const pinSize = isItinerary || isSelected ? 34 : 28;
+        const pinBg = isItinerary ? '#f59e0b' : isSelected ? '#0d9488' : '#0284c7';
+
+        const markerHtml = `
+          <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
+            ${isSelected ? '<div class="marker-selected-ring"></div>' : ''}
+            <div style="width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2.5px solid #ffffff; background: ${pinBg}; color: #ffffff;">
+              ${
+                isItinerary
+                  ? `#${itineraryIdx + 1}`
+                  : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`
+              }
+            </div>
+            <div class="map-pin-label${isSelected ? ' map-pin-label--selected' : ''}">
+              ${cleanName}
+            </div>
+          </div>
+        `;
+
+        const customIcon = L.divIcon({
+          className: 'custom-pin-marker',
+          html: markerHtml,
+          iconSize: [0, 0],
+        });
+
+        const marker = L.marker([place.latitude, place.longitude], {
+          icon: customIcon,
+          zIndexOffset: isSelected ? 1000 : isItinerary ? 500 : 0,
+        });
+
+        marker.on('click', () => {
+          onSelectPlaceRef.current(place);
+        });
+
+        markersGroup.addLayer(marker);
+      });
+
+      // Pan smoothly if a place is selected and container is visible
+      if (
+        currentSelected &&
+        hasFittedInitialRef.current &&
+        containerRef.current &&
+        containerRef.current.clientWidth > 0
+      ) {
+        map.panTo([currentSelected.latitude, currentSelected.longitude], {
+          animate: true,
+          duration: 0.8,
+        });
+      }
+    },
+    []
+  );
 
   // Initialize Map ONCE on mount
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     let isCancelled = false;
 
     // Reset container if previously tagged by Leaflet
-    if ((containerRef.current as any)._leaflet_id) {
-      delete (containerRef.current as any)._leaflet_id;
+    if ((container as unknown as Record<string, unknown>)._leaflet_id) {
+      delete (container as unknown as Record<string, unknown>)._leaflet_id;
     }
 
     import('leaflet').then((L) => {
-      if (isCancelled || !containerRef.current) return;
+      if (isCancelled || !container) return;
 
       // Double-check clean container
-      if ((containerRef.current as any)._leaflet_id) {
-        delete (containerRef.current as any)._leaflet_id;
+      if ((container as unknown as Record<string, unknown>)._leaflet_id) {
+        delete (container as unknown as Record<string, unknown>)._leaflet_id;
       }
 
       // Initialize map centered to cover both coastal and highland regions
-      const map = L.map(containerRef.current, {
+      const map = L.map(container, {
         center: [14.85, 108.40],
-        zoom: 9,
+        zoom: 8,
+        zoomSnap: 0.25,
+        zoomDelta: 0.5,
         zoomControl: true,
       });
 
       // Add tile layer
-      const layerConfig = TILE_LAYERS[mapLayer];
+      const layerConfig = TILE_LAYERS[mapLayerRef.current];
       const tileLayer = L.tileLayer(layerConfig.url, {
         attribution: layerConfig.attribution,
         subdomains: layerConfig.subdomains,
@@ -99,14 +239,20 @@ export default function LeafletMap({
       tileLayerRef.current = tileLayer;
       markersLayerRef.current = markersLayer;
 
-      // Handle ResizeObserver to avoid blank/gray tile rendering
-      if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      // Fit full province bounds once container has visible dimensions
+      applyInitialViewport(L, map, container);
+
+      // Handle ResizeObserver to avoid blank/gray tile rendering and handle hidden-tab reveals
+      if (typeof ResizeObserver !== 'undefined') {
         const ro = new ResizeObserver(() => {
           if (!isCancelled && mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize();
+            mapInstanceRef.current.invalidateSize({ animate: false });
+            if (!hasFittedInitialRef.current) {
+              applyInitialViewport(L, mapInstanceRef.current, container);
+            }
           }
         });
-        ro.observe(containerRef.current);
+        ro.observe(container);
         resizeObserverRef.current = ro;
       }
 
@@ -114,7 +260,10 @@ export default function LeafletMap({
       [50, 200, 600].forEach((delay) => {
         setTimeout(() => {
           if (!isCancelled && mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize();
+            mapInstanceRef.current.invalidateSize({ animate: false });
+            if (!hasFittedInitialRef.current) {
+              applyInitialViewport(L, mapInstanceRef.current, container);
+            }
           }
         }, delay);
       });
@@ -125,6 +274,7 @@ export default function LeafletMap({
 
     return () => {
       isCancelled = true;
+      hasFittedInitialRef.current = false;
       if (resizeObserverRef.current) {
         resizeObserverRef.current.disconnect();
         resizeObserverRef.current = null;
@@ -133,11 +283,11 @@ export default function LeafletMap({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      if (containerRef.current && (containerRef.current as any)._leaflet_id) {
-        delete (containerRef.current as any)._leaflet_id;
+      if ((container as unknown as Record<string, unknown>)._leaflet_id) {
+        delete (container as unknown as Record<string, unknown>)._leaflet_id;
       }
     };
-  }, []);
+  }, [applyInitialViewport, drawMarkersAndRoute]);
 
   // Switch Tile Layer when mapLayer changes
   useEffect(() => {
@@ -170,95 +320,10 @@ export default function LeafletMap({
       if (!mapInstanceRef.current || !markersLayerRef.current) return;
       drawMarkersAndRoute(L, mapInstanceRef.current, markersLayerRef.current);
     });
-  }, [places, selectedPlace, itineraryPlaces]);
-
-  // Helper: Draw markers and route polyline
-  const drawMarkersAndRoute = (
-    L: typeof LType,
-    map: LType.Map,
-    markersGroup: LType.LayerGroup
-  ) => {
-    markersGroup.clearLayers();
-
-    // 1. Draw Route Polyline
-    if (polylineRef.current) {
-      map.removeLayer(polylineRef.current);
-      polylineRef.current = null;
-    }
-
-    const currentItinerary = itineraryPlacesRef.current;
-    if (currentItinerary.length >= 2) {
-      const latlngs: [number, number][] = currentItinerary.map((p) => [
-        p.latitude,
-        p.longitude,
-      ]);
-
-      const polyline = L.polyline(latlngs, {
-        color: '#0d9488',
-        weight: 5,
-        opacity: 0.95,
-        dashArray: '8, 8',
-      }).addTo(map);
-
-      polylineRef.current = polyline;
-    }
-
-    // 2. Draw Markers
-    const currentPlaces = placesRef.current;
-    const currentSelected = selectedPlaceRef.current;
-
-    currentPlaces.forEach((place) => {
-      const isSelected = currentSelected?.id === place.id;
-      const itineraryIdx = currentItinerary.findIndex((p) => p.id === place.id);
-      const isItinerary = itineraryIdx !== -1;
-      const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
-      const pinSize = isItinerary || isSelected ? 34 : 28;
-      const pinBg = isItinerary ? '#f59e0b' : isSelected ? '#0d9488' : '#0284c7';
-
-      const markerHtml = `
-        <div style="width: 36px; height: 36px; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: translate(-50%, -50%);">
-          ${isSelected ? '<div class="marker-selected-ring"></div>' : ''}
-          <div style="width: ${pinSize}px; height: ${pinSize}px; border-radius: 50%; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2.5px solid #ffffff; background: ${pinBg}; color: #ffffff;">
-            ${
-              isItinerary
-                ? `#${itineraryIdx + 1}`
-                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`
-            }
-          </div>
-          <div style="position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 3; padding: 3px 8px; border-radius: 6px; background: rgba(15, 23, 42, 0.92); color: #ffffff; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.35); pointer-events: none; border: 1px solid rgba(255,255,255,0.15);">
-            ${cleanName}
-          </div>
-        </div>
-      `;
-
-      const customIcon = L.divIcon({
-        className: 'custom-pin-marker',
-        html: markerHtml,
-        iconSize: [0, 0],
-      });
-
-      const marker = L.marker([place.latitude, place.longitude], {
-        icon: customIcon,
-      });
-
-      marker.on('click', () => {
-        onSelectPlaceRef.current(place);
-      });
-
-      markersGroup.addLayer(marker);
-    });
-
-    // Pan smoothly if a place is selected
-    if (currentSelected) {
-      map.panTo([currentSelected.latitude, currentSelected.longitude], {
-        animate: true,
-        duration: 0.8,
-      });
-    }
-  };
+  }, [places, selectedPlace, itineraryPlaces, drawMarkersAndRoute]);
 
   return (
-    <div className="w-full h-full relative min-h-[450px]" data-lenis-prevent>
+    <div className="w-full h-full relative min-h-[380px]" data-lenis-prevent>
       <div ref={containerRef} className="absolute inset-0 w-full h-full z-10" data-lenis-prevent />
     </div>
   );

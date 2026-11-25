@@ -205,19 +205,19 @@ export default function MapViewer() {
 
   return (
     <div
-      className={`relative flex flex-col lg:flex-row w-full bg-slate-900 overflow-hidden ${
+      className={`map-viewer-shell relative flex flex-col lg:flex-row w-full bg-slate-900 overflow-hidden ${
         isFullscreen
-          ? 'fixed inset-0 z-50 h-screen'
-          : 'h-[calc(100dvh-57px)] lg:h-[calc(100vh-80px)] lg:min-h-[640px]'
+          ? 'fixed inset-0 z-50 h-dvh'
+          : 'flex-1 min-h-0 lg:flex-none lg:h-[calc(100vh-80px)] lg:min-h-[640px]'
       }`}
     >
-      {/* MOBILE FLOATING BAR: SEGMENTED CONTROL + COMPACT LAYERS */}
-      <div className="lg:hidden absolute top-3 left-3 right-3 z-30 flex items-center gap-2">
-        <div className="flex-1 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-soft-xl border border-slate-200/90 flex items-center gap-1">
+      {/* MOBILE FLOATING BAR: SEGMENTED CONTROL + COMPACT LAYERS + FULLSCREEN */}
+      <div className="lg:hidden absolute top-3 left-3 right-3 z-30 flex items-center gap-1.5 sm:gap-2">
+        <div className="flex-1 min-w-0 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-soft-xl border border-slate-200/90 flex items-center gap-1">
           <button
             type="button"
             onClick={() => setMobileTab('map')}
-            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 min-w-0 py-1.5 px-2 rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all flex items-center justify-center gap-1 ${
               mobileTab === 'map'
                 ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -233,7 +233,7 @@ export default function MapViewer() {
               setMobileTab('places');
               setSidebarMode('places');
             }}
-            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 min-w-0 py-1.5 px-2 rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all flex items-center justify-center gap-1 ${
               mobileTab === 'places'
                 ? 'bg-teal-600 text-white shadow-soft-sm font-extrabold'
                 : 'text-slate-600 hover:text-slate-900'
@@ -241,7 +241,7 @@ export default function MapViewer() {
           >
             <Compass className="w-3.5 h-3.5 shrink-0" />
             <span>Địa điểm</span>
-            <span className="text-[10px] font-semibold opacity-85">({filteredPlaces.length})</span>
+            <span className="hidden min-[400px]:inline text-[10px] font-semibold opacity-85">({filteredPlaces.length})</span>
           </button>
 
           <button
@@ -250,7 +250,7 @@ export default function MapViewer() {
               setMobileTab('itinerary');
               setSidebarMode('itinerary');
             }}
-            className={`flex-1 py-1.5 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 min-w-0 py-1.5 px-2 rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all flex items-center justify-center gap-1 ${
               mobileTab === 'itinerary'
                 ? 'bg-amber-500 text-slate-950 shadow-soft-sm font-black'
                 : 'text-slate-600 hover:text-slate-900'
@@ -259,7 +259,7 @@ export default function MapViewer() {
             <Route className="w-3.5 h-3.5 shrink-0" />
             <span>Lịch trình</span>
             {itinerary.length > 0 && (
-              <span className="text-[10px] font-black bg-slate-950/15 px-1 rounded-full">
+              <span className="text-[10px] font-black bg-slate-950/15 px-1 rounded-full shrink-0">
                 {itinerary.length}
               </span>
             )}
@@ -267,21 +267,34 @@ export default function MapViewer() {
         </div>
 
         {mobileTab === 'map' && (
-          <div className="relative shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="relative">
+              <button
+                ref={layersBtnRef}
+                type="button"
+                onClick={() => setIsLayersOpen((prev) => !prev)}
+                className={`p-2.5 rounded-2xl backdrop-blur-md shadow-soft-xl border transition-all flex items-center justify-center ${
+                  isLayersOpen
+                    ? 'bg-teal-600 text-white border-teal-500 shadow-teal-500/20'
+                    : 'bg-white/95 text-slate-700 hover:text-teal-700 border-slate-200/90'
+                }`}
+                title="Đổi lớp bản đồ"
+                aria-label="Đổi lớp bản đồ"
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+              {isLayersOpen && renderLayerPopover()}
+            </div>
+
             <button
-              ref={layersBtnRef}
               type="button"
-              onClick={() => setIsLayersOpen((prev) => !prev)}
-              className={`p-2.5 rounded-2xl backdrop-blur-md shadow-soft-xl border transition-all flex items-center justify-center ${
-                isLayersOpen
-                  ? 'bg-teal-600 text-white border-teal-500 shadow-teal-500/20'
-                  : 'bg-white/95 text-slate-700 hover:text-teal-700 border-slate-200/90'
-              }`}
-              title="Đổi lớp bản đồ"
+              onClick={() => setIsFullscreen((prev) => !prev)}
+              className="p-2.5 rounded-2xl bg-white/95 backdrop-blur-md text-slate-700 hover:text-teal-700 shadow-soft-xl border border-slate-200/90 transition-colors flex items-center justify-center"
+              title={isFullscreen ? 'Thu nhỏ giao diện' : 'Toàn màn hình'}
+              aria-label={isFullscreen ? 'Thu nhỏ giao diện' : 'Toàn màn hình'}
             >
-              <Layers className="w-4 h-4" />
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
-            {isLayersOpen && renderLayerPopover()}
           </div>
         )}
       </div>
@@ -651,7 +664,7 @@ export default function MapViewer() {
       )}
 
       {/* 2. REAL INTERACTIVE LEAFLET MAP */}
-      <div className="flex-1 relative w-full h-full bg-slate-900 overflow-hidden">
+      <div className="flex-1 min-h-0 relative w-full h-full bg-slate-900 overflow-hidden">
         <LeafletMap
           places={places}
           selectedPlace={selectedPlace}
@@ -708,10 +721,10 @@ export default function MapViewer() {
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 mt-1">
-                  <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md shrink-0">
+                  <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md truncate min-w-0">
                     {selectedPlace.price_label}
                   </span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
                       onClick={() => addToItinerary(selectedPlace)}
@@ -776,21 +789,21 @@ export default function MapViewer() {
           </button>
         </div>
 
-        {/* Map Legend (Bottom Right, Desktop/Tablet only) */}
+        {/* Map Legend (Bottom Left on mobile, Bottom Right on Desktop/Tablet) */}
         <div
-          className={`hidden sm:flex absolute bottom-4 right-4 z-20 bg-slate-950/85 backdrop-blur-md border border-slate-800 text-white px-3.5 py-2 rounded-2xl text-[11px] items-center gap-3 shadow-soft-xl ${
+          className={`flex absolute bottom-7 left-3 sm:left-auto sm:bottom-6 sm:right-4 z-20 bg-slate-950/85 backdrop-blur-md border border-slate-800 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] items-center gap-2.5 sm:gap-3 shadow-soft-xl max-w-[calc(100%-24px)] ${
             selectedPlace ? 'hidden lg:flex' : ''
           }`}
         >
-          <div className="flex items-center gap-1.5 font-bold">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+          <div className="flex items-center gap-1.5 font-bold whitespace-nowrap">
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-teal-400 shrink-0"></span>
             <span>Địa danh Quảng Ngãi</span>
           </div>
-          <div className="flex items-center gap-1.5 font-bold">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          <div className="flex items-center gap-1.5 font-bold whitespace-nowrap">
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-400 shrink-0"></span>
             <span>Chặng lộ trình</span>
           </div>
-          <div className="text-slate-400 border-l border-slate-700 pl-3">
+          <div className="hidden sm:block text-slate-400 border-l border-slate-700 pl-3 whitespace-nowrap">
             Bản đồ số OpenStreetMap / Google
           </div>
         </div>

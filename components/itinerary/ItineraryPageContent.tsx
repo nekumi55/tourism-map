@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Map,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -83,16 +84,18 @@ export default function ItineraryPageContent() {
 
   // Preset Tour: Lý Sơn 2 Ngày 1 Đêm
   const handlePresetLySon = () => {
-    const lySon = places.filter((p) => p.district_id === 'dist-ly-son');
-    setSelectedPlaces(lySon.slice(0, 4));
+    const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    setSelectedPlaces(lySon);
+    setActiveStepPlace(lySon[0] || null);
   };
 
   // Preset Tour: Di Sản & Danh Thắng
   const handlePresetHeritage = () => {
-    const items = places.filter(
-      (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
-    );
-    setSelectedPlaces(items.slice(0, 4));
+    const items = places
+      .filter((p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum')
+      .slice(0, 4);
+    setSelectedPlaces(items);
+    setActiveStepPlace(items[0] || null);
   };
 
   return (
@@ -207,13 +210,13 @@ export default function ItineraryPageContent() {
       {/* Main 2-Column Interface: Left Itinerary Stops + Right Live Interactive Map */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Itinerary Sequence & Selector (5 cols on lg, toggleable on mobile) */}
-        <div className={`lg:col-span-5 space-y-6 ${mobileTab === 'stops' ? 'block' : 'hidden lg:block'}`}>
+        <div className={`lg:col-span-5 min-w-0 space-y-6 ${mobileTab === 'stops' ? 'block' : 'hidden lg:block'}`}>
           {/* Add Stop Selector */}
           <div className="p-3.5 sm:p-4 bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft space-y-2">
             <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700">
               + Thêm một điểm dừng vào hành trình:
             </label>
-            <div className="flex gap-2">
+            <div className="relative w-full min-w-0">
               <select
                 onChange={(e) => {
                   if (e.target.value) {
@@ -222,7 +225,7 @@ export default function ItineraryPageContent() {
                   }
                 }}
                 defaultValue=""
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-hidden focus:border-teal-500"
+                className="w-full min-w-0 max-w-full px-3.5 py-2.5 pr-9 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-hidden focus:border-teal-500 appearance-none truncate cursor-pointer"
               >
                 <option value="" disabled>
                   Chọn địa điểm từ danh sách...
@@ -233,6 +236,7 @@ export default function ItineraryPageContent() {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="w-4 h-4 text-teal-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 
@@ -432,15 +436,15 @@ export default function ItineraryPageContent() {
         </div>
 
         {/* Right Column: Interactive Route Map Visualizer (7 cols on lg, toggleable on mobile) */}
-        <div className={`lg:col-span-7 lg:sticky lg:top-24 space-y-4 ${mobileTab === 'map' ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft-sm flex items-center justify-between">
-            <div className="flex items-center gap-2 font-black text-slate-900 text-xs sm:text-sm">
+        <div className={`lg:col-span-7 min-w-0 lg:sticky lg:top-24 space-y-4 ${mobileTab === 'map' ? 'block' : 'hidden lg:block'}`}>
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft-sm flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-black text-slate-900 text-xs sm:text-sm min-w-0">
               <Map className="w-4 h-4 text-teal-600 shrink-0" />
-              <span>Bản Đồ Chỉ Dẫn Lộ Trình Tour Trực Quan</span>
+              <span className="truncate">Bản Đồ Chỉ Dẫn Lộ Trình Tour Trực Quan</span>
             </div>
             <Link
               href="/map"
-              className="text-xs font-bold text-teal-700 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-teal-700 hover:underline flex items-center gap-1 shrink-0"
             >
               <span>Xem trên bản đồ lớn</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -448,7 +452,7 @@ export default function ItineraryPageContent() {
           </div>
 
           {/* Leaflet Map Frame with Route Polyline */}
-          <div className="relative aspect-16/11 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-slate-200 shadow-soft-xl bg-slate-900 min-h-[380px] sm:min-h-[460px]">
+          <div className="relative w-full h-[380px] sm:h-[440px] lg:h-auto lg:aspect-16/11 lg:min-h-[460px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-slate-200 shadow-soft-xl bg-slate-900">
             <LeafletMap
               places={places}
               selectedPlace={activeStepPlace}

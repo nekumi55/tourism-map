@@ -20,26 +20,26 @@ export default function Navbar() {
   const { settings } = useData();
 
   return (
-    <header suppressHydrationWarning className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-soft-sm transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+    <header suppressHydrationWarning className="sticky top-0 z-50 w-full overflow-x-clip bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-soft-sm transition-all">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 h-16 md:h-20">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20 group-hover:scale-105 group-hover:shadow-glow transition-all shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0 flex-1 lg:flex-initial lg:max-w-[250px] xl:max-w-[325px]">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20 group-hover:scale-105 group-hover:shadow-glow transition-all shrink-0">
               <LogoIcon className="w-5 h-5 animate-spin-slow" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-base sm:text-lg md:text-xl tracking-tight text-slate-900 group-hover:text-teal-700 transition-colors whitespace-nowrap">
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-sm sm:text-base xl:text-lg tracking-tight text-slate-900 group-hover:text-teal-700 transition-colors truncate">
                 {settings.siteTitle}
               </span>
-              <span className="text-[10px] md:text-xs text-slate-500 uppercase tracking-wider font-semibold whitespace-nowrap">
+              <span className="text-[10px] md:text-[11px] text-slate-500 uppercase tracking-wider font-semibold truncate">
                 {settings.siteSubtitle}
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation (Protected from wrapping) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0">
             {NAV_LINKS.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
@@ -47,7 +47,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-1.5 xl:gap-2 px-3 xl:px-3.5 py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all shrink-0 ${
+                  className={`flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all shrink-0 ${
                     isActive
                       ? 'text-teal-800 bg-teal-50/90 shadow-soft-sm font-bold border border-teal-200/60'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
@@ -61,24 +61,24 @@ export default function Navbar() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
             <Link
               href="/explore"
-              className="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-slate-100 transition-colors shrink-0"
               title="Tìm kiếm địa điểm"
             >
               <Search className="w-5 h-5" />
             </Link>
             <Link
               href="/itinerary"
-              className="hidden xl:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-200 text-teal-700 hover:bg-teal-50 text-xs font-bold transition-all shadow-soft-sm whitespace-nowrap"
+              className="hidden xl:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-200 text-teal-700 hover:bg-teal-50 text-xs font-bold transition-all shadow-soft-sm whitespace-nowrap shrink-0"
             >
               <Route className="w-4 h-4 text-teal-600 shrink-0" />
               <span>Lên Lịch Trình</span>
             </Link>
             <Link
               href="/map"
-              className="flex items-center gap-1.5 px-3.5 xl:px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs xl:text-sm font-bold shadow-soft transition-all hover:shadow-soft-xl active:scale-95 whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3.5 xl:px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs xl:text-sm font-bold shadow-soft transition-all hover:shadow-soft-xl active:scale-95 whitespace-nowrap shrink-0"
             >
               <Map className="w-4 h-4 shrink-0" />
               <span>Mở Bản Đồ</span>
@@ -86,7 +86,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile & Tablet (< lg) Menu Button */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             <Link
               href="/map"
               className="px-3 py-1.5 rounded-xl bg-teal-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap"
