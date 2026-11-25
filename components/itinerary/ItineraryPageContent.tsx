@@ -98,34 +98,53 @@ export default function ItineraryPageContent() {
 
   useGSAP(
     () => {
-      const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const runIntro = (reduced: boolean) => {
         const root = containerRef.current;
         if (!root) return;
 
         const header = root.querySelector('[data-itinerary-header]');
         const stats = root.querySelectorAll('[data-itinerary-stat]');
         const stops = root.querySelectorAll('[data-stop-card]');
-        const introTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        const introTl = gsap.timeline({ defaults: { ease: reduced ? 'power2.out' : 'power3.out' } });
 
         if (header) {
-          introTl.from(header, { y: 12, opacity: 0, duration: 0.32, clearProps: 'transform,opacity' }, 0);
+          introTl.from(
+            header,
+            { y: reduced ? 6 : 12, opacity: 0, duration: reduced ? 0.24 : 0.32, clearProps: 'transform,opacity' },
+            0
+          );
         }
         if (stats.length > 0) {
           introTl.from(
             stats,
-            { y: 14, opacity: 0, duration: 0.32, stagger: 0.04, clearProps: 'transform,opacity' },
-            0.06
+            {
+              y: reduced ? 6 : 14,
+              opacity: 0,
+              duration: reduced ? 0.24 : 0.32,
+              stagger: reduced ? 0.03 : 0.04,
+              clearProps: 'transform,opacity',
+            },
+            reduced ? 0.04 : 0.06
           );
         }
         if (stops.length > 0) {
           introTl.from(
             stops,
-            { y: 12, opacity: 0, duration: 0.3, stagger: 0.04, clearProps: 'transform,opacity' },
-            0.14
+            {
+              y: reduced ? 6 : 12,
+              opacity: 0,
+              duration: reduced ? 0.22 : 0.3,
+              stagger: reduced ? 0.03 : 0.04,
+              clearProps: 'transform,opacity',
+            },
+            reduced ? 0.09 : 0.14
           );
         }
-      });
+      };
+
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => runIntro(false));
+      mm.add('(prefers-reduced-motion: reduce)', () => runIntro(true));
       return () => mm.revert();
     },
     { scope: containerRef }
@@ -143,8 +162,8 @@ export default function ItineraryPageContent() {
         } else {
           gsap.to(mobileTabPillRef.current, {
             xPercent: targetX,
-            duration: reduceMotion ? 0 : 0.26,
-            ease: 'power3.out',
+            duration: reduceMotion ? 0.18 : 0.26,
+            ease: reduceMotion ? 'power2.out' : 'power3.out',
             overwrite: 'auto',
           });
         }
@@ -160,8 +179,8 @@ export default function ItineraryPageContent() {
       if (reduceMotion) {
         gsap.fromTo(
           targetCol,
-          { autoAlpha: 0.5 },
-          { autoAlpha: 1, duration: 0.1, clearProps: 'opacity,visibility' }
+          { autoAlpha: 0.35, y: 4 },
+          { autoAlpha: 1, y: 0, duration: 0.18, ease: 'power2.out', clearProps: 'transform,opacity,visibility' }
         );
       } else {
         gsap.fromTo(
@@ -200,13 +219,13 @@ export default function ItineraryPageContent() {
         });
       }
 
-      if (card && !reduceMotion) {
+      if (card) {
         gsap.fromTo(
           card,
-          { scale: 0.99 },
+          { scale: reduceMotion ? 0.994 : 0.99 },
           {
             scale: 1,
-            duration: 0.22,
+            duration: reduceMotion ? 0.18 : 0.22,
             ease: 'power2.out',
             overwrite: 'auto',
             clearProps: 'transform',
@@ -214,14 +233,14 @@ export default function ItineraryPageContent() {
         );
       }
 
-      if (badge && !reduceMotion) {
+      if (badge) {
         gsap.fromTo(
           badge,
-          { scale: 0.9 },
+          { scale: reduceMotion ? 0.94 : 0.9 },
           {
-            scale: 1.05,
-            duration: 0.24,
-            ease: 'back.out(2)',
+            scale: reduceMotion ? 1.03 : 1.05,
+            duration: reduceMotion ? 0.18 : 0.24,
+            ease: reduceMotion ? 'power2.out' : 'back.out(2)',
             overwrite: 'auto',
             clearProps: 'transform',
           }
@@ -255,14 +274,14 @@ export default function ItineraryPageContent() {
       const reduceMotion = prefersReducedMotion();
 
       entries.forEach(({ el, badge, deltaY, isMoved }) => {
-        if (!reduceMotion && Math.abs(deltaY) > 1) {
+        if (Math.abs(deltaY) > 1) {
           gsap.fromTo(
             el,
-            { y: deltaY },
+            { y: reduceMotion ? Math.max(-24, Math.min(24, deltaY * 0.4)) : deltaY },
             {
               y: 0,
-              duration: 0.28,
-              ease: 'power3.out',
+              duration: reduceMotion ? 0.2 : 0.28,
+              ease: reduceMotion ? 'power2.out' : 'power3.out',
               overwrite: 'auto',
               clearProps: 'transform',
             }
@@ -275,20 +294,20 @@ export default function ItineraryPageContent() {
             { backgroundColor: '#E3F0ED' },
             {
               backgroundColor: '#FFFDF9',
-              duration: 0.5,
+              duration: reduceMotion ? 0.35 : 0.5,
               ease: 'power2.out',
               clearProps: 'backgroundColor',
             }
           );
 
-          if (badge && !reduceMotion) {
+          if (badge) {
             gsap.fromTo(
               badge,
-              { scale: 1.15 },
+              { scale: reduceMotion ? 1.08 : 1.15 },
               {
                 scale: 1,
-                duration: 0.28,
-                ease: 'back.out(2)',
+                duration: reduceMotion ? 0.2 : 0.28,
+                ease: reduceMotion ? 'power2.out' : 'back.out(2)',
                 clearProps: 'transform',
               }
             );
@@ -309,8 +328,16 @@ export default function ItineraryPageContent() {
       if (reduceMotion) {
         gsap.fromTo(
           cards,
-          { autoAlpha: 0.5 },
-          { autoAlpha: 1, duration: 0.12, clearProps: 'opacity,visibility' }
+          { autoAlpha: 0, y: 6 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.2,
+            stagger: 0.025,
+            ease: 'power2.out',
+            overwrite: 'auto',
+            clearProps: 'transform,opacity,visibility',
+          }
         );
       } else {
         gsap.fromTo(
@@ -343,8 +370,16 @@ export default function ItineraryPageContent() {
       if (reduceMotion) {
         gsap.fromTo(
           el,
-          { autoAlpha: 0.5 },
-          { autoAlpha: 1, duration: 0.2, clearProps: 'opacity,visibility' }
+          { autoAlpha: 0, y: 6, backgroundColor: '#E3F0ED' },
+          {
+            autoAlpha: 1,
+            y: 0,
+            backgroundColor: '#FFFDF9',
+            duration: 0.22,
+            ease: 'power2.out',
+            overwrite: 'auto',
+            clearProps: 'transform,opacity,visibility,backgroundColor',
+          }
         );
       } else {
         gsap.fromTo(
@@ -406,11 +441,12 @@ export default function ItineraryPageContent() {
   };
 
   const pulsePresetButton = contextSafe((btn: HTMLButtonElement | null) => {
-    if (!btn || prefersReducedMotion()) return;
+    if (!btn) return;
+    const reduceMotion = prefersReducedMotion();
     gsap.fromTo(
       btn,
-      { scale: 0.97 },
-      { scale: 1, duration: 0.22, ease: 'power2.out', clearProps: 'transform' }
+      { scale: reduceMotion ? 0.985 : 0.97 },
+      { scale: 1, duration: reduceMotion ? 0.16 : 0.22, ease: 'power2.out', clearProps: 'transform' }
     );
   });
 

@@ -91,11 +91,12 @@ function MapLayersControl({ mapLayer, onSelectLayer, variant }: MapLayersControl
     const token = closeTokenRef.current;
     setIsOpen(false);
 
-    if (!popoverRef.current || prefersReducedMotion()) {
+    if (!popoverRef.current) {
       setIsMounted(false);
       return;
     }
 
+    const reduceMotion = prefersReducedMotion();
     contextSafe(() => {
       if (!popoverRef.current) {
         setIsMounted(false);
@@ -103,9 +104,9 @@ function MapLayersControl({ mapLayer, onSelectLayer, variant }: MapLayersControl
       }
       gsap.to(popoverRef.current, {
         autoAlpha: 0,
-        y: -6,
-        scale: 0.95,
-        duration: 0.14,
+        y: reduceMotion ? -3 : -6,
+        scale: reduceMotion ? 0.985 : 0.95,
+        duration: reduceMotion ? 0.12 : 0.14,
         ease: 'power2.in',
         overwrite: 'auto',
         onComplete: () => {
@@ -132,20 +133,20 @@ function MapLayersControl({ mapLayer, onSelectLayer, variant }: MapLayersControl
       if (!isMounted || !isOpen || !popoverRef.current) return;
       const reduceMotion = prefersReducedMotion();
 
-      if (reduceMotion) {
-        gsap.set(popoverRef.current, { autoAlpha: 1, y: 0, scale: 1 });
-        return;
-      }
-
       gsap.fromTo(
         popoverRef.current,
-        { autoAlpha: 0, y: -8, scale: 0.94, transformOrigin: 'top right' },
+        {
+          autoAlpha: 0,
+          y: reduceMotion ? -4 : -8,
+          scale: reduceMotion ? 0.98 : 0.94,
+          transformOrigin: 'top right',
+        },
         {
           autoAlpha: 1,
           y: 0,
           scale: 1,
-          duration: 0.22,
-          ease: 'power3.out',
+          duration: reduceMotion ? 0.18 : 0.22,
+          ease: reduceMotion ? 'power2.out' : 'power3.out',
           overwrite: 'auto',
         }
       );
@@ -154,12 +155,12 @@ function MapLayersControl({ mapLayer, onSelectLayer, variant }: MapLayersControl
       if (options.length > 0) {
         gsap.fromTo(
           options,
-          { autoAlpha: 0, x: -6 },
+          { autoAlpha: 0, x: reduceMotion ? -3 : -6 },
           {
             autoAlpha: 1,
             x: 0,
-            duration: 0.18,
-            stagger: 0.03,
+            duration: reduceMotion ? 0.14 : 0.18,
+            stagger: reduceMotion ? 0.02 : 0.03,
             ease: 'power2.out',
             clearProps: 'transform,opacity,visibility',
           }
@@ -175,15 +176,15 @@ function MapLayersControl({ mapLayer, onSelectLayer, variant }: MapLayersControl
       if (chevronRef.current) {
         gsap.to(chevronRef.current, {
           rotation: isOpen ? 180 : 0,
-          duration: reduceMotion ? 0 : 0.2,
+          duration: reduceMotion ? 0.16 : 0.2,
           ease: 'power2.out',
           overwrite: 'auto',
         });
       }
       if (iconRef.current) {
         gsap.to(iconRef.current, {
-          scale: isOpen ? 1.06 : 1,
-          duration: reduceMotion ? 0 : 0.18,
+          scale: isOpen ? (reduceMotion ? 1.04 : 1.06) : 1,
+          duration: reduceMotion ? 0.14 : 0.18,
           ease: 'power2.out',
           overwrite: 'auto',
         });
@@ -422,8 +423,8 @@ export default function MapViewer() {
       gsap.to(mobileTabPillRef.current, {
         xPercent: targetIdx * 100,
         backgroundColor: bg,
-        duration: reduceMotion ? 0 : 0.26,
-        ease: 'power3.out',
+        duration: reduceMotion ? 0.18 : 0.26,
+        ease: reduceMotion ? 'power2.out' : 'power3.out',
         overwrite: 'auto',
       });
     },
@@ -446,8 +447,8 @@ export default function MapViewer() {
       gsap.to(desktopTabPillRef.current, {
         xPercent: targetIdx * 100,
         backgroundColor: bg,
-        duration: reduceMotion ? 0 : 0.24,
-        ease: 'power3.out',
+        duration: reduceMotion ? 0.18 : 0.24,
+        ease: reduceMotion ? 'power2.out' : 'power3.out',
         overwrite: 'auto',
       });
     },
@@ -531,17 +532,18 @@ export default function MapViewer() {
   );
 
   const handleCollapseSidebar = () => {
-    if (!sidebarRef.current || prefersReducedMotion()) {
+    if (!sidebarRef.current) {
       setIsSidebarOpen(false);
       return;
     }
 
+    const reduceMotion = prefersReducedMotion();
     contextSafe(() => {
       if (!sidebarRef.current) return;
       gsap.to(sidebarRef.current, {
-        x: -24,
+        x: reduceMotion ? -10 : -24,
         autoAlpha: 0,
-        duration: 0.18,
+        duration: reduceMotion ? 0.15 : 0.18,
         ease: 'power2.in',
         overwrite: 'auto',
         onComplete: () => {
@@ -568,39 +570,33 @@ export default function MapViewer() {
 
       if (isSidebarOpen && sidebarRef.current) {
         if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-          if (reduceMotion) {
-            gsap.set(sidebarRef.current, { clearProps: 'transform,opacity,visibility' });
-          } else {
-            gsap.fromTo(
-              sidebarRef.current,
-              { x: -24, autoAlpha: 0 },
-              {
-                x: 0,
-                autoAlpha: 1,
-                duration: 0.26,
-                ease: 'power3.out',
-                overwrite: 'auto',
-                clearProps: 'transform,opacity,visibility',
-              }
-            );
-          }
-        }
-      } else if (!isSidebarOpen && reopenBtnRef.current) {
-        if (!reduceMotion) {
           gsap.fromTo(
-            reopenBtnRef.current,
-            { x: -14, autoAlpha: 0, scale: 0.95 },
+            sidebarRef.current,
+            { x: reduceMotion ? -10 : -24, autoAlpha: 0 },
             {
               x: 0,
               autoAlpha: 1,
-              scale: 1,
-              duration: 0.24,
-              ease: 'power3.out',
+              duration: reduceMotion ? 0.2 : 0.26,
+              ease: reduceMotion ? 'power2.out' : 'power3.out',
               overwrite: 'auto',
               clearProps: 'transform,opacity,visibility',
             }
           );
         }
+      } else if (!isSidebarOpen && reopenBtnRef.current) {
+        gsap.fromTo(
+          reopenBtnRef.current,
+          { x: reduceMotion ? -6 : -14, autoAlpha: 0, scale: reduceMotion ? 0.98 : 0.95 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            scale: 1,
+            duration: reduceMotion ? 0.18 : 0.24,
+            ease: reduceMotion ? 'power2.out' : 'power3.out',
+            overwrite: 'auto',
+            clearProps: 'transform,opacity,visibility',
+          }
+        );
       }
     },
     { scope: shellRef, dependencies: [isSidebarOpen] }
@@ -613,22 +609,13 @@ export default function MapViewer() {
       if (!tabPanelRef.current) return;
 
       const reduceMotion = prefersReducedMotion();
-      if (reduceMotion) {
-        gsap.fromTo(
-          tabPanelRef.current,
-          { autoAlpha: 0.5 },
-          { autoAlpha: 1, duration: 0.1, clearProps: 'opacity,visibility' }
-        );
-        return;
-      }
-
       gsap.fromTo(
         tabPanelRef.current,
-        { autoAlpha: 0, y: 8 },
+        { autoAlpha: reduceMotion ? 0.35 : 0, y: reduceMotion ? 4 : 8 },
         {
           autoAlpha: 1,
           y: 0,
-          duration: 0.22,
+          duration: reduceMotion ? 0.18 : 0.22,
           ease: 'power2.out',
           overwrite: 'auto',
           clearProps: 'transform,opacity,visibility',
@@ -663,15 +650,15 @@ export default function MapViewer() {
         const cards = Array.from(
           placesListRef.current.querySelectorAll('[data-place-card]')
         ).slice(0, 8);
-        if (cards.length > 0 && !reduceMotion) {
+        if (cards.length > 0) {
           gsap.fromTo(
             cards,
-            { autoAlpha: 0, y: 6 },
+            { autoAlpha: reduceMotion ? 0.35 : 0, y: reduceMotion ? 4 : 6 },
             {
               autoAlpha: 1,
               y: 0,
-              duration: 0.2,
-              stagger: 0.02,
+              duration: reduceMotion ? 0.18 : 0.2,
+              stagger: reduceMotion ? 0.015 : 0.02,
               ease: 'power2.out',
               overwrite: 'auto',
               clearProps: 'transform,opacity,visibility',
@@ -701,18 +688,19 @@ export default function MapViewer() {
     setSelectedPlace(null);
     wasPopupOpenRef.current = false;
 
-    if (!popupRef.current || prefersReducedMotion()) {
+    if (!popupRef.current) {
       setRenderedPopupPlace(null);
       return;
     }
 
+    const reduceMotion = prefersReducedMotion();
     contextSafe(() => {
       if (!popupRef.current) return;
       gsap.to(popupRef.current, {
         autoAlpha: 0,
-        y: 16,
-        scale: 0.97,
-        duration: 0.16,
+        y: reduceMotion ? 8 : 16,
+        scale: reduceMotion ? 0.99 : 0.97,
+        duration: reduceMotion ? 0.14 : 0.16,
         ease: 'power2.in',
         overwrite: 'auto',
         onComplete: () => {
@@ -741,9 +729,9 @@ export default function MapViewer() {
         if (wasPopupOpenRef.current) {
           gsap.to(popupRef.current, {
             autoAlpha: 0,
-            y: reduceMotion ? 0 : 12,
-            scale: reduceMotion ? 1 : 0.97,
-            duration: reduceMotion ? 0 : 0.15,
+            y: reduceMotion ? 6 : 12,
+            scale: reduceMotion ? 0.99 : 0.97,
+            duration: reduceMotion ? 0.12 : 0.15,
             ease: 'power2.in',
             overwrite: 'auto',
           });
@@ -753,32 +741,32 @@ export default function MapViewer() {
       }
 
       if (!wasPopupOpenRef.current) {
-        if (reduceMotion) {
-          gsap.set(popupRef.current, { autoAlpha: 1, y: 0, scale: 1 });
-        } else {
-          gsap.fromTo(
-            popupRef.current,
-            { autoAlpha: 0, y: 20, scale: 0.97 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.26,
-              ease: 'power3.out',
-              overwrite: 'auto',
-              clearProps: 'transform',
-            }
-          );
-        }
+        gsap.fromTo(
+          popupRef.current,
+          {
+            autoAlpha: 0,
+            y: reduceMotion ? 8 : 20,
+            scale: reduceMotion ? 0.99 : 0.97,
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: reduceMotion ? 0.2 : 0.26,
+            ease: reduceMotion ? 'power2.out' : 'power3.out',
+            overwrite: 'auto',
+            clearProps: 'transform',
+          }
+        );
       } else if (prevPopupPlaceIdRef.current !== renderedPopupPlaceId) {
-        if (popupContentRef.current && !reduceMotion) {
+        if (popupContentRef.current) {
           gsap.fromTo(
             popupContentRef.current,
-            { autoAlpha: 0, y: 6 },
+            { autoAlpha: reduceMotion ? 0.35 : 0, y: reduceMotion ? 4 : 6 },
             {
               autoAlpha: 1,
               y: 0,
-              duration: 0.2,
+              duration: reduceMotion ? 0.18 : 0.2,
               ease: 'power2.out',
               overwrite: 'auto',
               clearProps: 'transform,opacity,visibility',
@@ -807,19 +795,17 @@ export default function MapViewer() {
         block: 'nearest',
       });
 
-      if (!reduceMotion) {
-        gsap.fromTo(
-          cardEl,
-          { scale: 0.988 },
-          {
-            scale: 1,
-            duration: 0.24,
-            ease: 'power2.out',
-            overwrite: 'auto',
-            clearProps: 'transform',
-          }
-        );
-      }
+      gsap.fromTo(
+        cardEl,
+        { scale: reduceMotion ? 0.994 : 0.988 },
+        {
+          scale: 1,
+          duration: reduceMotion ? 0.18 : 0.24,
+          ease: 'power2.out',
+          overwrite: 'auto',
+          clearProps: 'transform',
+        }
+      );
     },
     { scope: shellRef, dependencies: [selectedPlaceId] }
   );
@@ -914,14 +900,14 @@ export default function MapViewer() {
       const reduceMotion = prefersReducedMotion();
 
       deltas.forEach(({ el, deltaY, isMoved }) => {
-        if (!reduceMotion && Math.abs(deltaY) > 1) {
+        if (Math.abs(deltaY) > 1) {
           gsap.fromTo(
             el,
-            { y: deltaY },
+            { y: reduceMotion ? Math.max(-24, Math.min(24, deltaY * 0.4)) : deltaY },
             {
               y: 0,
-              duration: 0.26,
-              ease: 'power3.out',
+              duration: reduceMotion ? 0.2 : 0.26,
+              ease: reduceMotion ? 'power2.out' : 'power3.out',
               overwrite: 'auto',
               clearProps: 'transform',
             }
@@ -933,7 +919,7 @@ export default function MapViewer() {
             { backgroundColor: '#E3F0ED' },
             {
               backgroundColor: '#FFFDF9',
-              duration: 0.45,
+              duration: reduceMotion ? 0.35 : 0.45,
               ease: 'power2.out',
               clearProps: 'backgroundColor',
             }

@@ -63,11 +63,11 @@ export default function Navbar() {
 
     if (!targetEl || targetEl.offsetWidth === 0 || navEl.offsetWidth === 0) {
       indicatorTweenRef.current?.kill();
-      if (targetIndex < 0 && hasPlacedIndicatorRef.current && animate && !reduce) {
+      if (targetIndex < 0 && hasPlacedIndicatorRef.current && animate) {
         indicatorTweenRef.current = gsap.to(indicatorEl, {
           autoAlpha: 0,
           scaleX: 0.3,
-          duration: 0.18,
+          duration: reduce ? 0.14 : 0.18,
           ease: 'power2.out',
           overwrite: true,
           onComplete: () => {
@@ -88,7 +88,7 @@ export default function Navbar() {
 
     indicatorTweenRef.current?.kill();
 
-    if (!hasPlacedIndicatorRef.current || !animate || reduce) {
+    if (!hasPlacedIndicatorRef.current || !animate) {
       hasPlacedIndicatorRef.current = true;
       gsap.set(indicatorEl, {
         x: targetX,
@@ -104,7 +104,7 @@ export default function Navbar() {
       x: targetX,
       scaleX: targetScaleX,
       autoAlpha: 1,
-      duration: 0.32,
+      duration: reduce ? 0.2 : 0.32,
       ease: 'power3.out',
       willChange: 'transform, opacity',
       overwrite: true,
@@ -366,7 +366,7 @@ export default function Navbar() {
                       }}
                       href={link.href}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`relative z-10 flex items-center gap-1.5 px-3 xl:px-3.5 min-h-9 rounded-lg text-[13px] xl:text-sm whitespace-nowrap transition-[color,background-color,box-shadow] duration-200 motion-reduce:transition-none shrink-0 border ${
+                      className={`relative z-10 flex items-center gap-1.5 px-3 xl:px-3.5 min-h-9 rounded-lg text-[13px] xl:text-sm whitespace-nowrap transition-[color,background-color,box-shadow] duration-200 shrink-0 border ${
                         isActive
                           ? 'bg-[var(--bg-surface)] text-[var(--accent-jade)] font-bold border-[var(--border-subtle)] shadow-soft-sm'
                           : 'text-[var(--ink-secondary)] font-medium border-transparent hover:text-[var(--ink-primary)] hover:bg-[var(--bg-surface)]/65'

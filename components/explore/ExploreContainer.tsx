@@ -250,7 +250,7 @@ export default function ExploreContainer() {
       const targetX = targetBtn.offsetLeft - firstBtn.offsetLeft;
       const reduceMotion = prefersReducedMotion();
 
-      if (isFirstViewSyncRef.current || reduceMotion) {
+      if (isFirstViewSyncRef.current) {
         gsap.set(pill, { x: targetX });
         isFirstViewSyncRef.current = false;
         return;
@@ -258,7 +258,7 @@ export default function ExploreContainer() {
 
       gsap.to(pill, {
         x: targetX,
-        duration: 0.26,
+        duration: reduceMotion ? 0.18 : 0.26,
         ease: 'power3.out',
         overwrite: 'auto',
       });
@@ -278,7 +278,7 @@ export default function ExploreContainer() {
       const targetScaleY = targetBtn.offsetHeight / baseHeight;
       const reduceMotion = prefersReducedMotion();
 
-      if (instant || reduceMotion) {
+      if (instant) {
         gsap.set(pill, { y: targetY, scaleY: targetScaleY, opacity: 1 });
         return;
       }
@@ -287,7 +287,7 @@ export default function ExploreContainer() {
         y: targetY,
         scaleY: targetScaleY,
         opacity: 1,
-        duration: 0.28,
+        duration: reduceMotion ? 0.2 : 0.28,
         ease: 'power3.out',
         overwrite: 'auto',
       });
@@ -306,14 +306,14 @@ export default function ExploreContainer() {
       const targetX = targetBtn.offsetLeft - firstBtn.offsetLeft;
       const reduceMotion = prefersReducedMotion();
 
-      if (instant || reduceMotion) {
+      if (instant) {
         gsap.set(pill, { x: targetX });
         return;
       }
 
       gsap.to(pill, {
         x: targetX,
-        duration: 0.24,
+        duration: reduceMotion ? 0.18 : 0.24,
         ease: 'power3.out',
         overwrite: 'auto',
       });
@@ -380,35 +380,32 @@ export default function ExploreContainer() {
 
       if (cards.length > 0) {
         gsap.killTweensOf(cards);
-        if (reduceMotion) {
-          gsap.fromTo(
-            cards,
-            { opacity: 0.7 },
-            { opacity: 1, duration: 0.12, ease: 'power1.out', clearProps: 'opacity' }
-          );
-        } else {
-          gsap.fromTo(
-            cards,
-            { opacity: 0, y: 14 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.3,
-              stagger: { amount: 0.16, from: 'start' },
-              ease: 'power3.out',
-              clearProps: 'transform,opacity',
-            }
-          );
-        }
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: reduceMotion ? 10 : 18, scale: reduceMotion ? 0.99 : 0.985 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: reduceMotion ? 0.28 : 0.36,
+            stagger: { amount: reduceMotion ? 0.12 : 0.18, from: 'start' },
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+          }
+        );
       } else if (emptyState) {
         gsap.killTweensOf(emptyState);
-        if (!reduceMotion) {
-          gsap.fromTo(
-            emptyState,
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: 0.26, ease: 'power3.out', clearProps: 'transform,opacity' }
-          );
-        }
+        gsap.fromTo(
+          emptyState,
+          { opacity: 0, y: reduceMotion ? 6 : 12 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: reduceMotion ? 0.22 : 0.28,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+          }
+        );
       }
     },
     { scope: resultsContainerRef, dependencies: [cardsAnimKey] }
@@ -432,7 +429,7 @@ export default function ExploreContainer() {
       const pagesChanged = prevTotalPagesRef.current !== totalPages;
       prevTotalPagesRef.current = totalPages;
 
-      if (isFirstPageSyncRef.current || pagesChanged || reduceMotion) {
+      if (isFirstPageSyncRef.current || pagesChanged) {
         gsap.set(pill, { x: targetX });
         isFirstPageSyncRef.current = false;
         return;
@@ -440,7 +437,7 @@ export default function ExploreContainer() {
 
       gsap.to(pill, {
         x: targetX,
-        duration: 0.26,
+        duration: reduceMotion ? 0.18 : 0.26,
         ease: 'power3.out',
         overwrite: 'auto',
       });

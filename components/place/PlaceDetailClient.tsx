@@ -52,7 +52,8 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
+
+      const runDetail = (reduced: boolean) => {
         const root = containerRef.current;
         if (!root) return;
 
@@ -62,15 +63,29 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
         const introTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
         if (gallery) {
-          introTl.from(gallery, { y: 12, opacity: 0, duration: 0.36, clearProps: 'transform,opacity' }, 0);
+          introTl.from(
+            gallery,
+            { y: reduced ? 8 : 14, opacity: 0, duration: reduced ? 0.3 : 0.38, clearProps: 'transform,opacity' },
+            0
+          );
         }
         if (headerCard) {
-          introTl.from(headerCard, { y: 14, opacity: 0, duration: 0.36, clearProps: 'transform,opacity' }, 0.08);
+          introTl.from(
+            headerCard,
+            { y: reduced ? 8 : 16, opacity: 0, duration: reduced ? 0.3 : 0.38, clearProps: 'transform,opacity' },
+            0.08
+          );
         }
         if (asideCards.length > 0) {
           introTl.from(
             asideCards,
-            { y: 14, opacity: 0, duration: 0.34, stagger: 0.06, clearProps: 'transform,opacity' },
+            {
+              y: reduced ? 8 : 14,
+              opacity: 0,
+              duration: reduced ? 0.28 : 0.36,
+              stagger: 0.06,
+              clearProps: 'transform,opacity',
+            },
             0.12
           );
         }
@@ -80,8 +95,8 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
         if (highlightsWrap && highlights.length > 0) {
           gsap.from(highlights, {
             opacity: 0,
-            y: 10,
-            duration: 0.3,
+            y: reduced ? 6 : 12,
+            duration: reduced ? 0.26 : 0.32,
             stagger: 0.04,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
@@ -98,19 +113,22 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
         if (relatedSection && relatedCards.length > 0) {
           gsap.from(relatedCards, {
             opacity: 0,
-            y: 18,
-            duration: 0.38,
-            stagger: 0.06,
+            y: reduced ? 10 : 20,
+            duration: reduced ? 0.32 : 0.42,
+            stagger: 0.07,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
             scrollTrigger: {
               trigger: relatedSection,
-              start: 'top 85%',
+              start: 'top 86%',
               once: true,
             },
           });
         }
-      });
+      };
+
+      mm.add('(prefers-reduced-motion: no-preference)', () => runDetail(false));
+      mm.add('(prefers-reduced-motion: reduce)', () => runDetail(true));
       return () => mm.revert();
     },
     { scope: containerRef }

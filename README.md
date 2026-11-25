@@ -71,7 +71,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
     git push origin main
 
-    git status
-    git add .
-    git commit -m "Cap nhat giao dien va tinh nang moi"
-    git push origin main
+  git status
+  git add .
+  git commit -m "Cap nhat giao dien va tinh nang moi"
+  git push origin main

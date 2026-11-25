@@ -184,12 +184,12 @@ export default function HeroSearch() {
           wasDropdownMountedRef.current = true;
           gsap.set(panel, {
             autoAlpha: 0,
-            y: reduce ? 0 : -10,
-            scale: reduce ? 1 : 0.985,
+            y: reduce ? -4 : -10,
+            scale: reduce ? 0.992 : 0.985,
             transformOrigin: 'top center',
           });
           if (rows.length) {
-            gsap.set(rows, { autoAlpha: 0, y: reduce ? 0 : 8 });
+            gsap.set(rows, { autoAlpha: 0, y: reduce ? 4 : 8 });
           }
         }
 
@@ -199,38 +199,31 @@ export default function HeroSearch() {
           },
         });
 
-        if (reduce) {
-          tl.to(panel, { autoAlpha: 1, y: 0, scale: 1, duration: 0.1, ease: 'power1.out' }, 0);
-          if (rows.length) {
-            tl.to(rows, { autoAlpha: 1, y: 0, duration: 0.08, ease: 'power1.out' }, 0);
-          }
-        } else {
+        tl.to(
+          panel,
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: reduce ? 0.16 : 0.22,
+            ease: reduce ? 'power2.out' : 'power3.out',
+            willChange: 'transform, opacity',
+          },
+          0
+        );
+        if (rows.length) {
           tl.to(
-            panel,
+            rows,
             {
               autoAlpha: 1,
               y: 0,
-              scale: 1,
-              duration: 0.22,
-              ease: 'power3.out',
+              duration: reduce ? 0.14 : 0.2,
+              stagger: reduce ? 0.02 : 0.035,
+              ease: reduce ? 'power2.out' : 'power3.out',
               willChange: 'transform, opacity',
             },
-            0
+            reduce ? 0.02 : 0.04
           );
-          if (rows.length) {
-            tl.to(
-              rows,
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.2,
-                stagger: 0.035,
-                ease: 'power3.out',
-                willChange: 'transform, opacity',
-              },
-              0.04
-            );
-          }
         }
 
         dropdownTlRef.current = tl;
@@ -239,39 +232,32 @@ export default function HeroSearch() {
           onComplete: finalizeClose,
         });
 
-        if (reduce) {
-          if (rows.length) {
-            tl.to(rows, { autoAlpha: 0, duration: 0.08, ease: 'power1.in' }, 0);
-          }
-          tl.to(panel, { autoAlpha: 0, duration: 0.09, ease: 'power1.in' }, 0);
-        } else {
-          if (rows.length) {
-            tl.to(
-              rows,
-              {
-                autoAlpha: 0,
-                y: -4,
-                duration: 0.1,
-                stagger: { each: 0.015, from: 'end' },
-                ease: 'power2.in',
-                willChange: 'transform, opacity',
-              },
-              0
-            );
-          }
+        if (rows.length) {
           tl.to(
-            panel,
+            rows,
             {
               autoAlpha: 0,
-              y: -8,
-              scale: 0.985,
-              duration: 0.15,
+              y: reduce ? -2 : -4,
+              duration: reduce ? 0.08 : 0.1,
+              stagger: { each: reduce ? 0.01 : 0.015, from: 'end' },
               ease: 'power2.in',
               willChange: 'transform, opacity',
             },
-            rows.length ? 0.03 : 0
+            0
           );
         }
+        tl.to(
+          panel,
+          {
+            autoAlpha: 0,
+            y: reduce ? -3 : -8,
+            scale: reduce ? 0.992 : 0.985,
+            duration: reduce ? 0.12 : 0.15,
+            ease: 'power2.in',
+            willChange: 'transform, opacity',
+          },
+          rows.length ? 0.02 : 0
+        );
 
         dropdownTlRef.current = tl;
       }
@@ -300,20 +286,15 @@ export default function HeroSearch() {
       if (!rows.length) return;
 
       const reduce = prefersReducedMotion();
-      if (reduce) {
-        gsap.set(rows, { autoAlpha: 1, y: 0 });
-        return;
-      }
-
       gsap.fromTo(
         rows,
-        { autoAlpha: 0.45, y: 6 },
+        { autoAlpha: 0.45, y: reduce ? 4 : 6 },
         {
           autoAlpha: 1,
           y: 0,
-          duration: 0.2,
-          stagger: 0.03,
-          ease: 'power3.out',
+          duration: reduce ? 0.16 : 0.2,
+          stagger: reduce ? 0.02 : 0.03,
+          ease: reduce ? 'power2.out' : 'power3.out',
           overwrite: 'auto',
           clearProps: 'transform,willChange',
         }
@@ -378,15 +359,15 @@ export default function HeroSearch() {
       if (!category) return;
       const reduce = prefersReducedMotion();
       const badge = categoryBadgeRef.current;
-      if (badge && !reduce) {
+      if (badge) {
         gsap.fromTo(
           badge,
-          { autoAlpha: 0, scale: 0.85 },
+          { autoAlpha: 0, scale: reduce ? 0.92 : 0.85 },
           {
             autoAlpha: 1,
             scale: 1,
-            duration: 0.2,
-            ease: 'power3.out',
+            duration: reduce ? 0.16 : 0.2,
+            ease: reduce ? 'power2.out' : 'power3.out',
             clearProps: 'transform,willChange',
           }
         );
@@ -400,15 +381,15 @@ export default function HeroSearch() {
       if (!district) return;
       const reduce = prefersReducedMotion();
       const badge = districtBadgeRef.current;
-      if (badge && !reduce) {
+      if (badge) {
         gsap.fromTo(
           badge,
-          { autoAlpha: 0, scale: 0.85 },
+          { autoAlpha: 0, scale: reduce ? 0.92 : 0.85 },
           {
             autoAlpha: 1,
             scale: 1,
-            duration: 0.2,
-            ease: 'power3.out',
+            duration: reduce ? 0.16 : 0.2,
+            ease: reduce ? 'power2.out' : 'power3.out',
             clearProps: 'transform,willChange',
           }
         );
@@ -421,15 +402,16 @@ export default function HeroSearch() {
     () => {
       if (activeFilterCount <= 0) return;
       const badge = filterCountBadgeRef.current;
-      if (!badge || prefersReducedMotion()) return;
+      if (!badge) return;
+      const reduce = prefersReducedMotion();
       gsap.fromTo(
         badge,
-        { autoAlpha: 0, scale: 0.75 },
+        { autoAlpha: 0, scale: reduce ? 0.88 : 0.75 },
         {
           autoAlpha: 1,
           scale: 1,
-          duration: 0.2,
-          ease: 'power3.out',
+          duration: reduce ? 0.16 : 0.2,
+          ease: reduce ? 'power2.out' : 'power3.out',
           clearProps: 'transform,willChange',
         }
       );
@@ -463,20 +445,20 @@ export default function HeroSearch() {
       if (activeFilterCount > 0) {
         if (!wasFilterBarMountedRef.current) {
           wasFilterBarMountedRef.current = true;
-          gsap.set(bar, { autoAlpha: 0, y: reduce ? 0 : -6 });
+          gsap.set(bar, { autoAlpha: 0, y: reduce ? -3 : -6 });
         }
         filterBarTweenRef.current = gsap.to(bar, {
           autoAlpha: 1,
           y: 0,
-          duration: reduce ? 0.1 : 0.22,
-          ease: 'power3.out',
+          duration: reduce ? 0.16 : 0.22,
+          ease: reduce ? 'power2.out' : 'power3.out',
           clearProps: 'transform,willChange',
         });
       } else {
         filterBarTweenRef.current = gsap.to(bar, {
           autoAlpha: 0,
-          y: reduce ? 0 : -6,
-          duration: reduce ? 0.08 : 0.14,
+          y: reduce ? -3 : -6,
+          duration: reduce ? 0.12 : 0.14,
           ease: 'power2.in',
           onComplete: finalize,
         });
@@ -743,7 +725,7 @@ export default function HeroSearch() {
           )}
           <ArrowRight
             aria-hidden="true"
-            className="w-4 h-4 transition-transform duration-200 motion-safe:group-hover/submit:translate-x-0.5 motion-reduce:transition-none"
+            className="w-4 h-4 transition-transform duration-200 group-hover/submit:translate-x-0.5"
           />
         </button>
       </form>

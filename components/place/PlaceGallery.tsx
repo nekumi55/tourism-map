@@ -156,14 +156,14 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
         nextEl,
         {
           autoAlpha: 0,
-          x: reduceMotion ? 0 : dir * 24,
-          scale: reduceMotion ? 1 : 1.02,
+          x: reduceMotion ? dir * 10 : dir * 24,
+          scale: reduceMotion ? 1.008 : 1.02,
         },
         {
           autoAlpha: 1,
           x: 0,
           scale: 1,
-          duration: reduceMotion ? 0.12 : 0.4,
+          duration: reduceMotion ? 0.24 : 0.4,
           ease: 'power3.out',
           clearProps: 'transform',
           onComplete: () => {
@@ -187,14 +187,14 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
       const targetX = targetBtn.offsetLeft - firstBtn.offsetLeft;
       const reduceMotion = prefersReducedMotion();
 
-      if (instant || reduceMotion) {
+      if (instant) {
         gsap.set(ring, { x: targetX });
         return;
       }
 
       gsap.to(ring, {
         x: targetX,
-        duration: 0.28,
+        duration: reduceMotion ? 0.18 : 0.28,
         ease: 'power3.out',
         overwrite: 'auto',
       });
@@ -258,18 +258,18 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
         enterTl.fromTo(
           overlay,
           { opacity: 0 },
-          { opacity: 1, duration: reduceMotion ? 0.08 : 0.22, ease: 'power2.out' },
+          { opacity: 1, duration: reduceMotion ? 0.16 : 0.22, ease: 'power2.out' },
           0
         );
         enterTl.fromTo(
           stage,
-          { opacity: 0, scale: reduceMotion ? 1 : 0.95, y: reduceMotion ? 0 : 10 },
+          { opacity: 0, scale: reduceMotion ? 0.985 : 0.95, y: reduceMotion ? 4 : 10 },
           {
             opacity: 1,
             scale: 1,
             y: 0,
-            duration: reduceMotion ? 0.08 : 0.3,
-            ease: 'expo.out',
+            duration: reduceMotion ? 0.2 : 0.3,
+            ease: reduceMotion ? 'power2.out' : 'expo.out',
             clearProps: 'transform',
           },
           0
@@ -286,8 +286,8 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
           stage,
           {
             opacity: 0,
-            scale: reduceMotion ? 1 : 0.96,
-            duration: reduceMotion ? 0.06 : 0.18,
+            scale: reduceMotion ? 0.985 : 0.96,
+            duration: reduceMotion ? 0.14 : 0.18,
             ease: 'power2.in',
           },
           0
@@ -295,7 +295,7 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
 
         exitTl.to(
           overlay,
-          { opacity: 0, duration: reduceMotion ? 0.06 : 0.2, ease: 'power2.in' },
+          { opacity: 0, duration: reduceMotion ? 0.14 : 0.2, ease: 'power2.in' },
           '<0.03'
         );
       }
@@ -320,7 +320,11 @@ export default function PlaceGallery({ images, placeName }: PlaceGalleryProps) {
 
       gsap.killTweensOf(frame);
       if (reduceMotion) {
-        gsap.fromTo(frame, { opacity: 0.5 }, { opacity: 1, duration: 0.12, clearProps: 'opacity' });
+        gsap.fromTo(
+          frame,
+          { opacity: 0.4, x: dir * 10 },
+          { opacity: 1, x: 0, duration: 0.22, ease: 'power2.out', clearProps: 'transform,opacity' }
+        );
       } else {
         gsap.fromTo(
           frame,
