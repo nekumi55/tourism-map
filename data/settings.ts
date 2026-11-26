@@ -9,10 +9,10 @@ export const SHOW_PLACE_RATINGS = false;
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   siteTitle: 'Quảng Ngãi Atlas',
   siteSubtitle: 'Bản Đồ Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',
-  heroBadge: '6 tuyến di sản trọng tâm · Hệ thống tra cứu di tích toàn tỉnh Quảng Ngãi',
+  heroBadge: '6 tuyến di sản trọng tâm · 442 di tích & địa điểm toàn tỉnh Quảng Ngãi',
   heroHeading: 'Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',
   heroSubheading:
-    'Tra cứu 6 tuyến di sản trọng tâm cùng hệ thống di tích cấp quốc gia đặc biệt, cấp quốc gia, cấp tỉnh và di tích đã kiểm kê từ biển đảo Đông Quảng Ngãi đến đại ngàn Tây Quảng Ngãi.',
+    'Tra cứu 6 tuyến di sản trọng tâm cùng 442 di tích cấp quốc gia đặc biệt, cấp quốc gia, cấp tỉnh và di tích đã kiểm kê từ biển đảo Đông Quảng Ngãi đến đại ngàn Tây Quảng Ngãi.',
   heroBgImage:
     'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=85',
   contactEmail: 'dulich@quangngai.gov.vn',
@@ -22,8 +22,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   showBanner: false,
   bannerText: '',
   stats: {
-    totalPlaces: '6 Tuyến Di Sản & Toàn Tỉnh',
+    totalPlaces: '442 Địa điểm & Di sản',
     districtsCount: '6 Tuyến · 9 Khu vực',
-    avgRating: 'QG Đặc biệt · QG · Cấp tỉnh · Kiểm kê',
+    avgRating: '108 Điểm bản đồ · 43 QG/QGĐB',
   },
 };

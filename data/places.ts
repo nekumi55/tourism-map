@@ -1,4 +1,6 @@
 import { Place } from '@/types';
+import { PROVINCIAL_MONUMENTS } from './provincialMonuments';
+import { INVENTORIED_MONUMENTS } from './inventoriedMonuments';
 
 export const CORE_PLACES: Place[] = [
   {
@@ -3499,4 +3501,8 @@ export const CORE_PLACES: Place[] = [
   }
 ];
 
-export const MOCK_PLACES: Place[] = [...CORE_PLACES];
+export const MOCK_PLACES: Place[] = [
+  ...CORE_PLACES,
+  ...PROVINCIAL_MONUMENTS,
+  ...INVENTORIED_MONUMENTS,
+];

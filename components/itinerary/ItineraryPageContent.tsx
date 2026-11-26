@@ -446,6 +446,21 @@ export default function ItineraryPageContent() {
     }
   };
 
+  const handleTogglePopupItinerary = (place: Place) => {
+    if (selectedPlaces.some((p) => p.id === place.id)) {
+      const clean = place.name.replace(/\[Minh Họa\]\s*/g, '');
+      const next = selectedPlaces.filter((p) => p.id !== place.id);
+      setActivePreset(null);
+      setSelectedPlaces(next);
+      if (activeStepPlace?.id === place.id) {
+        setActiveStepPlace(next[0] ?? null);
+      }
+      setStatusNotice(`Đã bỏ "${clean}" khỏi lộ trình.`);
+      return;
+    }
+    handleAddPlace(place.id);
+  };
+
   const handleMove = (idx: number, direction: 'up' | 'down') => {
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= selectedPlaces.length) return;
@@ -1006,7 +1021,7 @@ export default function ItineraryPageContent() {
                   ? selectedPlaces.some((p) => p.id === renderedPopupPlace.id)
                   : false
               }
-              onAddToItinerary={(place) => handleAddPlace(place.id)}
+              onAddToItinerary={handleTogglePopupItinerary}
               onClose={closePopup}
             />
           </div>

@@ -717,10 +717,11 @@ export default function MapViewer() {
     { scope: shellRef, dependencies: [selectedPlaceId] }
   );
 
-  const addToItinerary = (place: Place) => {
+  const toggleItineraryPlace = (place: Place) => {
     const clean = place.name.replace(/\[Minh Họa\]\s*/g, '');
     if (itinerary.some((p) => p.id === place.id)) {
-      setToastMsg(`"${clean}" đã có trong lộ trình.`);
+      setItinerary((prev) => prev.filter((p) => p.id !== place.id));
+      setToastMsg(`Đã bỏ "${clean}" khỏi lộ trình.`);
       return;
     }
     setItinerary((prev) => [...prev, place]);
@@ -1147,10 +1148,17 @@ export default function MapViewer() {
                             </span>
                             <button
                               type="button"
-                              onClick={() => addToItinerary(place)}
+                              onClick={() => toggleItineraryPlace(place)}
+                              aria-pressed={inItinerary}
+                              title={inItinerary ? 'Nhấn để bỏ khỏi lộ trình' : 'Thêm vào lộ trình'}
+                              aria-label={
+                                inItinerary
+                                  ? `Bỏ ${cleanName} khỏi lộ trình`
+                                  : `Thêm ${cleanName} vào lộ trình`
+                              }
                               className={`min-h-8 px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors shrink-0 cursor-pointer ${
                                 inItinerary
-                                  ? 'bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)]'
+                                  ? 'bg-[var(--accent-ochre-soft)] hover:bg-[#F5E4C8] text-[var(--accent-ochre-ink)]'
                                   : 'bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9]'
                               }`}
                             >
@@ -1407,14 +1415,10 @@ export default function MapViewer() {
           places={mappedPlaces}
           selectedPlace={selectedPlace}
           onSelectPlace={(p) => openPlacePopup(p, true)}
-          itineraryPlaces={
-            showMarkers || sidebarMode === 'itinerary' || mobileTab === 'itinerary'
-              ? itinerary
-              : []
-          }
+          itineraryPlaces={itinerary}
           mapLayer={mapLayer}
           showMarkers={showMarkers}
-          showItineraryMarkers={sidebarMode === 'itinerary' || mobileTab === 'itinerary'}
+          showItineraryMarkers
         />
 
         {/* Selected Place Popup Card */}
@@ -1430,7 +1434,7 @@ export default function MapViewer() {
           isInItinerary={
             renderedPopupPlace ? itinerary.some((p) => p.id === renderedPopupPlace.id) : false
           }
-          onAddToItinerary={addToItinerary}
+          onAddToItinerary={toggleItineraryPlace}
           onClose={closePlacePopup}
         />
 
@@ -1439,8 +1443,8 @@ export default function MapViewer() {
           <MapMarkersToggleButton
             showMarkers={showMarkers}
             onToggle={() => setShowMarkers((prev) => !prev)}
-            showLabel={sidebarMode === 'itinerary' ? 'Hiện tất cả điểm' : 'Hiện đánh dấu'}
-            hideLabel={sidebarMode === 'itinerary' ? 'Chỉ hiện lộ trình' : 'Ẩn đánh dấu'}
+            showLabel={itinerary.length > 0 ? 'Hiện tất cả điểm' : 'Hiện đánh dấu'}
+            hideLabel={itinerary.length > 0 ? 'Chỉ hiện lộ trình' : 'Ẩn đánh dấu'}
           />
 
           <MapLayersControl

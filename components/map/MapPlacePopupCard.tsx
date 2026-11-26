@@ -262,9 +262,16 @@ export default function MapPlacePopupCard({
               <button
                 type="button"
                 onClick={() => onAddToItinerary(place)}
+                aria-pressed={isInItinerary}
+                title={isInItinerary ? 'Nhấn để bỏ khỏi lộ trình' : 'Thêm vào lộ trình'}
+                aria-label={
+                  isInItinerary
+                    ? `Bỏ ${cleanName} khỏi lộ trình`
+                    : `Thêm ${cleanName} vào lộ trình`
+                }
                 className={`min-h-9 px-2.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
                   isInItinerary
-                    ? 'bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)]'
+                    ? 'bg-[var(--accent-ochre-soft)] hover:bg-[#F5E4C8] text-[var(--accent-ochre-ink)]'
                     : 'bg-[#F59E0B] hover:bg-[#D97706] text-[#16201D]'
                 }`}
               >
