@@ -16,16 +16,20 @@ import {
   ChevronDown,
   Check,
   Info,
+  Sparkles,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useData } from '@/context/DataContext';
 import { Place } from '@/types';
 import MapPlacePopupCard, { usePlacePopup } from '@/components/map/MapPlacePopupCard';
+import MapMarkersToggleButton from '@/components/map/MapMarkersToggleButton';
 import {
   calculateDistanceKm,
   calculateTotalRouteDistance,
   buildGoogleMapsRouteUrl,
+  optimizeItineraryOrder,
+  formatOptimizeNotice,
 } from '@/utils/itinerary';
 
 gsap.registerPlugin(useGSAP);
@@ -49,10 +53,14 @@ const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
 
 export default function ItineraryPageContent() {
   const { places, categories } = useData();
+  const mappedPlaces = useMemo(
+    () => places.filter((p) => p.has_coordinates !== false),
+    [places]
+  );
 
   const [selectedPlaces, setSelectedPlaces] = useState<Place[]>(() => {
-    const initial = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    return initial.length > 0 ? initial : places.slice(0, 4);
+    const initial = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    return initial.length > 0 ? initial : mappedPlaces.slice(0, 4);
   });
 
   const [activeStepPlace, setActiveStepPlace] = useState<Place | null>(selectedPlaces[0] || null);
@@ -65,6 +73,7 @@ export default function ItineraryPageContent() {
   } = usePlacePopup();
   const [activePreset, setActivePreset] = useState<'ly-son' | 'heritage' | null>('ly-son');
   const [mobileTab, setMobileTab] = useState<'stops' | 'map'>('stops');
+  const [showMarkers, setShowMarkers] = useState<boolean>(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   const [reorderTick, setReorderTick] = useState(0);
@@ -409,9 +418,11 @@ export default function ItineraryPageContent() {
   );
 
   const handleAddPlace = (placeId: string) => {
-    const found = places.find((p) => p.id === placeId);
+    const found = mappedPlaces.find((p) => p.id === placeId);
     if (!found) return;
     const clean = found.name.replace(/\[Minh Họa\]\s*/g, '');
+    setActiveStepPlace(found);
+    openPopup(found);
     if (selectedPlaces.some((p) => p.id === found.id)) {
       setStatusNotice(`"${clean}" đã có sẵn trong lộ trình.`);
       return;
@@ -424,8 +435,15 @@ export default function ItineraryPageContent() {
   };
 
   const handleRemovePlace = (placeId: string) => {
+    const next = selectedPlaces.filter((p) => p.id !== placeId);
     setActivePreset(null);
-    setSelectedPlaces(selectedPlaces.filter((p) => p.id !== placeId));
+    setSelectedPlaces(next);
+    if (activeStepPlace?.id === placeId) {
+      setActiveStepPlace(next[0] ?? null);
+    }
+    if (popupPlace?.id === placeId) {
+      closePopup();
+    }
   };
 
   const handleMove = (idx: number, direction: 'up' | 'down') => {
@@ -448,6 +466,24 @@ export default function ItineraryPageContent() {
     setReorderTick((t) => t + 1);
   };
 
+  const handleSmartOptimize = () => {
+    if (selectedPlaces.length < 3) return;
+    const result = optimizeItineraryOrder(selectedPlaces);
+    setStatusNotice(formatOptimizeNotice(result));
+    if (!result.changed) return;
+
+    const tops = new Map<string, number>();
+    stopCardRefs.current.forEach((el, id) => {
+      tops.set(id, el.getBoundingClientRect().top);
+    });
+    pendingReorderTopsRef.current = tops;
+    lastMovedIdRef.current = null;
+
+    setActivePreset(null);
+    setSelectedPlaces(result.places);
+    setReorderTick((t) => t + 1);
+  };
+
   const pulsePresetButton = contextSafe((btn: HTMLButtonElement | null) => {
     if (!btn) return;
     const reduceMotion = prefersReducedMotion();
@@ -464,8 +500,8 @@ export default function ItineraryPageContent() {
   };
 
   const handlePresetLySon = () => {
-    const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    const items = lySon.length > 0 ? lySon : places.slice(0, 4);
+    const lySon = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    const items = lySon.length > 0 ? lySon : mappedPlaces.slice(0, 4);
     setActivePreset('ly-son');
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
@@ -475,10 +511,10 @@ export default function ItineraryPageContent() {
   };
 
   const handlePresetHeritage = () => {
-    const heritage = places
+    const heritage = mappedPlaces
       .filter((p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum')
       .slice(0, 4);
-    const items = heritage.length > 0 ? heritage : places.slice(0, 4);
+    const items = heritage.length > 0 ? heritage : mappedPlaces.slice(0, 4);
     setActivePreset('heritage');
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
@@ -655,7 +691,7 @@ export default function ItineraryPageContent() {
                 <option value="" disabled>
                   Chọn địa điểm từ danh sách...
                 </option>
-                {places.map((place) => (
+                {mappedPlaces.map((place) => (
                   <option key={place.id} value={place.id}>
                     {place.name.replace(/\[Minh Họa\]\s*/g, '')}
                   </option>
@@ -681,21 +717,39 @@ export default function ItineraryPageContent() {
 
           {/* Sequential Stops */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-xl truncate min-w-0">
                 Lộ Trình Từng Chặng ({selectedPlaces.length})
               </h2>
               {selectedPlaces.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActivePreset(null);
-                    setSelectedPlaces([]);
-                  }}
-                  className="min-h-10 px-2.5 text-xs font-semibold text-[#9A3412] hover:underline shrink-0 cursor-pointer"
-                >
-                  Xóa tất cả
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleSmartOptimize}
+                    disabled={selectedPlaces.length < 3}
+                    title={
+                      selectedPlaces.length < 3
+                        ? 'Cần ít nhất 3 điểm dừng để sắp xếp thông minh'
+                        : 'Tự động sắp xếp thứ tự các chặng để rút ngắn quãng đường'
+                    }
+                    className="ui-interactive-press min-h-9 px-3 rounded-lg bg-[var(--accent-jade-soft)] hover:bg-[var(--accent-jade)] text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] disabled:opacity-45 disabled:pointer-events-none text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>Sắp xếp thông minh</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePreset(null);
+                      setSelectedPlaces([]);
+                      setActiveStepPlace(null);
+                      closePopup();
+                    }}
+                    className="min-h-9 px-2 text-xs font-semibold text-[#9A3412] hover:underline shrink-0 cursor-pointer"
+                  >
+                    Xóa tất cả
+                  </button>
+                </div>
               )}
             </div>
 
@@ -921,11 +975,21 @@ export default function ItineraryPageContent() {
 
           <div className="relative w-full h-[380px] sm:h-[440px] lg:h-auto lg:aspect-16/11 lg:min-h-[460px] rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-basalt)]">
             <LeafletMap
-              places={places}
+              places={mappedPlaces}
               selectedPlace={activeStepPlace}
               onSelectPlace={handleSelectPlace}
               itineraryPlaces={selectedPlaces}
               mapLayer="standard"
+              showMarkers={showMarkers}
+              showItineraryMarkers
+            />
+
+            <MapMarkersToggleButton
+              showMarkers={showMarkers}
+              onToggle={() => setShowMarkers((prev) => !prev)}
+              showLabel="Hiện tất cả điểm"
+              hideLabel="Chỉ hiện lộ trình"
+              className="absolute top-3 right-3 z-30"
             />
 
             <MapPlacePopupCard

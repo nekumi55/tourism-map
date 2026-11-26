@@ -10,6 +10,8 @@ interface LeafletMapProps {
   onSelectPlace: (place: Place) => void;
   itineraryPlaces: Place[];
   mapLayer: 'standard' | 'satellite' | 'terrain';
+  showMarkers?: boolean;
+  showItineraryMarkers?: boolean;
 }
 
 // Highly reliable, ultra-fast tile servers with verified 200 OK in Vietnam
@@ -40,6 +42,8 @@ export default function LeafletMap({
   onSelectPlace,
   itineraryPlaces,
   mapLayer,
+  showMarkers = true,
+  showItineraryMarkers = false,
 }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<LType.Map | null>(null);
@@ -58,6 +62,8 @@ export default function LeafletMap({
   const itineraryPlacesRef = useRef(itineraryPlaces);
   const onSelectPlaceRef = useRef(onSelectPlace);
   const mapLayerRef = useRef(mapLayer);
+  const showMarkersRef = useRef(showMarkers);
+  const showItineraryMarkersRef = useRef(showItineraryMarkers);
 
   useEffect(() => {
     placesRef.current = places;
@@ -65,7 +71,17 @@ export default function LeafletMap({
     itineraryPlacesRef.current = itineraryPlaces;
     onSelectPlaceRef.current = onSelectPlace;
     mapLayerRef.current = mapLayer;
-  }, [places, selectedPlace, itineraryPlaces, onSelectPlace, mapLayer]);
+    showMarkersRef.current = showMarkers;
+    showItineraryMarkersRef.current = showItineraryMarkers;
+  }, [
+    places,
+    selectedPlace,
+    itineraryPlaces,
+    onSelectPlace,
+    mapLayer,
+    showMarkers,
+    showItineraryMarkers,
+  ]);
 
   const applyInitialViewport = useCallback(
     (L: typeof LType, map: LType.Map, container: HTMLDivElement) => {
@@ -77,9 +93,9 @@ export default function LeafletMap({
       map.invalidateSize({ animate: false });
 
       const currentSelected = selectedPlaceRef.current;
-      const currentPlaces = placesRef.current;
+      const currentPlaces = placesRef.current.filter((p) => p.has_coordinates !== false);
 
-      if (currentSelected) {
+      if (currentSelected && currentSelected.has_coordinates !== false) {
         map.setView(
           [currentSelected.latitude, currentSelected.longitude],
           width < 640 ? 12.5 : 13,
@@ -136,14 +152,37 @@ export default function LeafletMap({
         polylineRef.current = polyline;
       }
 
-      // 2. Draw Markers
-      const currentPlaces = placesRef.current;
+      // 2. Draw Markers (only places with verified coordinates)
+      const currentPlaces = placesRef.current.filter((p) => p.has_coordinates !== false);
       const currentSelected = selectedPlaceRef.current;
+      const validSelected =
+        currentSelected && currentSelected.has_coordinates !== false ? currentSelected : null;
+      const currentShowMarkers = showMarkersRef.current;
+      const currentShowItineraryMarkers = showItineraryMarkersRef.current;
       const selectedChanged =
         Boolean(currentSelected?.id) && prevSelectedIdRef.current !== currentSelected?.id;
       prevSelectedIdRef.current = currentSelected?.id ?? null;
 
-      currentPlaces.forEach((place) => {
+      let placesToRender: Place[] = [];
+      if (currentShowMarkers) {
+        placesToRender =
+          validSelected && !currentPlaces.some((p) => p.id === validSelected.id)
+            ? [...currentPlaces, validSelected]
+            : currentPlaces;
+      } else {
+        const byId = new Map<string, Place>();
+        if (currentShowItineraryMarkers) {
+          currentItinerary
+            .filter((p) => p.has_coordinates !== false)
+            .forEach((p) => byId.set(p.id, p));
+        }
+        if (validSelected) {
+          byId.set(validSelected.id, validSelected);
+        }
+        placesToRender = Array.from(byId.values());
+      }
+
+      placesToRender.forEach((place) => {
         const isSelected = currentSelected?.id === place.id;
         const itineraryIdx = currentItinerary.findIndex((p) => p.id === place.id);
         const isItinerary = itineraryIdx !== -1;
@@ -200,12 +239,18 @@ export default function LeafletMap({
 
       const currentSelectedId = currentSelected?.id ?? null;
       const selectionChanged = currentSelectedId !== lastHandledSelectedIdRef.current;
-      lastHandledSelectedIdRef.current = currentSelectedId;
 
       const wasClickedOnMap =
         currentSelectedId !== null && mapClickedIdRef.current === currentSelectedId;
       if (wasClickedOnMap || currentSelectedId === null) {
         mapClickedIdRef.current = null;
+      }
+
+      const isContainerVisible =
+        Boolean(containerRef.current) && (containerRef.current?.clientWidth ?? 0) > 0;
+
+      if (selectionChanged && (isContainerVisible || wasClickedOnMap || currentSelectedId === null)) {
+        lastHandledSelectedIdRef.current = currentSelectedId;
       }
 
       // Pan (and zoom in if at province-wide zoom) when a place is chosen outside the map (e.g. sidebar list)
@@ -214,8 +259,7 @@ export default function LeafletMap({
         !wasClickedOnMap &&
         currentSelected &&
         hasFittedInitialRef.current &&
-        containerRef.current &&
-        containerRef.current.clientWidth > 0
+        isContainerVisible
       ) {
         const reduceMotion =
           typeof window !== 'undefined' &&
@@ -281,9 +325,28 @@ export default function LeafletMap({
       if (typeof ResizeObserver !== 'undefined') {
         const ro = new ResizeObserver(() => {
           if (!isCancelled && mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize({ animate: false });
+            const mapInstance = mapInstanceRef.current;
+            mapInstance.invalidateSize({ animate: false });
             if (!hasFittedInitialRef.current) {
-              applyInitialViewport(L, mapInstanceRef.current, container);
+              applyInitialViewport(L, mapInstance, container);
+            } else if (
+              container.clientWidth > 0 &&
+              selectedPlaceRef.current &&
+              selectedPlaceRef.current.id !== lastHandledSelectedIdRef.current
+            ) {
+              const pending = selectedPlaceRef.current;
+              lastHandledSelectedIdRef.current = pending.id;
+              const reduceMotion =
+                typeof window !== 'undefined' &&
+                window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+              mapInstance.setView(
+                [pending.latitude, pending.longitude],
+                Math.max(mapInstance.getZoom(), 13),
+                {
+                  animate: !reduceMotion,
+                  duration: reduceMotion ? 0 : 0.55,
+                }
+              );
             }
           }
         });
@@ -347,7 +410,7 @@ export default function LeafletMap({
     });
   }, [mapLayer]);
 
-  // Redraw Markers & Route when places or selection or itinerary changes
+  // Redraw Markers & Route when places or selection or itinerary or visibility changes
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
 
@@ -355,7 +418,14 @@ export default function LeafletMap({
       if (!mapInstanceRef.current || !markersLayerRef.current) return;
       drawMarkersAndRoute(L, mapInstanceRef.current, markersLayerRef.current);
     });
-  }, [places, selectedPlace, itineraryPlaces, drawMarkersAndRoute]);
+  }, [
+    places,
+    selectedPlace,
+    itineraryPlaces,
+    showMarkers,
+    showItineraryMarkers,
+    drawMarkersAndRoute,
+  ]);
 
   return (
     <div className="w-full h-full relative min-h-[380px]" data-lenis-prevent>

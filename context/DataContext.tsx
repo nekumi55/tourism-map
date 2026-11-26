@@ -37,10 +37,10 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PLACES: 'tourism_map_places_v8',
-  CATEGORIES: 'tourism_map_categories_v8',
-  DISTRICTS: 'tourism_map_districts_v8',
-  SETTINGS: 'tourism_map_settings_v8',
+  PLACES: 'tourism_map_places_v9',
+  CATEGORIES: 'tourism_map_categories_v9',
+  DISTRICTS: 'tourism_map_districts_v9',
+  SETTINGS: 'tourism_map_settings_v9',
 };
 
 export function DataProvider({ children }: { children: React.ReactNode }) {

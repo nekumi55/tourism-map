@@ -72,6 +72,9 @@ export interface Place {
   region?: 'Đông Quảng Ngãi' | 'Tây Quảng Ngãi'; // Phân vùng nghiên cứu
   route_name?: string; // Tuyến di sản (e.g. Tuyến 1 – Di sản khảo cổ học)
   verification_source?: string; // Nguồn kiểm chứng
+  has_coordinates?: boolean; // default true; false for monuments with no public/verifiable map coordinates
+  dms_coordinates?: string; // Official DMS coordinate string (e.g. 14°45'54"B, 108°43'51"Đ)
+  component_sites?: string[]; // Component sub-sites listed for complex monuments
 }
 
 export interface FilterState {

@@ -27,6 +27,7 @@ import {
   Globe,
   Check,
   Info,
+  Sparkles,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -34,10 +35,13 @@ import { Place, Category } from '@/types';
 import { useData } from '@/context/DataContext';
 import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import MapPlacePopupCard, { usePlacePopup } from '@/components/map/MapPlacePopupCard';
+import MapMarkersToggleButton from '@/components/map/MapMarkersToggleButton';
 import {
   calculateDistanceKm,
   calculateTotalRouteDistance,
   buildGoogleMapsRouteUrl,
+  optimizeItineraryOrder,
+  formatOptimizeNotice,
 } from '@/utils/itinerary';
 import { matchSearchKeyword } from '@/utils/vietnamese';
 
@@ -317,12 +321,17 @@ export default function MapViewer() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  const mappedPlaces = useMemo(
+    () => places.filter((p) => p.has_coordinates !== false),
+    [places]
+  );
+
   const initialPlace = useMemo(() => {
     if (initialPlaceId) {
-      return places.find((p) => p.id === initialPlaceId) || null;
+      return mappedPlaces.find((p) => p.id === initialPlaceId) || null;
     }
     return null;
-  }, [initialPlaceId, places]);
+  }, [initialPlaceId, mappedPlaces]);
 
   const {
     popupPlace: selectedPlace,
@@ -333,12 +342,13 @@ export default function MapViewer() {
   } = usePlacePopup(initialPlace);
 
   const [mapLayer, setMapLayer] = useState<MapLayerType>('standard');
+  const [showMarkers, setShowMarkers] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const [itinerary, setItinerary] = useState<Place[]>(() => {
-    const lySonPlaces = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
-    return lySonPlaces.length > 0 ? lySonPlaces : places.slice(0, 3);
+    const lySonPlaces = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
+    return lySonPlaces.length > 0 ? lySonPlaces : mappedPlaces.slice(0, 3);
   });
   const [itineraryReorderTick, setItineraryReorderTick] = useState<number>(0);
 
@@ -374,7 +384,7 @@ export default function MapViewer() {
   }, [toastMsg]);
 
   const filteredPlaces = useMemo(() => {
-    return places.filter((p) => {
+    return mappedPlaces.filter((p) => {
       const matchCategory =
         selectedCategory === 'all' || p.category_id === selectedCategory;
       const matchQuery =
@@ -384,7 +394,7 @@ export default function MapViewer() {
         p.tags.some((t) => matchSearchKeyword(t, searchQuery));
       return matchCategory && matchQuery;
     });
-  }, [places, selectedCategory, searchQuery]);
+  }, [mappedPlaces, selectedCategory, searchQuery]);
 
   const totalDistance = useMemo(() => calculateTotalRouteDistance(itinerary), [itinerary]);
   const estimatedHours = useMemo(() => {
@@ -740,6 +750,23 @@ export default function MapViewer() {
     setItineraryReorderTick((t) => t + 1);
   };
 
+  const optimizeMapItinerary = () => {
+    if (itinerary.length < 3) return;
+    const result = optimizeItineraryOrder(itinerary);
+    setToastMsg(formatOptimizeNotice(result));
+    if (!result.changed) return;
+
+    const tops = new Map<string, number>();
+    itineraryCardRefs.current.forEach((el, id) => {
+      tops.set(id, el.getBoundingClientRect().top);
+    });
+    pendingReorderTopsRef.current = tops;
+    lastMovedItineraryIdRef.current = null;
+
+    setItinerary(result.places);
+    setItineraryReorderTick((t) => t + 1);
+  };
+
   useGSAP(
     () => {
       if (itineraryReorderTick === 0 || !pendingReorderTopsRef.current) return;
@@ -790,19 +817,19 @@ export default function MapViewer() {
   );
 
   const loadLySonTour = () => {
-    const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    const items = lySon.length > 0 ? lySon : places.slice(0, 4);
+    const lySon = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    const items = lySon.length > 0 ? lySon : mappedPlaces.slice(0, 4);
     setItinerary(items);
     setSidebarMode('itinerary');
   };
 
   const loadHeritageTour = () => {
-    const heritage = places
+    const heritage = mappedPlaces
       .filter(
         (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
       )
       .slice(0, 4);
-    const items = heritage.length > 0 ? heritage : places.slice(0, 4);
+    const items = heritage.length > 0 ? heritage : mappedPlaces.slice(0, 4);
     setItinerary(items);
     setSidebarMode('itinerary');
   };
@@ -885,6 +912,12 @@ export default function MapViewer() {
 
         {mobileTab === 'map' && (
           <div className="flex items-center gap-1.5 shrink-0">
+            <MapMarkersToggleButton
+              showMarkers={showMarkers}
+              onToggle={() => setShowMarkers((prev) => !prev)}
+              compact
+            />
+
             <MapLayersControl
               mapLayer={mapLayer}
               onSelectLayer={setMapLayer}
@@ -1172,25 +1205,44 @@ export default function MapViewer() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <a
-                  href={buildGoogleMapsRouteUrl(itinerary)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ui-interactive-press flex-1 min-w-0 min-h-10 px-3 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] text-xs font-semibold flex items-center justify-center gap-1.5"
-                >
-                  <Navigation className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span className="truncate">Chỉ đường Google Maps</span>
-                </a>
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={buildGoogleMapsRouteUrl(itinerary)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ui-interactive-press flex-1 min-w-0 min-h-10 px-3 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] text-xs font-semibold flex items-center justify-center gap-1.5"
+                  >
+                    <Navigation className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">Chỉ đường Google Maps</span>
+                  </a>
+                  {itinerary.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setItinerary([])}
+                      className="min-h-10 min-w-10 rounded-lg text-[#9A3412] hover:bg-[#F6EAE6] border border-[var(--border-subtle)] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                      title="Xóa toàn bộ lộ trình"
+                      aria-label="Xóa toàn bộ lộ trình"
+                    >
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+
                 {itinerary.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setItinerary([])}
-                    className="min-h-10 min-w-10 rounded-lg text-[#9A3412] hover:bg-[#F6EAE6] border border-[var(--border-subtle)] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
-                    title="Xóa toàn bộ lộ trình"
-                    aria-label="Xóa toàn bộ lộ trình"
+                    onClick={optimizeMapItinerary}
+                    disabled={itinerary.length < 3}
+                    title={
+                      itinerary.length < 3
+                        ? 'Cần ít nhất 3 điểm dừng để sắp xếp thông minh'
+                        : 'Tự động sắp xếp thứ tự các chặng để rút ngắn quãng đường'
+                    }
+                    className="ui-interactive-press w-full min-h-9 px-3 rounded-lg bg-[var(--accent-jade-soft)] hover:bg-[var(--accent-jade)] text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] disabled:opacity-45 disabled:pointer-events-none text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>Sắp xếp thông minh</span>
                   </button>
                 )}
               </div>
@@ -1352,11 +1404,17 @@ export default function MapViewer() {
       {/* 2. INTERACTIVE LEAFLET MAP */}
       <div className="flex-1 min-h-0 relative w-full h-full bg-[var(--bg-basalt)] overflow-hidden">
         <LeafletMap
-          places={places}
+          places={mappedPlaces}
           selectedPlace={selectedPlace}
           onSelectPlace={(p) => openPlacePopup(p, true)}
-          itineraryPlaces={itinerary}
+          itineraryPlaces={
+            showMarkers || sidebarMode === 'itinerary' || mobileTab === 'itinerary'
+              ? itinerary
+              : []
+          }
           mapLayer={mapLayer}
+          showMarkers={showMarkers}
+          showItineraryMarkers={sidebarMode === 'itinerary' || mobileTab === 'itinerary'}
         />
 
         {/* Selected Place Popup Card */}
@@ -1378,6 +1436,13 @@ export default function MapViewer() {
 
         {/* Desktop Controls (Top Right) */}
         <div className="hidden lg:flex absolute top-4 right-4 z-30 items-center gap-2">
+          <MapMarkersToggleButton
+            showMarkers={showMarkers}
+            onToggle={() => setShowMarkers((prev) => !prev)}
+            showLabel={sidebarMode === 'itinerary' ? 'Hiện tất cả điểm' : 'Hiện đánh dấu'}
+            hideLabel={sidebarMode === 'itinerary' ? 'Chỉ hiện lộ trình' : 'Ẩn đánh dấu'}
+          />
+
           <MapLayersControl
             mapLayer={mapLayer}
             onSelectLayer={setMapLayer}

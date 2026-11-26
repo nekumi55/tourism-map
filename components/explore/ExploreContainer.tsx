@@ -25,8 +25,36 @@ import { matchSearchKeyword } from '@/utils/vietnamese';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 const RATING_OPTIONS = [0, 4.6, 4.8] as const;
+const RECOGNITION_OPTIONS = [
+  'Quốc gia đặc biệt',
+  'Quốc gia',
+  'Quốc tế – UNESCO',
+  'Cấp tỉnh',
+  'Đã kiểm kê',
+  'Bổ sung',
+] as const;
+
+type CoordinateFilter = 'all' | 'mapped' | 'unmapped';
+
+function getPaginationItems(
+  current: number,
+  total: number
+): Array<number | 'ellipsis-left' | 'ellipsis-right'> {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const items: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [1];
+  const left = Math.max(2, current - 1);
+  const right = Math.min(total - 1, current + 1);
+
+  if (left > 2) items.push('ellipsis-left');
+  for (let p = left; p <= right; p += 1) items.push(p);
+  if (right < total - 1) items.push('ellipsis-right');
+  items.push(total);
+  return items;
+}
 
 type SortOption = 'featured' | 'rating-desc' | 'reviews-desc' | 'name-asc';
 
@@ -41,6 +69,8 @@ export default function ExploreContainer() {
   const [search, setSearch] = useState(() => searchParams.get('search') || '');
   const [category, setCategory] = useState(() => searchParams.get('category') || 'all');
   const [district, setDistrict] = useState(() => searchParams.get('district') || 'all');
+  const [recognitionLevel, setRecognitionLevel] = useState<string>('all');
+  const [coordinateFilter, setCoordinateFilter] = useState<CoordinateFilter>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [minRating, setMinRating] = useState<number>(0);
   const [sortBy, setSortBy] = useState<SortOption>('featured');
@@ -85,6 +115,8 @@ export default function ExploreContainer() {
     setSearch('');
     setCategory('all');
     setDistrict('all');
+    setRecognitionLevel('all');
+    setCoordinateFilter('all');
     setPriceRange('all');
     setMinRating(0);
     setSortBy('featured');
@@ -124,6 +156,9 @@ export default function ExploreContainer() {
 
       if (category !== 'all' && p.category_id !== category) return false;
       if (district !== 'all' && p.district_id !== district) return false;
+      if (recognitionLevel !== 'all' && p.recognition_level !== recognitionLevel) return false;
+      if (coordinateFilter === 'mapped' && p.has_coordinates === false) return false;
+      if (coordinateFilter === 'unmapped' && p.has_coordinates !== false) return false;
       if (priceRange !== 'all' && p.price_range !== priceRange) return false;
       if (minRating > 0 && p.rating < minRating) return false;
 
@@ -139,7 +174,7 @@ export default function ExploreContainer() {
     });
 
     return result;
-  }, [places, search, category, district, priceRange, minRating, sortBy]);
+  }, [places, search, category, district, recognitionLevel, coordinateFilter, priceRange, minRating, sortBy]);
 
   const totalItems = filteredAndSortedPlaces.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
@@ -151,12 +186,14 @@ export default function ExploreContainer() {
   const activeFiltersCount = [
     category !== 'all',
     district !== 'all',
+    recognitionLevel !== 'all',
+    coordinateFilter !== 'all',
     priceRange !== 'all',
     minRating > 0,
     search.trim() !== '',
   ].filter(Boolean).length;
 
-  const cardsAnimKey = `${search}|${category}|${district}|${priceRange}|${minRating}|${sortBy}|${viewMode}|${currentPage}`;
+  const cardsAnimKey = `${search}|${category}|${district}|${recognitionLevel}|${coordinateFilter}|${priceRange}|${minRating}|${sortBy}|${viewMode}|${currentPage}`;
   const prevCardsKeyRef = useRef(cardsAnimKey);
 
   useGSAP(
@@ -733,6 +770,63 @@ export default function ExploreContainer() {
               </div>
             </div>
 
+            {/* Recognition Level Filter */}
+            <div>
+              <label
+                htmlFor="explore-recognition-select"
+                className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2"
+              >
+                Cấp xếp hạng
+              </label>
+              <div className="relative min-w-0">
+                <select
+                  id="explore-recognition-select"
+                  value={recognitionLevel}
+                  onChange={(e) => handleFilterChange(() => setRecognitionLevel(e.target.value))}
+                  className="w-full min-h-11 min-w-0 max-w-full truncate px-3 py-2 text-sm rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-[var(--ink-primary)] focus:outline-none focus:border-[var(--accent-jade)] focus:bg-[var(--bg-surface)] appearance-none pr-8 cursor-pointer transition-colors"
+                >
+                  <option value="all">Tất cả cấp xếp hạng</option>
+                  {RECOGNITION_OPTIONS.map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="w-4 h-4 text-[var(--ink-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Coordinate Availability Filter */}
+            <div>
+              <label
+                htmlFor="explore-coordinate-select"
+                className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2"
+              >
+                Vị trí bản đồ
+              </label>
+              <div className="relative min-w-0">
+                <select
+                  id="explore-coordinate-select"
+                  value={coordinateFilter}
+                  onChange={(e) =>
+                    handleFilterChange(() => setCoordinateFilter(e.target.value as CoordinateFilter))
+                  }
+                  className="w-full min-h-11 min-w-0 max-w-full truncate px-3 py-2 text-sm rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-[var(--ink-primary)] focus:outline-none focus:border-[var(--accent-jade)] focus:bg-[var(--bg-surface)] appearance-none pr-8 cursor-pointer transition-colors"
+                >
+                  <option value="all">Tất cả địa điểm</option>
+                  <option value="mapped">Có tọa độ trên bản đồ</option>
+                  <option value="unmapped">Chưa có tọa độ bản đồ</option>
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="w-4 h-4 text-[var(--ink-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+              </div>
+            </div>
+
             {/* Price Range Filter */}
             <div>
               <label
@@ -918,25 +1012,35 @@ export default function ExploreContainer() {
                   aria-hidden="true"
                   className="pointer-events-none absolute top-1 left-1 w-10 h-10 rounded-md bg-[var(--accent-jade)]"
                 />
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    ref={(el) => {
-                      pageBtnRefs.current[page] = el;
-                    }}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    aria-current={currentPage === page ? 'page' : undefined}
-                    aria-label={`Trang ${page}`}
-                    className={`relative z-10 w-10 h-10 rounded-md text-xs sm:text-sm font-semibold tabular-nums transition-colors duration-200 flex items-center justify-center cursor-pointer ${
-                      currentPage === page
-                        ? 'text-[#FFFDF9]'
-                        : 'text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {getPaginationItems(currentPage, totalPages).map((item) =>
+                  typeof item === 'number' ? (
+                    <button
+                      key={item}
+                      ref={(el) => {
+                        pageBtnRefs.current[item] = el;
+                      }}
+                      type="button"
+                      onClick={() => setCurrentPage(item)}
+                      aria-current={currentPage === item ? 'page' : undefined}
+                      aria-label={`Trang ${item}`}
+                      className={`relative z-10 w-10 h-10 rounded-md text-xs sm:text-sm font-semibold tabular-nums transition-colors duration-200 flex items-center justify-center cursor-pointer ${
+                        currentPage === item
+                          ? 'text-[#FFFDF9]'
+                          : 'text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ) : (
+                    <span
+                      key={item}
+                      aria-hidden="true"
+                      className="relative z-10 w-8 h-10 flex items-center justify-center text-xs sm:text-sm font-semibold text-[var(--ink-muted)] select-none"
+                    >
+                      …
+                    </span>
+                  )
+                )}
               </div>
 
               <button
@@ -1055,6 +1159,63 @@ export default function ExploreContainer() {
                         {d.name}
                       </option>
                     ))}
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="w-4 h-4 text-[var(--ink-muted)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              <div data-drawer-section>
+                <label
+                  htmlFor="explore-mobile-recognition"
+                  className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2"
+                >
+                  Cấp xếp hạng
+                </label>
+                <div className="relative w-full min-w-0">
+                  <select
+                    id="explore-mobile-recognition"
+                    value={recognitionLevel}
+                    onChange={(e) => handleFilterChange(() => setRecognitionLevel(e.target.value))}
+                    className="w-full min-h-12 min-w-0 max-w-full truncate px-3.5 py-2 text-base rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-[var(--ink-primary)] focus:outline-none focus:border-[var(--accent-jade)] focus:bg-[var(--bg-surface)] appearance-none pr-9 cursor-pointer"
+                  >
+                    <option value="all">Tất cả cấp xếp hạng</option>
+                    {RECOGNITION_OPTIONS.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="w-4 h-4 text-[var(--ink-muted)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              <div data-drawer-section>
+                <label
+                  htmlFor="explore-mobile-coordinate"
+                  className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2"
+                >
+                  Vị trí bản đồ
+                </label>
+                <div className="relative w-full min-w-0">
+                  <select
+                    id="explore-mobile-coordinate"
+                    value={coordinateFilter}
+                    onChange={(e) =>
+                      handleFilterChange(() =>
+                        setCoordinateFilter(e.target.value as CoordinateFilter)
+                      )
+                    }
+                    className="w-full min-h-12 min-w-0 max-w-full truncate px-3.5 py-2 text-base rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-[var(--ink-primary)] focus:outline-none focus:border-[var(--accent-jade)] focus:bg-[var(--bg-surface)] appearance-none pr-9 cursor-pointer"
+                  >
+                    <option value="all">Tất cả địa điểm</option>
+                    <option value="mapped">Có tọa độ trên bản đồ</option>
+                    <option value="unmapped">Chưa có tọa độ bản đồ</option>
                   </select>
                   <ChevronDown
                     aria-hidden="true"

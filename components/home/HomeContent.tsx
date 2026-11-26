@@ -27,12 +27,13 @@ export default function HomeContent() {
   const { places, categories, districts, settings } = useData();
   const rootRef = useRef<HTMLDivElement>(null);
 
+  const mappedPlaces = places.filter((p) => p.has_coordinates !== false);
   const featuredPlaces = places.filter((p) => p.is_featured);
   const displayPlaces = featuredPlaces.length > 0 ? featuredPlaces : places.slice(0, 6);
 
   const isGradientBg = settings.heroBgImage && settings.heroBgImage.startsWith('linear-gradient');
-  const routeSamplePlaces = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
-  const previewStops = routeSamplePlaces.length > 0 ? routeSamplePlaces : displayPlaces.slice(0, 3);
+  const routeSamplePlaces = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
+  const previewStops = routeSamplePlaces.length > 0 ? routeSamplePlaces : mappedPlaces.slice(0, 3);
 
   useGSAP(
     () => {

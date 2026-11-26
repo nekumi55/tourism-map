@@ -82,14 +82,20 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
               {place.price_label}
             </span>
             <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href={`/map?placeId=${place.id}`}
-                className="ui-interactive-press min-h-11 px-3 text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:bg-[var(--accent-jade-soft)]/60 rounded-lg text-xs inline-flex items-center gap-1.5 font-semibold"
-                title="Xem trên bản đồ"
-              >
-                <Navigation className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Bản đồ</span>
-              </Link>
+              {place.has_coordinates !== false ? (
+                <Link
+                  href={`/map?placeId=${place.id}`}
+                  className="ui-interactive-press min-h-11 px-3 text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:bg-[var(--accent-jade-soft)]/60 rounded-lg text-xs inline-flex items-center gap-1.5 font-semibold"
+                  title="Xem trên bản đồ"
+                >
+                  <Navigation className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Bản đồ</span>
+                </Link>
+              ) : (
+                <span className="min-h-11 px-2.5 text-[var(--ink-muted)] text-xs inline-flex items-center font-medium">
+                  Chưa có tọa độ
+                </span>
+              )}
               <Link
                 href={`/places/${place.id}`}
                 className="ui-interactive-press min-h-11 px-4 bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] rounded-lg text-xs font-semibold inline-flex items-center"
@@ -170,6 +176,11 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
             </h3>
           </Link>
 
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)] flex items-center gap-1.5 font-normal">
+            <MapPin className="w-3.5 h-3.5 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
+            <span className="line-clamp-1">{place.address}</span>
+          </p>
+
           <p className="mt-2 text-sm text-[var(--ink-secondary)] font-normal line-clamp-2 leading-relaxed">
             {place.description}
           </p>
@@ -191,14 +202,20 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
             {place.price_label}
           </span>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Link
-              href={`/map?placeId=${place.id}`}
-              className="ui-interactive-press min-h-11 min-w-11 px-2.5 text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:bg-[var(--accent-jade-soft)]/60 rounded-lg flex items-center justify-center"
-              title="Định vị trên bản đồ"
-              aria-label={`Định vị ${cleanName} trên bản đồ`}
-            >
-              <Navigation className="w-4 h-4" aria-hidden="true" />
-            </Link>
+            {place.has_coordinates !== false ? (
+              <Link
+                href={`/map?placeId=${place.id}`}
+                className="ui-interactive-press min-h-11 min-w-11 px-2.5 text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:bg-[var(--accent-jade-soft)]/60 rounded-lg flex items-center justify-center"
+                title="Định vị trên bản đồ"
+                aria-label={`Định vị ${cleanName} trên bản đồ`}
+              >
+                <Navigation className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            ) : (
+              <span className="text-[11px] font-medium text-[var(--ink-muted)] px-1.5 truncate max-w-[96px]">
+                Chưa có tọa độ
+              </span>
+            )}
             <Link
               href={`/places/${place.id}`}
               className="ui-interactive-press min-h-11 px-3.5 bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] rounded-lg text-xs font-semibold inline-flex items-center"

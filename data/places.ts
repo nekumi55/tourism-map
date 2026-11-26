@@ -1,6 +1,6 @@
 import { Place } from '@/types';
 
-export const MOCK_PLACES: Place[] = [
+export const CORE_PLACES: Place[] = [
   {
     "id": "pl-van-hoa-sa-huynh",
     "name": "Di tích Văn hóa Sa Huỳnh",
@@ -58,7 +58,16 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "29/12/2022",
     "issuing_authority": "Thủ tướng Chính phủ",
     "management_unit": "UBND xã, phường: Khánh Cường, Sa Huỳnh",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Cục Di sản văn hóa / OpenStreetMap / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°40'36\"B, 109°03'57\"Đ (Tham chiếu trung tâm Sa Huỳnh)",
+    "component_sites": [
+      "Long Thạnh",
+      "Phú Khương",
+      "Thạnh Đức",
+      "Đầm An Khê - lạch An Khê",
+      "Quần thể di tích Chăm Pa/Gò Cỏ"
+    ]
   },
   {
     "id": "pl-di-chi-xom-oc",
@@ -110,7 +119,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 1 – Di sản khảo cổ học",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 1"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 1",
+    "has_coordinates": true
   },
   {
     "id": "pl-di-chi-suoi-chinh",
@@ -162,7 +172,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 1 – Di sản khảo cổ học",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 1"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 1",
+    "has_coordinates": true
   },
   {
     "id": "pl-di-chi-lung-leng",
@@ -214,7 +225,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 1 – Di sản khảo cổ học",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 1"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / Viện Khảo cổ học",
+    "has_coordinates": true,
+    "dms_coordinates": "14°23'46\"B, 107°50'15\"Đ (Tham chiếu Lung Leng)"
   },
   {
     "id": "pl-khoi-nghia-ba-to",
@@ -234,8 +247,8 @@ export const MOCK_PLACES: Place[] = [
       "Thời điểm tháng 3 âm lịch hoặc dịp kỷ niệm 11/3 có nhiều hoạt động truyền thống"
     ],
     "address": "Các xã: Ba Tơ, Ba Động, Ba Vinh",
-    "latitude": 14.769,
-    "longitude": 108.732,
+    "latitude": 14.765,
+    "longitude": 108.7308,
     "rating": 4.9,
     "review_count": 380,
     "price_range": "free",
@@ -270,7 +283,22 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "25/12/2017",
     "issuing_authority": "Thủ tướng Chính phủ",
     "management_unit": "UBND các xã: Ba Tơ, Ba Động, Ba Vinh",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / Hồ sơ Cục Di sản văn hóa / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°45'54\"B, 108°43'51\"Đ (Đồn Ba Tơ)",
+    "component_sites": [
+      "Đồn Ba Tơ (Khu trung tâm Bảo tàng/Đồn)",
+      "Khúc sông Liên",
+      "Lò gạch Nước Năng",
+      "Nhà đ/c Trần Quý Hai",
+      "Chòi canh Suối Loa",
+      "Nha kiểm lý",
+      "Sân vận động Ba Tơ",
+      "Bãi Hang Én",
+      "Bến Buôn",
+      "Chiến khu Nước Lá - Hang Voọt Rệp",
+      "Chiến khu Núi Cao Muôn"
+    ]
   },
   {
     "id": "pl-duong-truong-son",
@@ -326,7 +354,14 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "09/12/2013",
     "issuing_authority": "Thủ tướng Chính phủ",
     "management_unit": "UBND các xã: Mô Rai, Bờ Y",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°41'02\"B, 107°33'24\"Đ (Mốc ngã ba biên giới Bờ Y)",
+    "component_sites": [
+      "Mốc ngã ba biên giới (Bờ Y): 14°41'02\"B, 107°33'24\"Đ",
+      "Tuyến QL14 qua Kon Tum: 15°18'33\"B, 107°43'43\"Đ đến 14°14'47\"B, 107°59'28\"Đ",
+      "Đoạn qua Mô Rai (14°42'24\"B)"
+    ]
   },
   {
     "id": "pl-dak-to-tan-canh",
@@ -346,8 +381,8 @@ export const MOCK_PLACES: Place[] = [
       "Có thể kết hợp tuyến tham quan Ngọc Hồi – Đăk Tô – Măng Đen"
     ],
     "address": "Các xã: Đăk Tô, Sa Bình, Rờ Kơi",
-    "latitude": 14.6567,
-    "longitude": 107.8253,
+    "latitude": 14.6575,
+    "longitude": 107.8236,
     "rating": 4.9,
     "review_count": 295,
     "price_range": "free",
@@ -382,7 +417,15 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "22/12/2016 (bổ sung 18/01/2022)",
     "issuing_authority": "Thủ tướng Chính phủ",
     "management_unit": "UBND các xã: Đăk Tô, Sa Bình, Rờ Kơi",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / Hồ sơ xếp hạng / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°39'27\"B, 107°49'25\"Đ (Căn cứ E42 & Tượng đài)",
+    "component_sites": [
+      "Căn cứ E42 & Tượng đài Đăk Tô - Tân Cảnh",
+      "Điểm cao 1015 (Đồi Charlie - Rờ Kơi)",
+      "Điểm cao 1049 (Căn cứ Delta - Rờ Kơi/Sa Bình)",
+      "Sân bay Phượng Hoàng"
+    ]
   },
   {
     "id": "pl-nha-nguc-kon-tum",
@@ -438,7 +481,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "11/02/2026",
     "issuing_authority": "Thủ tướng Chính phủ",
     "management_unit": "Sở Văn hóa, Thể thao và Du lịch",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / OpenStreetMap / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°20'40\"B, 108°00'09\"Đ"
   },
   {
     "id": "pl-khu-di-tich-son-my",
@@ -458,8 +503,8 @@ export const MOCK_PLACES: Place[] = [
       "Cách biển Mỹ Khê chỉ vài phút di chuyển, rất thuận tiện kết hợp"
     ],
     "address": "Xã Tịnh Khê",
-    "latitude": 15.178,
-    "longitude": 108.8727,
+    "latitude": 15.1786,
+    "longitude": 108.8708,
     "rating": 4.9,
     "review_count": 920,
     "price_range": "budget",
@@ -495,7 +540,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "29/4/1979",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "Sở Văn hóa, Thể thao và Du lịch",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "15°10'43\"B, 108°52'15\"Đ"
   },
   {
     "id": "pl-pham-van-dong",
@@ -551,7 +598,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "21/02/2006",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Mộ Đức",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-ubkhc-nam-trung-bo",
@@ -607,7 +655,13 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "12/12/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Nghĩa Hành",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true,
+    "component_sites": [
+      "Trụ sở Ủy ban kháng chiến hành chính Nam Trung Bộ (1946–1949)",
+      "Nhà bà Võ Thị Tuyết",
+      "Nhà ông Ngô Xuân Dương"
+    ]
   },
   {
     "id": "pl-dia-dao-dam-toai",
@@ -663,7 +717,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "30/12/1991",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Đông Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-khoi-nghia-tra-bong",
@@ -719,7 +774,18 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "30/12/1991",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin và Thể thao",
     "management_unit": "UBND các xã: Tây Trà, Tây Trà Bồng, Thanh Bồng, Trà Bồng",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Danh mục di tích tỉnh Quảng Ngãi 2025 / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "component_sites": [
+      "Gò Rô",
+      "Nước Xoay",
+      "Đồn Eo Chim",
+      "Đồn Làng Ngãi",
+      "Đồn Tà Lạt",
+      "Đồn Đá Liếp",
+      "Đồn Xây dựng",
+      "Lô cốt trung tâm"
+    ]
   },
   {
     "id": "pl-chien-thang-van-tuong",
@@ -775,7 +841,16 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "24/12/1982",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa",
     "management_unit": "UBND xã Vạn Tường",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "15°19'32\"B, 108°51'21\"Đ (Khu vực Vạn Tường)",
+    "component_sites": [
+      "Bảo tàng Chiến thắng Vạn Tường",
+      "Đồi Tranh",
+      "Ngọc Hương",
+      "Lộc Tự",
+      "Bãi biển An Cường"
+    ]
   },
   {
     "id": "pl-chien-thang-ba-gia",
@@ -831,7 +906,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "20/5/1991",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin và Thể thao",
     "management_unit": "UBND các xã: Ba Gia, Sơn Tịnh",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-chien-thang-dinh-cuong",
@@ -886,7 +962,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "7/01/1993",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND các xã: Đình Cương, Phước Giang",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-khanh-giang-truong-le",
@@ -942,7 +1019,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "7/01/1993",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Thiện Tín",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-mo-nha-tho-tran-cam",
@@ -998,7 +1076,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "18/6/1997",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND các xã: Mỏ Cày, Mộ Đức",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-huyen-duong-duc-pho",
@@ -1054,7 +1133,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/5/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND phường Đức Phổ",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-mo-nha-tho-bui-ta-han",
@@ -1110,7 +1190,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "02/3/1990",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND phường Nghĩa Lộ",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-vu-tham-sat-binh-hoa",
@@ -1166,7 +1247,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "20/5/1991",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin-Thể thao và Du lịch",
     "management_unit": "UBND xã Vạn Tường",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-dien-nien-phuoc-binh",
@@ -1222,7 +1304,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "12/02/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Sơn Tịnh",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-dai-tieng-noi-nam-bo",
@@ -1278,7 +1361,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "20/7/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Sơn Tịnh",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-huynh-cong-thieu",
@@ -1334,7 +1418,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "29/3/2012",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND phường Đức Phổ",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-xuong-in-tin-phieu-xa-nay",
@@ -1391,7 +1476,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "03/12/2021",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND xã Sơn Hạ",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-den-tho-truong-dinh",
@@ -1448,7 +1534,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "24/02/2023",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "Sở Văn hóa, Thể thao và Du lịch",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-xuat-quan-viet-lao-de-an",
@@ -1505,7 +1592,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "12/3/2024",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND xã Đình Cương",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-nguc-dak-glei",
@@ -1561,7 +1649,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "30/12/1991",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa – Thông tin",
     "management_unit": "UBND xã Xốp",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / OpenStreetMap / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "15°11'42\"B, 107°45'12\"Đ"
   },
   {
     "id": "pl-chien-thang-plei-kan",
@@ -1617,7 +1707,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "13/4/2000",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa – Thông tin",
     "management_unit": "UBND xã Bờ Y",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-chien-thang-dak-pek",
@@ -1673,7 +1764,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "15/5/2024",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND xã Đăk Pék",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-dinh-lang-ly-hai",
@@ -1730,7 +1822,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/5/1997",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-chua-ong",
@@ -1787,7 +1880,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/01/1993",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Tư Nghĩa",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-thanh-co-chau-sa",
@@ -1843,7 +1937,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "25/01/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Tịnh Khê",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-chua-dieu-giac",
@@ -1900,7 +1995,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "13/4/2000",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã Bình Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-dinh-an-vinh",
@@ -1957,7 +2053,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "18/4/2013",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-truong-luy-quang-ngai",
@@ -2013,7 +2110,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "09/3/2011",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "Sở Văn hóa, Thể thao và Du lịch",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / OpenStreetMap / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°48'15\"B, 108°47'31\"Đ (Điểm mốc chuẩn hóa tại xã Ba Động)"
   },
   {
     "id": "pl-dinh-an-dinh",
@@ -2069,7 +2168,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "06/9/2017",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND xã Phước Giang",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-nha-tho-go-kon-tum",
@@ -2121,7 +2221,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 3 – Kiến trúc, nghệ thuật",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 3"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT (Địa danh Nhà thờ Gỗ / Chánh tòa Kon Tum) / OpenStreetMap",
+    "has_coordinates": true,
+    "dms_coordinates": "14°21'08\"B, 108°00'32\"Đ"
   },
   {
     "id": "pl-nha-rong-kon-klor",
@@ -2173,7 +2275,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 3 – Kiến trúc, nghệ thuật",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 3"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 3",
+    "has_coordinates": true
   },
   {
     "id": "pl-chua-hang",
@@ -2230,7 +2333,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "20/7/1994",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-thien-an-huynh-thuc-khang",
@@ -2286,7 +2390,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "02/3/1990",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND phường Trương Quang Trọng",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-phu-tho-co-luy",
@@ -2342,7 +2447,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/01/1993",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND xã An Phú",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-nui-thoi-loi",
@@ -2399,7 +2505,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/01/2020",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-nui-gieng-tien",
@@ -2456,7 +2563,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "07/01/2020",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-cong-to-vo",
@@ -2476,8 +2584,8 @@ export const MOCK_PLACES: Place[] = [
       "Không trèo lên phần vòm đá mỏng để bảo vệ di sản địa chất và đảm bảo an toàn"
     ],
     "address": "Đặc khu Lý Sơn",
-    "latitude": 15.3888,
-    "longitude": 109.1,
+    "latitude": 15.3886,
+    "longitude": 109.0997,
     "rating": 4.9,
     "review_count": 1420,
     "price_range": "free",
@@ -2513,7 +2621,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "09/9/2025",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Cục Di sản văn hóa (dsvh.gov.vn) / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "15°23'19\"B, 109°05'59\"Đ"
   },
   {
     "id": "pl-mang-den",
@@ -2570,7 +2680,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "13/4/2000",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa – Thông tin",
     "management_unit": "UBND xã Măng Đen",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Thông tư 06/2021/TT-BTNMT / Quyết định số 33/2026/QĐ-UBND",
+    "has_coordinates": true,
+    "dms_coordinates": "14°39'08\"B, 108°20'28\"Đ"
   },
   {
     "id": "pl-bien-my-khe",
@@ -2622,7 +2734,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 4 – Danh lam thắng cảnh và sinh thái",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 4"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / OpenStreetMap",
+    "has_coordinates": true,
+    "dms_coordinates": "15°10'28\"B, 108°54'16\"Đ (Địa danh Bãi biển Mỹ Khê)"
   },
   {
     "id": "pl-thac-trang",
@@ -2674,7 +2788,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 4 – Danh lam thắng cảnh và sinh thái",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 4"
+    "verification_source": "Thông tư 28/2015/TT-BTNMT / Wikipedia",
+    "has_coordinates": true,
+    "dms_coordinates": "14°55'12\"B, 108°40'36\"Đ (Địa danh Thác Trắng, Minh Long)"
   },
   {
     "id": "pl-chu-mom-ray",
@@ -2726,7 +2842,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 4 – Danh lam thắng cảnh và sinh thái",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 4"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 4",
+    "has_coordinates": true
   },
   {
     "id": "pl-am-linh-tu",
@@ -2783,7 +2900,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "08/3/2007",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa - Thông tin",
     "management_unit": "UBND đặc khu Lý Sơn",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-dien-truong-ba",
@@ -2840,7 +2958,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "09/5/2014",
     "issuing_authority": "Bộ trưởng Bộ Văn hóa, Thể thao và Du lịch",
     "management_unit": "UBND xã Trà Bồng",
-    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi"
+    "verification_source": "Quyết định số 33/2026/QĐ-UBND tỉnh Quảng Ngãi",
+    "has_coordinates": true
   },
   {
     "id": "pl-khao-le-the-linh-hoang-sa",
@@ -2893,7 +3012,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 5 – Bản sắc văn hóa cộng đồng Đông – Tây",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5",
+    "has_coordinates": true
   },
   {
     "id": "pl-dua-thuyen-tu-linh",
@@ -2945,7 +3065,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 5 – Bản sắc văn hóa cộng đồng Đông – Tây",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5",
+    "has_coordinates": true
   },
   {
     "id": "pl-cong-chieng-tay-nguyen",
@@ -3002,7 +3123,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_date": "25/11/2005",
     "listed_year": "2008",
     "issuing_authority": "UNESCO",
-    "verification_source": "Hồ sơ chính thức của UNESCO – mã 00120"
+    "verification_source": "Hồ sơ chính thức của UNESCO – mã 00120",
+    "has_coordinates": true
   },
   {
     "id": "pl-le-an-than",
@@ -3054,7 +3176,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 5 – Bản sắc văn hóa cộng đồng Đông – Tây",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 5",
+    "has_coordinates": true
   },
   {
     "id": "pl-hanh-toi-ly-son",
@@ -3106,7 +3229,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   },
   {
     "id": "pl-don-quang-ngai",
@@ -3158,7 +3282,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   },
   {
     "id": "pl-ca-bong-song-tra",
@@ -3210,7 +3335,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   },
   {
     "id": "pl-que-tra-bong",
@@ -3262,7 +3388,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Đông Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   },
   {
     "id": "pl-sam-ngoc-linh",
@@ -3314,7 +3441,8 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   },
   {
     "id": "pl-goi-la-kon-tum",
@@ -3366,6 +3494,9 @@ export const MOCK_PLACES: Place[] = [
     "recognition_level": "Bổ sung",
     "region": "Tây Quảng Ngãi",
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
-    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6"
+    "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
+    "has_coordinates": true
   }
 ];
+
+export const MOCK_PLACES: Place[] = [...CORE_PLACES];

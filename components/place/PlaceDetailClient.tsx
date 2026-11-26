@@ -365,23 +365,37 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
               </div>
 
               <div className="pt-4 border-t border-[var(--border-subtle)] space-y-2.5">
-                <Link
-                  href={`/map?placeId=${place.id}`}
-                  className="ui-interactive-press w-full min-h-12 px-4 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] font-semibold text-sm flex items-center justify-center gap-2"
-                >
-                  <Navigation className="w-4 h-4 shrink-0" aria-hidden="true" />
-                  <span>Xem vị trí trên bản đồ</span>
-                </Link>
+                {place.has_coordinates !== false ? (
+                  <>
+                    <Link
+                      href={`/map?placeId=${place.id}`}
+                      className="ui-interactive-press w-full min-h-12 px-4 rounded-lg bg-[var(--accent-jade)] hover:bg-[var(--accent-jade-hover)] text-[#FFFDF9] font-semibold text-sm flex items-center justify-center gap-2"
+                    >
+                      <Navigation className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Xem vị trí trên bản đồ</span>
+                    </Link>
 
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ui-interactive-press w-full min-h-11 px-4 rounded-lg bg-[var(--accent-ochre-soft)] hover:bg-[#F5E4C8] text-[var(--accent-ochre-ink)] font-semibold text-sm flex items-center justify-center gap-2 border border-[var(--accent-ochre)]/25"
-                >
-                  <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
-                  <span>Chỉ đường Google Maps</span>
-                </a>
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="ui-interactive-press w-full min-h-11 px-4 rounded-lg bg-[var(--accent-ochre-soft)] hover:bg-[#F5E4C8] text-[var(--accent-ochre-ink)] font-semibold text-sm flex items-center justify-center gap-2 border border-[var(--accent-ochre)]/25"
+                    >
+                      <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Chỉ đường Google Maps</span>
+                    </a>
+                  </>
+                ) : (
+                  <div className="p-3.5 rounded-lg bg-[var(--bg-canvas)] border border-[var(--border-subtle)] text-xs text-[var(--ink-secondary)] space-y-1.5">
+                    <div className="font-semibold text-[var(--ink-primary)] flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
+                      <span>Địa chỉ (Phường / Xã): {place.address}</span>
+                    </div>
+                    <p className="text-[var(--ink-muted)] leading-relaxed">
+                      Địa điểm chưa có tọa độ GPS công khai (không đánh dấu trên bản đồ).
+                    </p>
+                  </div>
+                )}
 
                 <Link
                   href="/explore"
@@ -403,6 +417,8 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
               place.management_unit ||
               place.region ||
               place.route_name ||
+              place.dms_coordinates ||
+              (place.component_sites && place.component_sites.length > 0) ||
               place.verification_source) && (
               <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-5">
                 <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-lg pb-3 border-b border-[var(--border-subtle)] flex items-center gap-2">
@@ -497,6 +513,30 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
                     </div>
                   )}
 
+                  {place.dms_coordinates && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Tọa độ GPS (DMS)</div>
+                        <div className="font-mono text-xs text-[var(--ink-secondary)] mt-0.5">{place.dms_coordinates}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.component_sites && place.component_sites.length > 0 && (
+                    <div className="flex items-start gap-3">
+                      <Landmark className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Điểm thành phần</div>
+                        <ul className="mt-1 space-y-1 text-xs text-[var(--ink-secondary)] list-disc list-inside">
+                          {place.component_sites.map((site, idx) => (
+                            <li key={idx}>{site}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
                   {place.verification_source && (
                     <div className="pt-3 border-t border-[var(--border-subtle)] text-xs text-[var(--ink-muted)] leading-relaxed">
                       <span className="font-semibold text-[var(--ink-secondary)]">Nguồn kiểm chứng: </span>
@@ -508,35 +548,37 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
             )}
 
             {/* GPS COORDINATE CARD */}
-            <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-4">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-base flex items-center gap-2 min-w-0">
-                  <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
-                  <span className="truncate">Tọa Độ Địa Lý</span>
-                </h2>
-                <span className="font-mono text-xs font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm shrink-0">
-                  WGS84
-                </span>
-              </div>
+            {place.has_coordinates !== false && (
+              <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-base flex items-center gap-2 min-w-0">
+                    <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
+                    <span className="truncate">Tọa Độ Địa Lý</span>
+                  </h2>
+                  <span className="font-mono text-xs font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm shrink-0">
+                    WGS84
+                  </span>
+                </div>
 
-              <div className="relative h-40 rounded-lg overflow-hidden bg-[var(--bg-basalt)] border border-[#24332F] flex items-center justify-center p-4 text-center">
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-jade)]/30 text-[#A3D9CE] flex items-center justify-center border border-[#7CC4B8]/40 mb-2.5">
-                    <Navigation className="w-4 h-4" aria-hidden="true" />
-                  </div>
-                  <div className="font-mono text-sm text-[#FFFDF9] font-medium tabular-nums">
-                    {place.latitude.toFixed(4)}° N
-                  </div>
-                  <div className="font-mono text-sm text-[#A3D9CE] font-medium tabular-nums mt-0.5">
-                    {place.longitude.toFixed(4)}° E
+                <div className="relative h-40 rounded-lg overflow-hidden bg-[var(--bg-basalt)] border border-[#24332F] flex items-center justify-center p-4 text-center">
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-9 h-9 rounded-lg bg-[var(--accent-jade)]/30 text-[#A3D9CE] flex items-center justify-center border border-[#7CC4B8]/40 mb-2.5">
+                      <Navigation className="w-4 h-4" aria-hidden="true" />
+                    </div>
+                    <div className="font-mono text-sm text-[#FFFDF9] font-medium tabular-nums">
+                      {place.latitude.toFixed(4)}° N
+                    </div>
+                    <div className="font-mono text-sm text-[#A3D9CE] font-medium tabular-nums mt-0.5">
+                      {place.longitude.toFixed(4)}° E
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
-                Hệ tọa độ chuẩn WGS84 dùng để định vị trên bản đồ số tương tác và dẫn đường GPS.
-              </p>
-            </div>
+                <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                  Hệ tọa độ chuẩn WGS84 dùng để định vị trên bản đồ số tương tác và dẫn đường GPS.
+                </p>
+              </div>
+            )}
           </aside>
         </div>
 

@@ -840,15 +840,27 @@ export default function HeroSearch() {
                         </div>
                       )}
 
-                      <Link
-                        href={`/map?placeId=${place.id}`}
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="ui-interactive-press min-h-10 px-3 rounded-lg text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] hover:bg-[var(--accent-jade)] bg-[var(--accent-jade-soft)] flex items-center gap-1.5 text-xs font-semibold"
-                        title="Xem vị trí trên bản đồ số"
-                      >
-                        <Map className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span className="hidden sm:inline">Bản đồ</span>
-                      </Link>
+                      {place.has_coordinates !== false ? (
+                        <Link
+                          href={`/map?placeId=${place.id}`}
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="ui-interactive-press min-h-10 px-3 rounded-lg text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] hover:bg-[var(--accent-jade)] bg-[var(--accent-jade-soft)] flex items-center gap-1.5 text-xs font-semibold"
+                          title="Xem vị trí trên bản đồ số"
+                        >
+                          <Map className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span className="hidden sm:inline">Bản đồ</span>
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/places/${place.id}`}
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="ui-interactive-press min-h-10 px-3 rounded-lg text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] bg-[var(--bg-surface-muted)] flex items-center gap-1.5 text-xs font-semibold"
+                          title="Xem hồ sơ địa điểm"
+                        >
+                          <span className="hidden sm:inline">Chi tiết</span>
+                          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                        </Link>
+                      )}
                     </div>
                   </div>
                 );
