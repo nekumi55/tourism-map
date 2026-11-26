@@ -29,7 +29,7 @@ export const CATEGORIES: Category[] = [
       'Sắc thái văn hóa duyên hải và cao nguyên qua đình làng, chùa, thành cổ, trường lũy đến nhà thờ gỗ và nhà rông văn hóa.',
     icon: 'Building2',
     color: 'indigo',
-    count: 9,
+    count: 12,
   },
   {
     id: 'cat-nature',
@@ -39,7 +39,7 @@ export const CATEGORIES: Category[] = [
       'Từ biển đảo đến đại ngàn: kết nối cảnh quan biển đảo, núi lửa Lý Sơn với hệ sinh thái rừng, núi và cao nguyên Măng Đen, Chư Mom Ray.',
     icon: 'Trees',
     color: 'emerald',
-    count: 10,
+    count: 11,
   },
   {
     id: 'cat-community',

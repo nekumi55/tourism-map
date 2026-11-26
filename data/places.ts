@@ -3498,6 +3498,219 @@ export const CORE_PLACES: Place[] = [
     "route_name": "Tuyến 6 – Hương vị Đông – Tây Quảng Ngãi",
     "verification_source": "Danh mục đề xuất KHKT – Tuyến 6",
     "has_coordinates": true
+  },
+  {
+    "id": "pl-cang-sa-ky",
+    "name": "Cảng Sa Kỳ",
+    "slug": "cang-sa-ky",
+    "category_id": "cat-architecture",
+    "district_id": "dist-binh-son",
+    "description": "Cảng biển cửa ngõ trên đất liền Quảng Ngãi kết nối tuyến tàu cao tốc ra Đặc khu Lý Sơn.",
+    "content": "Cảng Sa Kỳ nằm tại cửa biển Sa Kỳ (xã Đông Sơn, huyện Bình Sơn cũ), là đầu mối giao thông đường thủy trọng yếu xuất phát từ đất liền đi ra đảo Lớn Lý Sơn. Mọi hành trình đường bộ từ TP. Quảng Ngãi hoặc các địa phương khác ra đảo Lý Sơn đều đi qua Cảng Sa Kỳ để lên tàu cao tốc.",
+    "highlights": [
+      "Bến cảng chính phục vụ tuyến tàu cao tốc Sa Kỳ – Lý Sơn",
+      "Nhà ga hành khách hiện đại kèm bãi gửi xe qua đêm cho du khách",
+      "Điểm trung chuyển bắt buộc cho mọi lộ trình đất liền – Lý Sơn"
+    ],
+    "tips": [
+      "Có mặt tại cảng trước giờ tàu chạy khoảng 30–45 phút để làm thủ tục",
+      "Theo dõi lịch tàu chạy theo ngày và tình hình thời tiết biển"
+    ],
+    "address": "Thôn Định Tân, xã Đông Sơn (Bình Châu cũ), tỉnh Quảng Ngãi",
+    "latitude": 15.2160,
+    "longitude": 108.9139,
+    "rating": 4.7,
+    "review_count": 640,
+    "price_range": "budget",
+    "price_label": "Cửa ngõ ra đảo Lý Sơn",
+    "opening_hours": "05:30 - 17:30 hàng ngày",
+    "tags": [
+      "Cảng Sa Kỳ",
+      "Bến tàu",
+      "Lý Sơn",
+      "Đông Quảng Ngãi"
+    ],
+    "amenities": [
+      "Nhà ga hành khách",
+      "Bãi đỗ xe",
+      "Quầy vé tàu cao tốc"
+    ],
+    "cover_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "is_featured": false,
+    "is_open_now": true,
+    "created_at": "2026-04-20T08:00:00Z",
+    "updated_at": "2026-04-20T08:00:00Z",
+    "is_mock_data": true,
+    "heritage_type": "Hạ tầng giao thông thủy",
+    "recognition_level": "Bổ sung",
+    "region": "Đông Quảng Ngãi",
+    "route_name": "Tuyến kết nối đất liền – Lý Sơn",
+    "verification_source": "Cục Hàng hải / OpenStreetMap",
+    "has_coordinates": true
+  },
+  {
+    "id": "pl-ben-tau-ly-son",
+    "name": "Bến tàu cano Đảo Lý Sơn Lớn - Đảo Bé",
+    "slug": "ben-tau-cano-dao-ly-son-lon-dao-be",
+    "category_id": "cat-architecture",
+    "district_id": "dist-ly-son",
+    "description": "Đầu mối bến tàu trên Đảo Lớn Lý Sơn tiếp nhận tàu cao tốc từ Cảng Sa Kỳ và trung chuyển cano sang Đảo Bé (Cù lao Bờ Bãi).",
+    "content": "Bến tàu cano Đảo Lý Sơn Lớn - Đảo Bé nằm tại bờ biển phía tây Đảo Lớn Lý Sơn (khu vực An Vĩnh, gần Âm Linh tự), là điểm cập bến của tuyến tàu từ Cảng Sa Kỳ và đồng thời là bến xuất phát cano sang Cầu tàu Đảo Bé - An Bình.",
+    "highlights": [
+      "Cửa ngõ đón tàu cao tốc từ Cảng Sa Kỳ cập Đảo Lớn Lý Sơn",
+      "Điểm trung chuyển bắt buộc để đi cano sang Cầu tàu Đảo Bé - An Bình",
+      "Kết nối trực tiếp với trục đường ven biển quanh Đảo Lớn"
+    ],
+    "tips": [
+      "Mua vé cano khứ hồi sang Đảo Bé ngay tại quầy vé bến tàu",
+      "Chú ý giờ chuyến cano cuối trong ngày quay lại Đảo Lớn"
+    ],
+    "address": "Đặc khu Lý Sơn (Đảo Lớn), tỉnh Quảng Ngãi",
+    "latitude": 15.3794,
+    "longitude": 109.0954,
+    "rating": 4.8,
+    "review_count": 510,
+    "price_range": "budget",
+    "price_label": "Bến trung chuyển Lý Sơn",
+    "opening_hours": "06:00 - 17:30 hàng ngày",
+    "tags": [
+      "Bến tàu Lý Sơn",
+      "Cano Đảo Bé",
+      "Lý Sơn",
+      "Đông Quảng Ngãi"
+    ],
+    "amenities": [
+      "Bến tàu khách",
+      "Quầy vé cano",
+      "Điểm đón xe điện"
+    ],
+    "cover_image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "is_featured": false,
+    "is_open_now": true,
+    "created_at": "2026-04-20T08:00:00Z",
+    "updated_at": "2026-04-20T08:00:00Z",
+    "is_mock_data": true,
+    "heritage_type": "Hạ tầng giao thông thủy",
+    "recognition_level": "Bổ sung",
+    "region": "Đông Quảng Ngãi",
+    "route_name": "Tuyến kết nối Lý Sơn – Đảo Bé",
+    "verification_source": "UBND Đặc khu Lý Sơn / OpenStreetMap",
+    "has_coordinates": true
+  },
+  {
+    "id": "pl-cau-tau-dao-be",
+    "name": "Cầu tàu Đảo Bé - An Bình",
+    "slug": "cau-tau-dao-be-an-binh",
+    "category_id": "cat-architecture",
+    "district_id": "dist-ly-son",
+    "description": "Cầu tàu đón cano duy nhất trên Đảo Bé (Cù lao Bờ Bãi) kết nối trực tiếp với Bến tàu cano Đảo Lý Sơn Lớn.",
+    "content": "Cầu tàu Đảo Bé - An Bình là cửa ngõ duy nhất đón du khách bằng cano xuất phát từ Bến tàu cano Đảo Lý Sơn Lớn - Đảo Bé. Từ đây, du khách theo đường bộ nội đảo để khám phá Bãi Ngang, vách đá trầm tích núi lửa và Cù lao Bờ Bãi.",
+    "highlights": [
+      "Điểm cập bến cano duy nhất của Đảo Bé – An Bình",
+      "Chỉ kết nối đường thủy trực tiếp với Bến tàu Đảo Lý Sơn Lớn",
+      "Điểm khởi đầu tham quan các bãi tắm và ghềnh đá trên đảo"
+    ],
+    "tips": [
+      "Chỉ có tuyến cano từ Đảo Lớn Lý Sơn sang Cầu tàu Đảo Bé, không có tàu trực tiếp từ Sa Kỳ",
+      "Có thể đi bộ hoặc thuê xe điện ngay tại đầu cầu tàu"
+    ],
+    "address": "Thôn Bắc, Đảo Bé (An Bình cũ), Đặc khu Lý Sơn, tỉnh Quảng Ngãi",
+    "latitude": 15.4257,
+    "longitude": 109.0796,
+    "rating": 4.9,
+    "review_count": 430,
+    "price_range": "free",
+    "price_label": "Cầu tàu Đảo Bé",
+    "opening_hours": "07:00 - 17:00 hàng ngày",
+    "tags": [
+      "Cầu tàu Đảo Bé",
+      "An Bình",
+      "Cù lao Bờ Bãi",
+      "Lý Sơn"
+    ],
+    "amenities": [
+      "Bến cano",
+      "Trạm xe điện",
+      "Không gian tham quan"
+    ],
+    "cover_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "is_featured": false,
+    "is_open_now": true,
+    "created_at": "2026-04-20T08:00:00Z",
+    "updated_at": "2026-04-20T08:00:00Z",
+    "is_mock_data": true,
+    "heritage_type": "Hạ tầng giao thông thủy",
+    "recognition_level": "Bổ sung",
+    "region": "Đông Quảng Ngãi",
+    "route_name": "Tuyến kết nối Lý Sơn – Đảo Bé",
+    "verification_source": "UBND Đặc khu Lý Sơn / OpenStreetMap",
+    "has_coordinates": true
+  },
+  {
+    "id": "pl-cu-lao-bo-bai",
+    "name": "Cù lao Bờ Bãi (Đảo Bé)",
+    "slug": "cu-lao-bo-bai-dao-be",
+    "category_id": "cat-nature",
+    "district_id": "dist-ly-son",
+    "description": "Hòn đảo nhỏ hoang sơ cách Đảo Lớn Lý Sơn khoảng 3 hải lý với làn nước ngọc bích, bãi cát trắng và ghềnh đá núi lửa.",
+    "content": "Cù lao Bờ Bãi (thường gọi là Đảo Bé, xã An Bình cũ) nổi tiếng với những vách đá trầm tích núi lửa đen tuyền ôm lấy Bãi Ngang nước trong vắt và rạn san hô tự nhiên. Để đến Cù lao Bờ Bãi từ đất liền, du khách đi tàu cao tốc qua Cảng Sa Kỳ đến Bến tàu Đảo Lý Sơn Lớn rồi chuyển cano sang Cầu tàu Đảo Bé - An Bình.",
+    "highlights": [
+      "Bãi Ngang với làn nước biển trong xanh và rạn san hô gần bờ",
+      "Cảnh quan vách đá núi lửa cổ và làng bích họa Đảo Bé",
+      "Di chuyển bằng cano từ Bến tàu cano Đảo Lý Sơn Lớn sang Cầu tàu Đảo Bé"
+    ],
+    "tips": [
+      "Chuẩn bị đồ bơi, kính lặn và kem chống nắng thân thiện rạn san hô",
+      "Kiểm tra giờ cano về lại Đảo Lớn trong ngày"
+    ],
+    "address": "Đảo Bé (An Bình cũ), Đặc khu Lý Sơn, tỉnh Quảng Ngãi",
+    "latitude": 15.4283,
+    "longitude": 109.0869,
+    "rating": 4.9,
+    "review_count": 780,
+    "price_range": "budget",
+    "price_label": "Miễn phí tham quan đảo",
+    "opening_hours": "07:00 - 17:00 hàng ngày",
+    "tags": [
+      "Cù lao Bờ Bãi",
+      "Đảo Bé",
+      "An Bình",
+      "Lý Sơn",
+      "Biển đảo"
+    ],
+    "amenities": [
+      "Bãi tắm",
+      "Xe điện nội đảo",
+      "Điểm thuyết minh"
+    ],
+    "cover_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "is_featured": true,
+    "is_open_now": true,
+    "created_at": "2026-04-20T08:00:00Z",
+    "updated_at": "2026-04-20T08:00:00Z",
+    "is_mock_data": true,
+    "heritage_type": "Danh lam thắng cảnh biển",
+    "recognition_level": "Bổ sung",
+    "region": "Đông Quảng Ngãi",
+    "route_name": "Tuyến 4 – Danh lam thắng cảnh và sinh thái",
+    "verification_source": "UBND Đặc khu Lý Sơn / OpenStreetMap",
+    "has_coordinates": true
   }
 ];
 

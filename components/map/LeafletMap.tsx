@@ -3,6 +3,8 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import type * as LType from 'leaflet';
 import { Place } from '@/types';
+import { RouteNode } from '@/utils/itinerary';
+import { RouteSegment } from '@/utils/roadRouting';
 
 interface LeafletMapProps {
   places: Place[];
@@ -12,6 +14,8 @@ interface LeafletMapProps {
   mapLayer: 'standard' | 'satellite' | 'terrain';
   showMarkers?: boolean;
   showItineraryMarkers?: boolean;
+  routeSegments?: RouteSegment[];
+  transitPorts?: RouteNode[];
 }
 
 // Highly reliable, ultra-fast tile servers with verified 200 OK in Vietnam
@@ -44,12 +48,14 @@ export default function LeafletMap({
   mapLayer,
   showMarkers = true,
   showItineraryMarkers = false,
+  routeSegments,
+  transitPorts,
 }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<LType.Map | null>(null);
   const tileLayerRef = useRef<LType.TileLayer | null>(null);
   const markersLayerRef = useRef<LType.LayerGroup | null>(null);
-  const polylineRef = useRef<LType.Polyline | null>(null);
+  const routeLayerRef = useRef<LType.LayerGroup | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const hasFittedInitialRef = useRef(false);
   const mapClickedIdRef = useRef<string | null>(null);
@@ -64,6 +70,8 @@ export default function LeafletMap({
   const mapLayerRef = useRef(mapLayer);
   const showMarkersRef = useRef(showMarkers);
   const showItineraryMarkersRef = useRef(showItineraryMarkers);
+  const routeSegmentsRef = useRef(routeSegments);
+  const transitPortsRef = useRef(transitPorts);
 
   useEffect(() => {
     placesRef.current = places;
@@ -73,6 +81,8 @@ export default function LeafletMap({
     mapLayerRef.current = mapLayer;
     showMarkersRef.current = showMarkers;
     showItineraryMarkersRef.current = showItineraryMarkers;
+    routeSegmentsRef.current = routeSegments;
+    transitPortsRef.current = transitPorts;
   }, [
     places,
     selectedPlace,
@@ -81,6 +91,8 @@ export default function LeafletMap({
     mapLayer,
     showMarkers,
     showItineraryMarkers,
+    routeSegments,
+    transitPorts,
   ]);
 
   const applyInitialViewport = useCallback(
@@ -124,32 +136,45 @@ export default function LeafletMap({
     []
   );
 
-  // Helper: Draw markers and route polyline
+  // Helper: Draw markers and route polylines
   const drawMarkersAndRoute = useCallback(
     (L: typeof LType, map: LType.Map, markersGroup: LType.LayerGroup) => {
       markersGroup.clearLayers();
 
-      // 1. Draw Route Polyline
-      if (polylineRef.current) {
-        map.removeLayer(polylineRef.current);
-        polylineRef.current = null;
+      // 1. Draw Route Polylines (road vs maritime)
+      if (routeLayerRef.current) {
+        routeLayerRef.current.clearLayers();
       }
 
+      const routeTarget = routeLayerRef.current ?? map;
       const currentItinerary = itineraryPlacesRef.current;
-      if (currentItinerary.length >= 2) {
+      const currentSegments = routeSegmentsRef.current;
+
+      if (currentSegments && currentSegments.length > 0) {
+        currentSegments.forEach((seg) => {
+          if (seg.coordinates.length < 2) return;
+          const isSea = seg.kind === 'sea';
+          L.polyline(seg.coordinates, {
+            color: isSea ? '#0284c7' : '#0d9488',
+            weight: isSea ? 4 : 5,
+            opacity: isSea ? 0.92 : 0.9,
+            dashArray: isSea || seg.isFallback ? '8, 8' : undefined,
+            lineJoin: 'round',
+            lineCap: 'round',
+          }).addTo(routeTarget);
+        });
+      } else if (currentItinerary.length >= 2) {
         const latlngs: [number, number][] = currentItinerary.map((p) => [
           p.latitude,
           p.longitude,
         ]);
 
-        const polyline = L.polyline(latlngs, {
+        L.polyline(latlngs, {
           color: '#0d9488',
           weight: 5,
           opacity: 0.95,
           dashArray: '8, 8',
-        }).addTo(map);
-
-        polylineRef.current = polyline;
+        }).addTo(routeTarget);
       }
 
       // 2. Draw Markers (only places with verified coordinates)
@@ -237,6 +262,47 @@ export default function LeafletMap({
         markersGroup.addLayer(marker);
       });
 
+      // Draw automatically inserted maritime transit ports (Cảng Sa Kỳ, Bến tàu Lý Sơn, Cầu tàu Đảo Bé)
+      const currentTransitPorts = transitPortsRef.current ?? [];
+      if (currentTransitPorts.length > 0) {
+        const renderedIds = new Set(placesToRender.map((p) => p.id));
+        currentTransitPorts.forEach((port) => {
+          if (renderedIds.has(port.id)) return;
+          const portHtml = `
+            <div class="map-pin-wrap">
+              <div class="map-pin-dot" style="width: 30px; height: 30px; background: #0284c7;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><circle cx="12" cy="5" r="3"/></svg>
+              </div>
+              <div class="map-pin-label">
+                ${port.name}
+              </div>
+            </div>
+          `;
+          const portIcon = L.divIcon({
+            className: 'custom-pin-marker',
+            html: portHtml,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+          });
+          const portMarker = L.marker([port.latitude, port.longitude], {
+            icon: portIcon,
+            title: port.name,
+            alt: port.name,
+            zIndexOffset: 420,
+          });
+          portMarker.on('click', () => {
+            const matchedPlace = placesRef.current.find((p) => p.id === port.id);
+            if (matchedPlace) {
+              if (selectedPlaceRef.current?.id !== matchedPlace.id) {
+                mapClickedIdRef.current = matchedPlace.id;
+              }
+              onSelectPlaceRef.current(matchedPlace);
+            }
+          });
+          markersGroup.addLayer(portMarker);
+        });
+      }
+
       const currentSelectedId = currentSelected?.id ?? null;
       const selectionChanged = currentSelectedId !== lastHandledSelectedIdRef.current;
 
@@ -311,11 +377,13 @@ export default function LeafletMap({
         maxZoom: layerConfig.maxZoom,
       }).addTo(map);
 
-      // Add markers layer group
+      // Add route & markers layer groups (route sits underneath markers)
+      const routeLayer = L.layerGroup().addTo(map);
       const markersLayer = L.layerGroup().addTo(map);
 
       mapInstanceRef.current = map;
       tileLayerRef.current = tileLayer;
+      routeLayerRef.current = routeLayer;
       markersLayerRef.current = markersLayer;
 
       // Fit full province bounds once container has visible dimensions
@@ -424,6 +492,8 @@ export default function LeafletMap({
     itineraryPlaces,
     showMarkers,
     showItineraryMarkers,
+    routeSegments,
+    transitPorts,
     drawMarkersAndRoute,
   ]);
 

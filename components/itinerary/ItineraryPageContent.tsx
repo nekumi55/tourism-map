@@ -25,12 +25,14 @@ import { Place } from '@/types';
 import MapPlacePopupCard, { usePlacePopup } from '@/components/map/MapPlacePopupCard';
 import MapMarkersToggleButton from '@/components/map/MapMarkersToggleButton';
 import {
-  calculateDistanceKm,
-  calculateTotalRouteDistance,
   buildGoogleMapsRouteUrl,
-  optimizeItineraryOrder,
   formatOptimizeNotice,
+  ITINERARY_PRESETS,
+  ItineraryPresetId,
+  getPresetPlaces,
 } from '@/utils/itinerary';
+import { optimizeItineraryOrderAsync, useItineraryRoute } from '@/utils/roadRouting';
+import { usePersistedItinerary } from '@/utils/usePersistedItinerary';
 
 gsap.registerPlugin(useGSAP);
 
@@ -58,12 +60,9 @@ export default function ItineraryPageContent() {
     [places]
   );
 
-  const [selectedPlaces, setSelectedPlaces] = useState<Place[]>(() => {
-    const initial = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    return initial.length > 0 ? initial : mappedPlaces.slice(0, 4);
-  });
+  const [selectedPlaces, setSelectedPlaces] = usePersistedItinerary(mappedPlaces);
 
-  const [activeStepPlace, setActiveStepPlace] = useState<Place | null>(selectedPlaces[0] || null);
+  const [selectedStepPlace, setActiveStepPlace] = useState<Place | null>(null);
   const {
     popupPlace,
     renderedPopupPlace,
@@ -71,9 +70,16 @@ export default function ItineraryPageContent() {
     openPopup,
     closePopup,
   } = usePlacePopup();
-  const [activePreset, setActivePreset] = useState<'ly-son' | 'heritage' | null>('ly-son');
+  const activeStepPlace =
+    selectedStepPlace &&
+    (popupPlace?.id === selectedStepPlace.id ||
+      selectedPlaces.some((p) => p.id === selectedStepPlace.id))
+      ? selectedStepPlace
+      : selectedPlaces[0] ?? null;
+  const [activePreset, setActivePreset] = useState<ItineraryPresetId | null>(null);
   const [mobileTab, setMobileTab] = useState<'stops' | 'map'>('stops');
   const [showMarkers, setShowMarkers] = useState<boolean>(false);
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   const [reorderTick, setReorderTick] = useState(0);
@@ -84,8 +90,7 @@ export default function ItineraryPageContent() {
   const mobileTabPillRef = useRef<HTMLDivElement>(null);
   const stopsColRef = useRef<HTMLDivElement>(null);
   const mapColRef = useRef<HTMLDivElement>(null);
-  const lySonBtnRef = useRef<HTMLButtonElement>(null);
-  const heritageBtnRef = useRef<HTMLButtonElement>(null);
+  const presetBtnRefs = useRef(new Map<ItineraryPresetId, HTMLButtonElement>());
 
   const stopCardRefs = useRef(new Map<string, HTMLDivElement>());
   const stopBadgeRefs = useRef(new Map<string, HTMLDivElement>());
@@ -105,13 +110,14 @@ export default function ItineraryPageContent() {
     return () => clearTimeout(timer);
   }, [statusNotice]);
 
-  const totalDistance = useMemo(() => calculateTotalRouteDistance(selectedPlaces), [selectedPlaces]);
+  const { route: itineraryRoute, isRouting } = useItineraryRoute(selectedPlaces);
+  const totalDistance = itineraryRoute.totalDistanceKm;
   const estimatedHours = useMemo(() => {
     if (selectedPlaces.length === 0) return 0;
-    const travelTime = totalDistance / 35;
+    const travelHours = itineraryRoute.totalTravelMinutes / 60;
     const visitingTime = selectedPlaces.length * 1.8;
-    return Number((travelTime + visitingTime).toFixed(1));
-  }, [selectedPlaces, totalDistance]);
+    return Number((travelHours + visitingTime).toFixed(1));
+  }, [selectedPlaces, itineraryRoute.totalTravelMinutes]);
 
   useGSAP(
     () => {
@@ -481,22 +487,27 @@ export default function ItineraryPageContent() {
     setReorderTick((t) => t + 1);
   };
 
-  const handleSmartOptimize = () => {
-    if (selectedPlaces.length < 3) return;
-    const result = optimizeItineraryOrder(selectedPlaces);
-    setStatusNotice(formatOptimizeNotice(result));
-    if (!result.changed) return;
+  const handleSmartOptimize = async () => {
+    if (selectedPlaces.length < 3 || isOptimizing) return;
+    setIsOptimizing(true);
+    try {
+      const result = await optimizeItineraryOrderAsync(selectedPlaces);
+      setStatusNotice(formatOptimizeNotice(result));
+      if (!result.changed) return;
 
-    const tops = new Map<string, number>();
-    stopCardRefs.current.forEach((el, id) => {
-      tops.set(id, el.getBoundingClientRect().top);
-    });
-    pendingReorderTopsRef.current = tops;
-    lastMovedIdRef.current = null;
+      const tops = new Map<string, number>();
+      stopCardRefs.current.forEach((el, id) => {
+        tops.set(id, el.getBoundingClientRect().top);
+      });
+      pendingReorderTopsRef.current = tops;
+      lastMovedIdRef.current = null;
 
-    setActivePreset(null);
-    setSelectedPlaces(result.places);
-    setReorderTick((t) => t + 1);
+      setActivePreset(null);
+      setSelectedPlaces(result.places);
+      setReorderTick((t) => t + 1);
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   const pulsePresetButton = contextSafe((btn: HTMLButtonElement | null) => {
@@ -514,28 +525,14 @@ export default function ItineraryPageContent() {
     openPopup(place);
   };
 
-  const handlePresetLySon = () => {
-    const lySon = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    const items = lySon.length > 0 ? lySon : mappedPlaces.slice(0, 4);
-    setActivePreset('ly-son');
+  const handleSelectPreset = (presetId: ItineraryPresetId) => {
+    const items = getPresetPlaces(presetId, mappedPlaces);
+    setActivePreset(presetId);
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
     closePopup();
     setPresetTick((t) => t + 1);
-    pulsePresetButton(lySonBtnRef.current);
-  };
-
-  const handlePresetHeritage = () => {
-    const heritage = mappedPlaces
-      .filter((p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum')
-      .slice(0, 4);
-    const items = heritage.length > 0 ? heritage : mappedPlaces.slice(0, 4);
-    setActivePreset('heritage');
-    setSelectedPlaces(items);
-    setActiveStepPlace(items[0] || null);
-    closePopup();
-    setPresetTick((t) => t + 1);
-    pulsePresetButton(heritageBtnRef.current);
+    pulsePresetButton(presetBtnRefs.current.get(presetId) ?? null);
   };
 
   return (
@@ -544,7 +541,7 @@ export default function ItineraryPageContent() {
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 space-y-6 sm:space-y-8"
     >
       {/* Header Banner */}
-      <div data-itinerary-header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
+      <div data-itinerary-header className="space-y-4 pb-6 border-b border-[var(--border-subtle)]">
         <div className="min-w-0">
           <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[var(--ink-primary)] tracking-[-0.02em]">
             Lập Lộ Trình Tour Quảng Ngãi
@@ -555,35 +552,40 @@ export default function ItineraryPageContent() {
         </div>
 
         {/* Preset Tour Selector */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button
-            ref={lySonBtnRef}
-            type="button"
-            onClick={handlePresetLySon}
-            aria-pressed={activePreset === 'ly-son'}
-            className={`ui-interactive-press flex-1 sm:flex-none text-center px-4 min-h-11 rounded-lg text-xs sm:text-sm font-semibold border inline-flex items-center justify-center gap-1.5 cursor-pointer ${
-              activePreset === 'ly-son'
-                ? 'bg-[var(--accent-jade)] text-[#FFFDF9] border-[var(--accent-jade)]'
-                : 'bg-[var(--bg-surface)] hover:bg-[var(--accent-jade-soft)] text-[var(--ink-primary)] border-[var(--border-subtle)]'
-            }`}
-          >
-            {activePreset === 'ly-son' && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
-            <span>Tour Đảo Lý Sơn</span>
-          </button>
-          <button
-            ref={heritageBtnRef}
-            type="button"
-            onClick={handlePresetHeritage}
-            aria-pressed={activePreset === 'heritage'}
-            className={`ui-interactive-press flex-1 sm:flex-none text-center px-4 min-h-11 rounded-lg text-xs sm:text-sm font-semibold border inline-flex items-center justify-center gap-1.5 cursor-pointer ${
-              activePreset === 'heritage'
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-[var(--ink-muted)] mr-1">
+            Gợi ý sẵn:
+          </span>
+          {ITINERARY_PRESETS.map((preset) => {
+            const isActive = activePreset === preset.id;
+            const activeStyle =
+              preset.accent === 'ochre'
                 ? 'bg-[#F59E0B] text-[#16201D] border-[#D97706]'
-                : 'bg-[var(--bg-surface)] hover:bg-[var(--accent-ochre-soft)] text-[var(--ink-primary)] border-[var(--border-subtle)]'
-            }`}
-          >
-            {activePreset === 'heritage' && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
-            <span>Tour Sông Trà &amp; Di Sản</span>
-          </button>
+                : 'bg-[var(--accent-jade)] text-[#FFFDF9] border-[var(--accent-jade)]';
+            const idleStyle =
+              preset.accent === 'ochre'
+                ? 'bg-[var(--bg-surface)] hover:bg-[var(--accent-ochre-soft)] text-[var(--ink-primary)] border-[var(--border-subtle)]'
+                : 'bg-[var(--bg-surface)] hover:bg-[var(--accent-jade-soft)] text-[var(--ink-primary)] border-[var(--border-subtle)]';
+
+            return (
+              <button
+                key={preset.id}
+                ref={(el) => {
+                  if (el) presetBtnRefs.current.set(preset.id, el);
+                  else presetBtnRefs.current.delete(preset.id);
+                }}
+                type="button"
+                onClick={() => handleSelectPreset(preset.id)}
+                aria-pressed={isActive}
+                className={`ui-interactive-press text-center px-3.5 min-h-10 rounded-lg text-xs sm:text-sm font-semibold border inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+                  isActive ? activeStyle : idleStyle
+                }`}
+              >
+                {isActive && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
+                <span>{preset.tourLabel}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -741,16 +743,16 @@ export default function ItineraryPageContent() {
                   <button
                     type="button"
                     onClick={handleSmartOptimize}
-                    disabled={selectedPlaces.length < 3}
+                    disabled={selectedPlaces.length < 3 || isOptimizing}
                     title={
                       selectedPlaces.length < 3
                         ? 'Cần ít nhất 3 điểm dừng để sắp xếp thông minh'
-                        : 'Tự động sắp xếp thứ tự các chặng để rút ngắn quãng đường'
+                        : 'Tự động sắp xếp thứ tự theo đường bộ & tuyến tàu để rút ngắn quãng đường'
                     }
                     className="ui-interactive-press min-h-9 px-3 rounded-lg bg-[var(--accent-jade-soft)] hover:bg-[var(--accent-jade)] text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] disabled:opacity-45 disabled:pointer-events-none text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    <span>Sắp xếp thông minh</span>
+                    <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isOptimizing ? 'animate-spin' : ''}`} aria-hidden="true" />
+                    <span>{isOptimizing ? 'Đang tối ưu...' : 'Sắp xếp thông minh'}</span>
                   </button>
                   <button
                     type="button"
@@ -777,15 +779,7 @@ export default function ItineraryPageContent() {
             ) : (
               selectedPlaces.map((place, idx) => {
                 const isActiveStep = activeStepPlace?.id === place.id;
-                const nextPlace = selectedPlaces[idx + 1];
-                const legDistance = nextPlace
-                  ? calculateDistanceKm(
-                      place.latitude,
-                      place.longitude,
-                      nextPlace.latitude,
-                      nextPlace.longitude
-                    )
-                  : null;
+                const legInfo = idx < selectedPlaces.length - 1 ? itineraryRoute.stopLegs[idx] : undefined;
                 const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
 
                 return (
@@ -950,14 +944,38 @@ export default function ItineraryPageContent() {
                       </div>
                     </div>
 
-                    {/* Leg distance info */}
-                    {legDistance !== null && (
-                      <div className="flex items-center gap-2 pl-4 sm:pl-7 py-0.5 text-xs font-medium text-[var(--accent-jade-ink)] tabular-nums">
-                        <div className="w-0.5 h-5 bg-[var(--accent-jade)]/40 shrink-0" aria-hidden="true" />
-                        <span className="font-mono bg-[var(--accent-jade-soft)] px-2.5 py-1 rounded-md text-xs">
-                          Chặng {idx + 1} → {idx + 2}: ~ {legDistance} km (~
-                          {Math.round((legDistance / 35) * 60)} phút)
-                        </span>
+                    {/* Leg distance & transit info */}
+                    {legInfo && (
+                      <div className="flex items-start gap-2 pl-4 sm:pl-7 py-0.5 text-xs font-medium text-[var(--accent-jade-ink)] tabular-nums">
+                        <div className="w-0.5 self-stretch min-h-5 bg-[var(--accent-jade)]/40 shrink-0" aria-hidden="true" />
+                        <div className="space-y-1 min-w-0">
+                          <span className="inline-flex flex-wrap items-center gap-1.5 font-mono bg-[var(--accent-jade-soft)] px-2.5 py-1 rounded-md text-xs">
+                            <span>
+                              Chặng {idx + 1} → {idx + 2}: ~ {legInfo.distanceKm} km (~
+                              {legInfo.durationMinutes} phút)
+                            </span>
+                            {isRouting && (
+                              <span className="font-sans text-[11px] opacity-75">· đang tính đường bộ...</span>
+                            )}
+                          </span>
+                          {legInfo.hasSeaCrossing && (
+                            <div className="text-[11px] text-[var(--ink-secondary)] font-normal space-y-0.5 pl-1">
+                              {legInfo.steps.map((step, stepIdx) => (
+                                <div key={stepIdx} className="flex items-center gap-1.5">
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                      step.kind === 'sea' ? 'bg-[#0284c7]' : 'bg-[var(--accent-jade)]'
+                                    }`}
+                                    aria-hidden="true"
+                                  />
+                                  <span className="truncate">
+                                    {step.label} (~{step.distanceKm} km, ~{step.durationMinutes} phút)
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -997,6 +1015,8 @@ export default function ItineraryPageContent() {
               mapLayer="standard"
               showMarkers={showMarkers}
               showItineraryMarkers
+              routeSegments={itineraryRoute.segments}
+              transitPorts={itineraryRoute.transitPorts}
             />
 
             <MapMarkersToggleButton
@@ -1029,8 +1049,10 @@ export default function ItineraryPageContent() {
           <div className="p-4 rounded-xl bg-[var(--accent-jade-soft)] border border-[var(--accent-jade)]/20 text-xs sm:text-sm text-[var(--ink-primary)] flex items-start gap-2.5">
             <CheckCircle2 className="w-4.5 h-4.5 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
             <div className="leading-relaxed">
-              <strong>Hướng dẫn:</strong> Tuyến đường nối các điểm dừng theo thứ tự (1, 2, 3...). Bấm{' '}
-              <strong>Mở Google Maps</strong> ở trên hoặc nút <strong>GPS</strong> tại từng chặng để dẫn đường trực tiếp.
+              <strong>Hướng dẫn:</strong> Tuyến{' '}
+              <span className="font-semibold text-[var(--accent-jade-ink)]">đường bộ (nét liền)</span>{' '}
+              bám theo đường giao thông thực tế trên bản đồ; các chặng ra Đảo Lý Sơn &amp; Cù lao Bờ Bãi (nét đứt xanh dương) tự động nối qua{' '}
+              <strong>Cảng Sa Kỳ ↔ Bến tàu cano Đảo Lý Sơn Lớn - Đảo Bé ↔ Cầu tàu Đảo Bé - An Bình</strong>.
             </div>
           </div>
         </div>

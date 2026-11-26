@@ -37,12 +37,14 @@ import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import MapPlacePopupCard, { usePlacePopup } from '@/components/map/MapPlacePopupCard';
 import MapMarkersToggleButton from '@/components/map/MapMarkersToggleButton';
 import {
-  calculateDistanceKm,
-  calculateTotalRouteDistance,
   buildGoogleMapsRouteUrl,
-  optimizeItineraryOrder,
   formatOptimizeNotice,
+  ITINERARY_PRESETS,
+  ItineraryPresetId,
+  getPresetPlaces,
 } from '@/utils/itinerary';
+import { optimizeItineraryOrderAsync, useItineraryRoute } from '@/utils/roadRouting';
+import { usePersistedItinerary } from '@/utils/usePersistedItinerary';
 import { matchSearchKeyword } from '@/utils/vietnamese';
 
 gsap.registerPlugin(useGSAP);
@@ -343,13 +345,15 @@ export default function MapViewer() {
 
   const [mapLayer, setMapLayer] = useState<MapLayerType>('standard');
   const [showMarkers, setShowMarkers] = useState<boolean>(false);
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
-  const [itinerary, setItinerary] = useState<Place[]>(() => {
-    const lySonPlaces = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 3);
-    return lySonPlaces.length > 0 ? lySonPlaces : mappedPlaces.slice(0, 3);
+  const [chipScroll, setChipScroll] = useState<{ left: boolean; right: boolean }>({
+    left: false,
+    right: false,
   });
+
+  const [itinerary, setItinerary] = usePersistedItinerary(mappedPlaces);
   const [itineraryReorderTick, setItineraryReorderTick] = useState<number>(0);
 
   const shellRef = useRef<HTMLDivElement>(null);
@@ -377,6 +381,56 @@ export default function MapViewer() {
 
   const { contextSafe } = useGSAP({ scope: shellRef });
 
+  const updateChipScrollState = useCallback(() => {
+    const el = chipsContainerRef.current;
+    if (!el) return;
+    const left = el.scrollLeft > 4;
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+    setChipScroll((prev) =>
+      prev.left === left && prev.right === right ? prev : { left, right }
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = chipsContainerRef.current;
+    if (!el) return;
+
+    const rafId = requestAnimationFrame(updateChipScrollState);
+
+    const handleWheel = (e: WheelEvent) => {
+      if (el.scrollWidth <= el.clientWidth) return;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+        updateChipScrollState();
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => updateChipScrollState());
+      ro.observe(el);
+    }
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      el.removeEventListener('wheel', handleWheel);
+      ro?.disconnect();
+    };
+  }, [updateChipScrollState, sidebarMode, isSidebarOpen, isMobileOverlayVisible, categories.length]);
+
+  const scrollChipsBy = (direction: 'left' | 'right') => {
+    const el = chipsContainerRef.current;
+    if (!el) return;
+    const offset = Math.max(140, Math.round(el.clientWidth * 0.65));
+    el.scrollBy({
+      left: direction === 'left' ? -offset : offset,
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
+  };
+
   useEffect(() => {
     if (!toastMsg) return;
     const timer = setTimeout(() => setToastMsg(null), 2800);
@@ -396,13 +450,14 @@ export default function MapViewer() {
     });
   }, [mappedPlaces, selectedCategory, searchQuery]);
 
-  const totalDistance = useMemo(() => calculateTotalRouteDistance(itinerary), [itinerary]);
+  const { route: itineraryRoute } = useItineraryRoute(itinerary);
+  const totalDistance = itineraryRoute.totalDistanceKm;
   const estimatedHours = useMemo(() => {
     if (itinerary.length === 0) return 0;
-    const travelHours = totalDistance / 35;
+    const travelHours = itineraryRoute.totalTravelMinutes / 60;
     const sightseeingHours = itinerary.length * 1.8;
     return Number((travelHours + sightseeingHours).toFixed(1));
-  }, [itinerary, totalDistance]);
+  }, [itinerary.length, itineraryRoute.totalTravelMinutes]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
@@ -751,21 +806,26 @@ export default function MapViewer() {
     setItineraryReorderTick((t) => t + 1);
   };
 
-  const optimizeMapItinerary = () => {
-    if (itinerary.length < 3) return;
-    const result = optimizeItineraryOrder(itinerary);
-    setToastMsg(formatOptimizeNotice(result));
-    if (!result.changed) return;
+  const optimizeMapItinerary = async () => {
+    if (itinerary.length < 3 || isOptimizing) return;
+    setIsOptimizing(true);
+    try {
+      const result = await optimizeItineraryOrderAsync(itinerary);
+      setToastMsg(formatOptimizeNotice(result));
+      if (!result.changed) return;
 
-    const tops = new Map<string, number>();
-    itineraryCardRefs.current.forEach((el, id) => {
-      tops.set(id, el.getBoundingClientRect().top);
-    });
-    pendingReorderTopsRef.current = tops;
-    lastMovedItineraryIdRef.current = null;
+      const tops = new Map<string, number>();
+      itineraryCardRefs.current.forEach((el, id) => {
+        tops.set(id, el.getBoundingClientRect().top);
+      });
+      pendingReorderTopsRef.current = tops;
+      lastMovedItineraryIdRef.current = null;
 
-    setItinerary(result.places);
-    setItineraryReorderTick((t) => t + 1);
+      setItinerary(result.places);
+      setItineraryReorderTick((t) => t + 1);
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   useGSAP(
@@ -817,22 +877,14 @@ export default function MapViewer() {
     { scope: shellRef, dependencies: [itineraryReorderTick] }
   );
 
-  const loadLySonTour = () => {
-    const lySon = mappedPlaces.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
-    const items = lySon.length > 0 ? lySon : mappedPlaces.slice(0, 4);
+  const loadPresetTour = (presetId: ItineraryPresetId) => {
+    const preset = ITINERARY_PRESETS.find((p) => p.id === presetId);
+    const items = getPresetPlaces(presetId, mappedPlaces);
     setItinerary(items);
     setSidebarMode('itinerary');
-  };
-
-  const loadHeritageTour = () => {
-    const heritage = mappedPlaces
-      .filter(
-        (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
-      )
-      .slice(0, 4);
-    const items = heritage.length > 0 ? heritage : mappedPlaces.slice(0, 4);
-    setItinerary(items);
-    setSidebarMode('itinerary');
+    if (preset) {
+      setToastMsg(`Đã chọn gợi ý "${preset.shortLabel}" (${items.length} điểm dừng).`);
+    }
   };
 
   return (
@@ -1027,45 +1079,66 @@ export default function MapViewer() {
                 )}
               </div>
 
-              <div
-                ref={chipsContainerRef}
-                className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none"
-              >
-                <button
-                  ref={(el) => {
-                    if (el) chipRefs.current.set('all', el);
-                    else chipRefs.current.delete('all');
-                  }}
-                  type="button"
-                  onClick={() => setSelectedCategory('all')}
-                  aria-pressed={selectedCategory === 'all'}
-                  className={`min-h-9 px-3 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors duration-150 shrink-0 cursor-pointer ${
-                    selectedCategory === 'all'
-                      ? 'bg-[var(--accent-jade)] text-[#FFFDF9]'
-                      : 'bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-                  }`}
+              <div className="relative flex items-center">
+                {chipScroll.left && (
+                  <div className="absolute left-0 top-0 bottom-0 z-10 flex items-center pr-3 bg-gradient-to-r from-[var(--bg-surface)] via-[var(--bg-surface)]/90 to-transparent">
+                    <button
+                      type="button"
+                      onClick={() => scrollChipsBy('left')}
+                      aria-label="Cuộn danh mục sang trái"
+                      title="Xem danh mục trước"
+                      className="w-7 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-soft-sm text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:border-[var(--accent-jade)]/40 flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+
+                <div
+                  ref={chipsContainerRef}
+                  onScroll={updateChipScrollState}
+                  data-lenis-prevent
+                  className={`flex items-center gap-1.5 overflow-x-auto text-xs scrollbar-none touch-pan-x w-full ${
+                    chipScroll.left ? 'pl-8' : ''
+                  } ${chipScroll.right ? 'pr-8' : ''}`}
                 >
-                  Tất cả
-                </button>
-                {categories.map((cat: Category) => (
-                  <button
-                    key={cat.id}
-                    ref={(el) => {
-                      if (el) chipRefs.current.set(cat.id, el);
-                      else chipRefs.current.delete(cat.id);
-                    }}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    aria-pressed={selectedCategory === cat.id}
-                    className={`min-h-9 px-3 py-1 rounded-lg font-semibold whitespace-nowrap transition-colors duration-150 shrink-0 cursor-pointer ${
-                      selectedCategory === cat.id
-                        ? 'bg-[var(--accent-jade)] text-[#FFFDF9]'
-                        : 'bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                  {[{ id: 'all', name: 'Tất cả' }, ...categories].map((cat) => {
+                    const isActive = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        ref={(el) => {
+                          if (el) chipRefs.current.set(cat.id, el);
+                          else chipRefs.current.delete(cat.id);
+                        }}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        aria-pressed={isActive}
+                        className={`min-h-9 px-3 py-1 rounded-lg font-semibold whitespace-nowrap shrink-0 transition-colors duration-150 cursor-pointer ${
+                          isActive
+                            ? 'bg-[var(--accent-jade)] text-[#FFFDF9]'
+                            : 'bg-[var(--bg-surface-muted)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {chipScroll.right && (
+                  <div className="absolute right-0 top-0 bottom-0 z-10 flex items-center pl-3 bg-gradient-to-l from-[var(--bg-surface)] via-[var(--bg-surface)]/90 to-transparent">
+                    <button
+                      type="button"
+                      onClick={() => scrollChipsBy('right')}
+                      aria-label="Cuộn danh mục sang phải"
+                      title="Xem thêm danh mục"
+                      className="w-7 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-soft-sm text-[var(--ink-secondary)] hover:text-[var(--accent-jade)] hover:border-[var(--accent-jade)]/40 flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1241,36 +1314,32 @@ export default function MapViewer() {
                   <button
                     type="button"
                     onClick={optimizeMapItinerary}
-                    disabled={itinerary.length < 3}
+                    disabled={itinerary.length < 3 || isOptimizing}
                     title={
                       itinerary.length < 3
                         ? 'Cần ít nhất 3 điểm dừng để sắp xếp thông minh'
-                        : 'Tự động sắp xếp thứ tự các chặng để rút ngắn quãng đường'
+                        : 'Tự động sắp xếp thứ tự theo đường bộ & tuyến tàu để rút ngắn quãng đường'
                     }
                     className="ui-interactive-press w-full min-h-9 px-3 rounded-lg bg-[var(--accent-jade-soft)] hover:bg-[var(--accent-jade)] text-[var(--accent-jade-ink)] hover:text-[#FFFDF9] disabled:opacity-45 disabled:pointer-events-none text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    <span>Sắp xếp thông minh</span>
+                    <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isOptimizing ? 'animate-spin' : ''}`} aria-hidden="true" />
+                    <span>{isOptimizing ? 'Đang tối ưu...' : 'Sắp xếp thông minh'}</span>
                   </button>
                 )}
               </div>
 
               <div className="text-xs text-[var(--ink-muted)] flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border-subtle)]">
                 <span className="font-medium text-[var(--ink-secondary)]">Gợi ý sẵn:</span>
-                <button
-                  type="button"
-                  onClick={loadLySonTour}
-                  className="min-h-8 px-2.5 py-1 rounded-md bg-[var(--bg-surface-muted)] hover:bg-[var(--accent-jade-soft)] hover:text-[var(--accent-jade-ink)] text-[var(--ink-primary)] font-semibold transition-colors cursor-pointer"
-                >
-                  Đảo Lý Sơn
-                </button>
-                <button
-                  type="button"
-                  onClick={loadHeritageTour}
-                  className="min-h-8 px-2.5 py-1 rounded-md bg-[var(--bg-surface-muted)] hover:bg-[var(--accent-jade-soft)] hover:text-[var(--accent-jade-ink)] text-[var(--ink-primary)] font-semibold transition-colors cursor-pointer"
-                >
-                  Sông Trà &amp; Di sản
-                </button>
+                {ITINERARY_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => loadPresetTour(preset.id)}
+                    className="min-h-8 px-2.5 py-1 rounded-md bg-[var(--bg-surface-muted)] hover:bg-[var(--accent-jade-soft)] hover:text-[var(--accent-jade-ink)] text-[var(--ink-primary)] font-semibold transition-colors cursor-pointer"
+                  >
+                    {preset.shortLabel}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1286,15 +1355,7 @@ export default function MapViewer() {
               ) : (
                 itinerary.map((place, idx) => {
                   const isSelected = selectedPlace?.id === place.id;
-                  const nextPlace = itinerary[idx + 1];
-                  const legDist = nextPlace
-                    ? calculateDistanceKm(
-                        place.latitude,
-                        place.longitude,
-                        nextPlace.latitude,
-                        nextPlace.longitude
-                      )
-                    : null;
+                  const legInfo = idx < itinerary.length - 1 ? itineraryRoute.stopLegs[idx] : undefined;
                   const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
 
                   return (
@@ -1380,12 +1441,26 @@ export default function MapViewer() {
                         </div>
                       </div>
 
-                      {legDist !== null && (
-                        <div className="flex items-center gap-2 pl-5 py-0.5 text-xs text-[var(--accent-jade-ink)] font-medium tabular-nums">
-                          <div className="w-0.5 h-4 bg-[var(--accent-jade)]/40" aria-hidden="true" />
-                          <span className="font-mono bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm">
-                            Chặng tiếp: ~ {legDist} km
-                          </span>
+                      {legInfo && (
+                        <div className="flex items-start gap-2 pl-5 py-0.5 text-xs text-[var(--accent-jade-ink)] font-medium tabular-nums">
+                          <div className="w-0.5 self-stretch min-h-4 bg-[var(--accent-jade)]/40 shrink-0" aria-hidden="true" />
+                          <div className="space-y-1 min-w-0">
+                            <span className="inline-block font-mono bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm">
+                              Chặng tiếp: ~ {legInfo.distanceKm} km (~{legInfo.durationMinutes} phút)
+                            </span>
+                            {legInfo.hasSeaCrossing && (
+                              <div className="text-[11px] text-[var(--ink-secondary)] font-normal space-y-0.5">
+                                {legInfo.steps
+                                  .filter((s) => s.kind === 'sea')
+                                  .map((step, sIdx) => (
+                                    <div key={sIdx} className="flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#0284c7] shrink-0" aria-hidden="true" />
+                                      <span className="truncate">{step.label}</span>
+                                    </div>
+                                  ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1419,6 +1494,8 @@ export default function MapViewer() {
           mapLayer={mapLayer}
           showMarkers={showMarkers}
           showItineraryMarkers
+          routeSegments={itineraryRoute.segments}
+          transitPorts={itineraryRoute.transitPorts}
         />
 
         {/* Selected Place Popup Card */}
@@ -1478,8 +1555,13 @@ export default function MapViewer() {
             <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0" aria-hidden="true" />
             <span>Chặng lộ trình</span>
           </div>
-          <div className="hidden sm:block text-[var(--ink-on-dark-muted)] border-l border-[#2B3D38] pl-3 whitespace-nowrap">
-            OpenStreetMap / Google
+          <div className="hidden sm:flex items-center gap-1.5 font-medium whitespace-nowrap">
+            <span className="w-4 h-0.5 bg-[#0d9488] shrink-0" aria-hidden="true" />
+            <span>Đường bộ</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 font-medium whitespace-nowrap">
+            <span className="w-4 border-t-2 border-dashed border-[#0284c7] shrink-0" aria-hidden="true" />
+            <span>Tàu/Cano</span>
           </div>
         </div>
       </div>
