@@ -34,6 +34,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Place, Category } from '@/types';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import {
   calculateDistanceKm,
   calculateTotalRouteDistance,
@@ -1227,13 +1228,15 @@ export default function MapViewer() {
                             <span className="text-[11px] font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-2 py-0.5 rounded-sm truncate">
                               {cat?.name}
                             </span>
-                            <div className="flex items-center text-xs text-[var(--ink-primary)] font-semibold shrink-0 tabular-nums">
-                              <Star
-                                aria-hidden="true"
-                                className="w-3.5 h-3.5 fill-[var(--accent-ochre-bright)] text-[var(--accent-ochre-bright)] mr-0.5"
-                              />
-                              <span>{place.rating}</span>
-                            </div>
+                            {SHOW_PLACE_RATINGS && (
+                              <div className="flex items-center text-xs text-[var(--ink-primary)] font-semibold shrink-0 tabular-nums">
+                                <Star
+                                  aria-hidden="true"
+                                  className="w-3.5 h-3.5 fill-[var(--accent-ochre-bright)] text-[var(--accent-ochre-bright)] mr-0.5"
+                                />
+                                <span>{place.rating}</span>
+                              </div>
+                            )}
                           </div>
                           <button
                             type="button"
@@ -1520,10 +1523,12 @@ export default function MapViewer() {
                   sizes="96px"
                   className="object-cover"
                 />
-                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded-sm bg-[#111A18]/85 text-xs text-[#F59E0B] font-semibold flex items-center gap-0.5 tabular-nums">
-                  <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" aria-hidden="true" />
-                  <span>{renderedPopupPlace.rating}</span>
-                </div>
+                {SHOW_PLACE_RATINGS && (
+                  <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded-sm bg-[#111A18]/85 text-xs text-[#F59E0B] font-semibold flex items-center gap-0.5 tabular-nums">
+                    <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" aria-hidden="true" />
+                    <span>{renderedPopupPlace.rating}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex-1 min-w-0 flex flex-col justify-between">

@@ -1,5 +1,11 @@
 import { SiteSettings } from '@/types/settings';
 
+/**
+ * Toggle visibility of place star ratings and review counts across the website.
+ * Set to `true` once verified user review data is available.
+ */
+export const SHOW_PLACE_RATINGS = false;
+
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   siteTitle: 'Quảng Ngãi Atlas',
   siteSubtitle: 'Bản Đồ Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',

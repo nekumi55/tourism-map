@@ -18,6 +18,7 @@ import {
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import { matchSearchKeyword } from '@/utils/vietnamese';
 
 gsap.registerPlugin(useGSAP);
@@ -829,13 +830,15 @@ export default function HeroSearch() {
                     </Link>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="hidden sm:flex items-center text-xs text-[var(--ink-primary)] font-semibold tabular-nums">
-                        <Star
-                          aria-hidden="true"
-                          className="w-3.5 h-3.5 fill-[var(--accent-ochre-bright)] text-[var(--accent-ochre-bright)] mr-1"
-                        />
-                        <span>{place.rating}</span>
-                      </div>
+                      {SHOW_PLACE_RATINGS && (
+                        <div className="hidden sm:flex items-center text-xs text-[var(--ink-primary)] font-semibold tabular-nums">
+                          <Star
+                            aria-hidden="true"
+                            className="w-3.5 h-3.5 fill-[var(--accent-ochre-bright)] text-[var(--accent-ochre-bright)] mr-1"
+                          />
+                          <span>{place.rating}</span>
+                        </div>
+                      )}
 
                       <Link
                         href={`/map?placeId=${place.id}`}

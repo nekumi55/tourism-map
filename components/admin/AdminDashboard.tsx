@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import { Place, Category, District } from '@/types';
 import { SiteSettings } from '@/types/settings';
 import { HERO_TEMPLATES } from '@/components/home/HeroBackgroundPicker';
@@ -594,7 +595,7 @@ export default function AdminDashboard() {
                     <th className="p-4">Danh mục</th>
                     <th className="p-4">Khu vực</th>
                     <th className="p-4">Tọa độ GPS</th>
-                    <th className="p-4">Đánh giá</th>
+                    {SHOW_PLACE_RATINGS && <th className="p-4">Đánh giá</th>}
                     <th className="p-4">Trạng thái</th>
                     <th className="p-4 text-right">Thao tác</th>
                   </tr>
@@ -631,9 +632,11 @@ export default function AdminDashboard() {
                         <td className="p-4 font-mono text-[11px]">
                           {place.latitude.toFixed(4)}, {place.longitude.toFixed(4)}
                         </td>
-                        <td className="p-4 font-bold text-amber-500">
-                          ★ {place.rating} ({place.review_count})
-                        </td>
+                        {SHOW_PLACE_RATINGS && (
+                          <td className="p-4 font-bold text-amber-500">
+                            ★ {place.rating} ({place.review_count})
+                          </td>
+                        )}
                         <td className="p-4">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

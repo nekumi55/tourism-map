@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { MapPin, Navigation } from 'lucide-react';
 import { Place } from '@/types';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import RatingStars from '@/components/common/RatingStars';
 import Badge from '@/components/common/Badge';
 
@@ -52,7 +53,9 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
         <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between min-w-0">
           <div>
             <div className="flex items-center justify-between gap-2 mb-2">
-              <RatingStars rating={place.rating} reviews={place.review_count} size="sm" />
+              {SHOW_PLACE_RATINGS && (
+                <RatingStars rating={place.rating} reviews={place.review_count} size="sm" />
+              )}
               <span className="text-xs font-semibold text-[#0E563B] bg-[#E5F2EC] px-2.5 py-0.5 rounded-md border border-[#0E563B]/15">
                 {place.is_open_now ? 'Đang mở cửa' : 'Tạm đóng cửa'}
               </span>
@@ -148,14 +151,18 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
 
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <RatingStars rating={place.rating} reviews={place.review_count} size="sm" />
-            {place.recognition_level && (
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)] truncate max-w-[140px]">
-                {place.recognition_level}
-              </span>
-            )}
-          </div>
+          {(SHOW_PLACE_RATINGS || place.recognition_level) && (
+            <div className="mb-2 flex items-center justify-between gap-2">
+              {SHOW_PLACE_RATINGS && (
+                <RatingStars rating={place.rating} reviews={place.review_count} size="sm" />
+              )}
+              {place.recognition_level && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)] truncate max-w-[140px]">
+                  {place.recognition_level}
+                </span>
+              )}
+            </div>
+          )}
 
           <Link href={`/places/${place.id}`} className="block">
             <h3 className="font-sans font-bold text-base sm:text-lg tracking-tight text-[var(--ink-primary)] group-hover:text-[var(--accent-jade)] transition-colors line-clamp-1">

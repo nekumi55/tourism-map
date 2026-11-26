@@ -23,6 +23,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import { Place } from '@/types';
 import PlaceGallery from '@/components/place/PlaceGallery';
 import PlaceCard from '@/components/place/PlaceCard';
@@ -221,10 +222,14 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
               </h1>
 
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-[var(--ink-secondary)] pt-1">
-                <RatingStars rating={place.rating} reviews={place.review_count} size="md" />
-                <span className="hidden sm:inline text-[var(--border-strong)]" aria-hidden="true">
-                  |
-                </span>
+                {SHOW_PLACE_RATINGS && (
+                  <>
+                    <RatingStars rating={place.rating} reviews={place.review_count} size="md" />
+                    <span className="hidden sm:inline text-[var(--border-strong)]" aria-hidden="true">
+                      |
+                    </span>
+                  </>
+                )}
                 <span className="font-semibold text-[var(--accent-jade-ink)] bg-[var(--accent-jade-soft)] px-3 py-1 rounded-md text-xs sm:text-sm">
                   {place.price_label}
                 </span>

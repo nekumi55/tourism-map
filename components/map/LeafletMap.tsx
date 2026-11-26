@@ -82,7 +82,7 @@ export default function LeafletMap({
       if (currentSelected) {
         map.setView(
           [currentSelected.latitude, currentSelected.longitude],
-          width < 640 ? 10 : 10.5,
+          width < 640 ? 12.5 : 13,
           { animate: false }
         );
         hasFittedInitialRef.current = true;
@@ -208,7 +208,7 @@ export default function LeafletMap({
         mapClickedIdRef.current = null;
       }
 
-      // Pan only when a different place is chosen outside the map (e.g. sidebar list)
+      // Pan (and zoom in if at province-wide zoom) when a place is chosen outside the map (e.g. sidebar list)
       if (
         selectionChanged &&
         !wasClickedOnMap &&
@@ -220,10 +220,10 @@ export default function LeafletMap({
         const reduceMotion =
           typeof window !== 'undefined' &&
           window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-        map.panTo([currentSelected.latitude, currentSelected.longitude], {
+        const targetZoom = Math.max(map.getZoom(), 13);
+        map.setView([currentSelected.latitude, currentSelected.longitude], targetZoom, {
           animate: !reduceMotion,
           duration: reduceMotion ? 0 : 0.65,
-          easeLinearity: 0.25,
         });
       }
     },

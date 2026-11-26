@@ -19,6 +19,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { Category, District } from '@/types';
 import { useData } from '@/context/DataContext';
+import { SHOW_PLACE_RATINGS } from '@/data/settings';
 import PlaceCard from '@/components/place/PlaceCard';
 import { matchSearchKeyword } from '@/utils/vietnamese';
 
@@ -133,7 +134,7 @@ export default function ExploreContainer() {
       if (sortBy === 'rating-desc') return b.rating - a.rating;
       if (sortBy === 'reviews-desc') return b.review_count - a.review_count;
       if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
-      if (a.is_featured === b.is_featured) return b.rating - a.rating;
+      if (a.is_featured === b.is_featured) return SHOW_PLACE_RATINGS ? b.rating - a.rating : 0;
       return a.is_featured ? -1 : 1;
     });
 
@@ -761,43 +762,45 @@ export default function ExploreContainer() {
             </div>
 
             {/* Rating Filter */}
-            <div>
-              <div className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2">
-                Đánh giá tối thiểu
+            {SHOW_PLACE_RATINGS && (
+              <div>
+                <div className="block text-xs font-semibold text-[var(--ink-secondary)] mb-2">
+                  Đánh giá tối thiểu
+                </div>
+                <div
+                  ref={ratingGroupRef}
+                  className="relative bg-[var(--bg-surface-muted)] p-1 rounded-lg grid grid-cols-3 gap-1 text-xs border border-[var(--border-subtle)]"
+                >
+                  <span
+                    ref={ratingPillRef}
+                    aria-hidden="true"
+                    style={{ width: 'calc((100% - 16px) / 3)' }}
+                    className="pointer-events-none absolute top-1 bottom-1 left-1 rounded-md bg-[#F59E0B] shadow-soft-sm"
+                  />
+                  {RATING_OPTIONS.map((stars) => {
+                    const isActive = minRating === stars;
+                    return (
+                      <button
+                        key={stars}
+                        ref={(el) => {
+                          ratingBtnRefs.current[stars] = el;
+                        }}
+                        type="button"
+                        onClick={() => handleFilterChange(() => setMinRating(stars))}
+                        aria-pressed={isActive}
+                        className={`relative z-10 min-h-9 py-1.5 px-2 rounded-md text-center transition-colors duration-200 cursor-pointer tabular-nums ${
+                          isActive
+                            ? 'text-[#16201D] font-bold'
+                            : 'text-[var(--ink-secondary)] font-medium hover:text-[var(--ink-primary)]'
+                        }`}
+                      >
+                        {stars === 0 ? 'Tất cả' : `★ ${stars}+`}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div
-                ref={ratingGroupRef}
-                className="relative bg-[var(--bg-surface-muted)] p-1 rounded-lg grid grid-cols-3 gap-1 text-xs border border-[var(--border-subtle)]"
-              >
-                <span
-                  ref={ratingPillRef}
-                  aria-hidden="true"
-                  style={{ width: 'calc((100% - 16px) / 3)' }}
-                  className="pointer-events-none absolute top-1 bottom-1 left-1 rounded-md bg-[#F59E0B] shadow-soft-sm"
-                />
-                {RATING_OPTIONS.map((stars) => {
-                  const isActive = minRating === stars;
-                  return (
-                    <button
-                      key={stars}
-                      ref={(el) => {
-                        ratingBtnRefs.current[stars] = el;
-                      }}
-                      type="button"
-                      onClick={() => handleFilterChange(() => setMinRating(stars))}
-                      aria-pressed={isActive}
-                      className={`relative z-10 min-h-9 py-1.5 px-2 rounded-md text-center transition-colors duration-200 cursor-pointer tabular-nums ${
-                        isActive
-                          ? 'text-[#16201D] font-bold'
-                          : 'text-[var(--ink-secondary)] font-medium hover:text-[var(--ink-primary)]'
-                      }`}
-                    >
-                      {stars === 0 ? 'Tất cả' : `★ ${stars}+`}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            )}
           </div>
         </aside>
 
@@ -832,8 +835,12 @@ export default function ExploreContainer() {
                   className="max-w-full min-w-0 min-h-10 truncate text-xs font-semibold text-[var(--ink-primary)] bg-[var(--bg-canvas)] border border-[var(--border-subtle)] px-3 py-1.5 rounded-lg focus:outline-none focus:border-[var(--accent-jade)] appearance-none pr-8 cursor-pointer transition-colors"
                 >
                   <option value="featured">Nổi bật nhất</option>
-                  <option value="rating-desc">Đánh giá cao nhất</option>
-                  <option value="reviews-desc">Nhiều đánh giá nhất</option>
+                  {SHOW_PLACE_RATINGS && (
+                    <>
+                      <option value="rating-desc">Đánh giá cao nhất</option>
+                      <option value="reviews-desc">Nhiều đánh giá nhất</option>
+                    </>
+                  )}
                   <option value="name-asc">Tên (A đến Z)</option>
                 </select>
                 <ChevronDown
