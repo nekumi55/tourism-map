@@ -851,11 +851,11 @@ export default function MapViewer() {
   const addToItinerary = (place: Place) => {
     const clean = place.name.replace(/\[Minh Họa\]\s*/g, '');
     if (itinerary.some((p) => p.id === place.id)) {
-      setToastMsg(`"${clean}" đã có trong lịch trình.`);
+      setToastMsg(`"${clean}" đã có trong lộ trình.`);
       return;
     }
     setItinerary((prev) => [...prev, place]);
-    setToastMsg(`Đã thêm "${clean}" vào lịch trình.`);
+    setToastMsg(`Đã thêm "${clean}" vào lộ trình.`);
   };
 
   const removeFromItinerary = (id: string) => {
@@ -931,17 +931,19 @@ export default function MapViewer() {
   );
 
   const loadLySonTour = () => {
-    const items = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    const items = lySon.length > 0 ? lySon : places.slice(0, 4);
     setItinerary(items);
     setSidebarMode('itinerary');
   };
 
   const loadHeritageTour = () => {
-    const items = places
+    const heritage = places
       .filter(
         (p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum'
       )
       .slice(0, 4);
+    const items = heritage.length > 0 ? heritage : places.slice(0, 4);
     setItinerary(items);
     setSidebarMode('itinerary');
   };
@@ -1013,7 +1015,7 @@ export default function MapViewer() {
             }`}
           >
             <Route className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>Lịch trình</span>
+            <span>Lộ trình</span>
             {itinerary.length > 0 && (
               <span className="text-[10px] font-bold bg-[#16201D]/15 px-1 rounded-full shrink-0 tabular-nums">
                 {itinerary.length}
@@ -1088,7 +1090,7 @@ export default function MapViewer() {
               }`}
             >
               <Route className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span className="truncate tabular-nums">Lịch trình ({itinerary.length})</span>
+              <span className="truncate tabular-nums">Lộ trình ({itinerary.length})</span>
             </button>
           </div>
 
@@ -1263,7 +1265,7 @@ export default function MapViewer() {
                               ) : (
                                 <Plus className="w-3 h-3" aria-hidden="true" />
                               )}
-                              <span>{inItinerary ? 'Đã thêm' : 'Lịch trình'}</span>
+                              <span>{inItinerary ? 'Đã thêm' : 'Lộ trình'}</span>
                             </button>
                           </div>
                         </div>
@@ -1324,8 +1326,8 @@ export default function MapViewer() {
                     type="button"
                     onClick={() => setItinerary([])}
                     className="min-h-10 min-w-10 rounded-lg text-[#9A3412] hover:bg-[#F6EAE6] border border-[var(--border-subtle)] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
-                    title="Xóa toàn bộ lịch trình"
-                    aria-label="Xóa toàn bộ lịch trình"
+                    title="Xóa toàn bộ lộ trình"
+                    aria-label="Xóa toàn bộ lộ trình"
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -1357,7 +1359,7 @@ export default function MapViewer() {
                   <Route className="w-9 h-9 text-[var(--border-strong)] mx-auto mb-2" aria-hidden="true" />
                   <p className="font-semibold text-[var(--ink-primary)] text-sm">Chưa có địa điểm nào</p>
                   <p className="mt-1">
-                    Chuyển sang mục <strong>Địa điểm</strong> và bấm <strong>+ Lịch trình</strong>.
+                    Chuyển sang mục <strong>Địa điểm</strong> và bấm <strong>+ Lộ trình</strong>.
                   </p>
                 </div>
               ) : (
@@ -1449,8 +1451,8 @@ export default function MapViewer() {
                             type="button"
                             onClick={() => removeFromItinerary(place.id)}
                             className="w-8 h-8 rounded-lg text-[#9A3412] hover:bg-[#F6EAE6] flex items-center justify-center cursor-pointer"
-                            title="Bỏ khỏi lịch trình"
-                            aria-label={`Xóa ${cleanName} khỏi lịch trình`}
+                            title="Bỏ khỏi lộ trình"
+                            aria-label={`Xóa ${cleanName} khỏi lộ trình`}
                           >
                             <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                           </button>
@@ -1482,7 +1484,7 @@ export default function MapViewer() {
           className="hidden lg:flex absolute top-4 left-4 z-30 min-h-11 px-3.5 rounded-xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-subtle)] shadow-soft-xl text-[var(--ink-primary)] hover:text-[var(--accent-jade)] items-center gap-2 text-xs font-semibold cursor-pointer"
         >
           <ChevronRight className="w-4 h-4 text-[var(--accent-jade)]" aria-hidden="true" />
-          <span>Mở danh sách &amp; Lịch trình</span>
+          <span>Mở danh sách &amp; Lộ trình</span>
         </button>
       )}
 
@@ -1575,7 +1577,7 @@ export default function MapViewer() {
                       <span>
                         {itinerary.some((p) => p.id === renderedPopupPlace.id)
                           ? 'Đã thêm'
-                          : 'Lịch trình'}
+                          : 'Lộ trình'}
                       </span>
                     </button>
                     <Link

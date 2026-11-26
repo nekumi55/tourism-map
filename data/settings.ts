@@ -3,10 +3,10 @@ import { SiteSettings } from '@/types/settings';
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   siteTitle: 'Quảng Ngãi Atlas',
   siteSubtitle: 'Bản Đồ Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',
-  heroBadge: '20 điểm đến · 7 khu vực từ đảo Lý Sơn đến đại ngàn Măng Đen',
+  heroBadge: '6 tuyến di sản · 61 địa điểm từ Đông sang Tây Quảng Ngãi',
   heroHeading: 'Di Sản, Văn Hóa & Danh Thắng Tỉnh Quảng Ngãi',
   heroSubheading:
-    'Tra cứu di tích lịch sử, danh lam thắng cảnh, biển đảo Lý Sơn, cao nguyên Măng Đen và ẩm thực xứ Quảng trên bản đồ số tương tác.',
+    'Tra cứu 6 tuyến di sản và 61 địa điểm lịch sử, khảo cổ, kiến trúc, danh thắng, bản sắc cộng đồng và ẩm thực đặc trưng từ biển đảo Đông Quảng Ngãi đến đại ngàn Tây Quảng Ngãi.',
   heroBgImage:
     'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=85',
   contactEmail: 'dulich@quangngai.gov.vn',
@@ -16,8 +16,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   showBanner: false,
   bannerText: '',
   stats: {
-    totalPlaces: '20 Địa danh & Di sản',
-    districtsCount: '7 Khu vực hành chính',
-    avgRating: '4.9 / 5.0 (Đánh giá du khách)',
+    totalPlaces: '61 Địa điểm & Di sản',
+    districtsCount: '6 Tuyến · 9 Khu vực',
+    avgRating: '43 Di tích QG & QG Đặc biệt',
   },
 };

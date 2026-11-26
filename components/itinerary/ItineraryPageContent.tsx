@@ -405,7 +405,7 @@ export default function ItineraryPageContent() {
     if (!found) return;
     const clean = found.name.replace(/\[Minh Họa\]\s*/g, '');
     if (selectedPlaces.some((p) => p.id === found.id)) {
-      setStatusNotice(`"${clean}" đã có sẵn trong lịch trình.`);
+      setStatusNotice(`"${clean}" đã có sẵn trong lộ trình.`);
       return;
     }
     lastAddedIdRef.current = found.id;
@@ -452,17 +452,19 @@ export default function ItineraryPageContent() {
 
   const handlePresetLySon = () => {
     const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
+    const items = lySon.length > 0 ? lySon : places.slice(0, 4);
     setActivePreset('ly-son');
-    setSelectedPlaces(lySon);
-    setActiveStepPlace(lySon[0] || null);
+    setSelectedPlaces(items);
+    setActiveStepPlace(items[0] || null);
     setPresetTick((t) => t + 1);
     pulsePresetButton(lySonBtnRef.current);
   };
 
   const handlePresetHeritage = () => {
-    const items = places
+    const heritage = places
       .filter((p) => p.district_id === 'dist-tp-quang-ngai' || p.district_id === 'dist-kon-tum')
       .slice(0, 4);
+    const items = heritage.length > 0 ? heritage : places.slice(0, 4);
     setActivePreset('heritage');
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
@@ -479,7 +481,7 @@ export default function ItineraryPageContent() {
       <div data-itinerary-header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
         <div className="min-w-0">
           <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[var(--ink-primary)] tracking-[-0.02em]">
-            Lập Lịch Trình Tour Quảng Ngãi
+            Lập Lộ Trình Tour Quảng Ngãi
           </h1>
           <p className="text-sm sm:text-base text-[var(--ink-secondary)] mt-1.5">
             Chọn thứ tự điểm đến để tự động tính cự ly, thời gian di chuyển và mở chỉ đường trên bản đồ
@@ -621,7 +623,7 @@ export default function ItineraryPageContent() {
               htmlFor="itinerary-add-stop"
               className="block text-xs font-semibold text-[var(--ink-secondary)]"
             >
-              Thêm điểm dừng vào hành trình
+              Thêm điểm dừng vào lộ trình
             </label>
             <div className="relative w-full min-w-0">
               <select
@@ -807,7 +809,7 @@ export default function ItineraryPageContent() {
                             }}
                             className="w-9 h-9 rounded-lg text-[#9A3412] hover:bg-[#F6EAE6] flex items-center justify-center cursor-pointer"
                             title="Xóa điểm này"
-                            aria-label={`Xóa ${cleanName} khỏi lịch trình`}
+                            aria-label={`Xóa ${cleanName} khỏi lộ trình`}
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </button>

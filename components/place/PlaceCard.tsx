@@ -5,8 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Navigation } from 'lucide-react';
 import { Place } from '@/types';
-import { CATEGORIES } from '@/data/categories';
-import { DISTRICTS } from '@/data/districts';
+import { useData } from '@/context/DataContext';
 import RatingStars from '@/components/common/RatingStars';
 import Badge from '@/components/common/Badge';
 
@@ -16,8 +15,9 @@ interface PlaceCardProps {
 }
 
 export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
-  const category = CATEGORIES.find((c) => c.id === place.category_id);
-  const district = DISTRICTS.find((d) => d.id === place.district_id);
+  const { categories, districts } = useData();
+  const category = categories.find((c) => c.id === place.category_id);
+  const district = districts.find((d) => d.id === place.district_id);
   const cleanName = place.name.replace(/\[Minh Họa\]\s*/g, '');
 
   if (viewMode === 'list') {
@@ -148,8 +148,13 @@ export default function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) 
 
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <RatingStars rating={place.rating} reviews={place.review_count} size="sm" />
+            {place.recognition_level && (
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)] truncate max-w-[140px]">
+                {place.recognition_level}
+              </span>
+            )}
           </div>
 
           <Link href={`/places/${place.id}`} className="block">

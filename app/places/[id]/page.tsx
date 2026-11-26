@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MOCK_PLACES } from '@/data/places';
@@ -32,7 +32,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PlaceDetailPage({ params }: Props) {
+function PlaceDetailSkeleton() {
+  return (
+    <div
+      className="bg-[var(--bg-canvas)] min-h-screen pb-20"
+      aria-busy="true"
+      aria-label="Đang tải thông tin địa điểm"
+    >
+      <div className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+          <div className="h-5 w-64 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        <div className="h-[320px] sm:h-[440px] rounded-2xl bg-[var(--bg-surface-muted)] animate-pulse border border-[var(--border-subtle)]" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-4">
+              <div className="h-6 w-48 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-10 w-3/4 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-5 w-1/2 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+            </div>
+            <div className="bg-[var(--bg-surface)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] space-y-3">
+              <div className="h-7 w-56 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-4 w-full rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-4 w-5/6 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-4 w-4/6 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+            </div>
+          </div>
+
+          <aside className="space-y-6">
+            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-4">
+              <div className="h-6 w-40 rounded bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-12 w-full rounded-lg bg-[var(--bg-surface-muted)] animate-pulse" />
+              <div className="h-11 w-full rounded-lg bg-[var(--bg-surface-muted)] animate-pulse" />
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function PlaceDetailContent({ params }: Props) {
   const { id } = await params;
   const place = MOCK_PLACES.find((p) => p.id === id);
 
@@ -41,4 +85,12 @@ export default async function PlaceDetailPage({ params }: Props) {
   }
 
   return <PlaceDetailClient initialPlace={place} />;
+}
+
+export default function PlaceDetailPage({ params }: Props) {
+  return (
+    <Suspense fallback={<PlaceDetailSkeleton />}>
+      <PlaceDetailContent params={params} />
+    </Suspense>
+  );
 }

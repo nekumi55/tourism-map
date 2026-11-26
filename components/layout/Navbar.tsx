@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { href: '/', label: 'Trang chủ', icon: Home },
   { href: '/explore', label: 'Khám phá', icon: Compass },
   { href: '/map', label: 'Bản đồ số', icon: Map },
-  { href: '/itinerary', label: 'Lịch trình', icon: Route },
+  { href: '/itinerary', label: 'Lộ trình', icon: Route },
   { href: '/about', label: 'Giới thiệu', icon: Info },
 ];
 

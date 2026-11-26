@@ -37,10 +37,10 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  PLACES: 'tourism_map_places_v6',
-  CATEGORIES: 'tourism_map_categories_v6',
-  DISTRICTS: 'tourism_map_districts_v6',
-  SETTINGS: 'tourism_map_settings_v6',
+  PLACES: 'tourism_map_places_v7',
+  CATEGORIES: 'tourism_map_categories_v7',
+  DISTRICTS: 'tourism_map_districts_v7',
+  SETTINGS: 'tourism_map_settings_v7',
 };
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
@@ -258,7 +258,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               id: p.id ? String(p.id) : `pl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
               name: String(p.name),
               slug: p.slug ? String(p.slug) : String(p.name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-              category_id: p.category_id ? String(p.category_id) : 'cat-culture',
+              category_id: p.category_id ? String(p.category_id) : 'cat-history',
               district_id: p.district_id ? String(p.district_id) : 'dist-tp-quang-ngai',
               description: p.description ? String(p.description) : '',
               content: p.content ? String(p.content) : (p.description ? String(p.description) : ''),

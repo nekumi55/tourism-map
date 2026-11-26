@@ -368,7 +368,7 @@ export default function HomeContent() {
               className="ui-interactive-press ml-1 min-h-10 px-4 py-1.5 rounded-full bg-[#F59E0B] hover:bg-[#D97706] motion-safe:hover:-translate-y-0.5 text-[#16201D] font-semibold inline-flex items-center gap-1.5"
             >
               <Route className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Lập lịch trình tour</span>
+              <span>Lập lộ trình tour</span>
             </Link>
           </div>
         </div>
@@ -515,7 +515,7 @@ export default function HomeContent() {
           <div className="rounded-2xl bg-[var(--bg-basalt)] text-[var(--ink-on-dark)] border border-[#24332F] p-6 sm:p-10 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7 space-y-6">
               <h2 className="font-serif text-2xl sm:text-4xl font-semibold tracking-[-0.02em] leading-[1.18] text-[#FFFDF9]">
-                Bản Đồ Số Đa Lớp &amp; Lịch Trình Từng Chặng
+                Bản Đồ Số Đa Lớp &amp; Lộ Trình Từng Chặng
               </h2>
 
               <p className="text-[var(--ink-on-dark-muted)] text-base leading-relaxed max-w-2xl">
@@ -547,7 +547,7 @@ export default function HomeContent() {
                   className="ui-interactive-press min-h-12 px-5 rounded-lg bg-[#F59E0B] hover:bg-[#D97706] text-[#16201D] font-semibold text-sm inline-flex items-center gap-2"
                 >
                   <Route className="w-4 h-4" aria-hidden="true" />
-                  <span>Tạo lịch trình tour</span>
+                  <span>Tạo lộ trình tour</span>
                 </Link>
                 <Link
                   href="/map"

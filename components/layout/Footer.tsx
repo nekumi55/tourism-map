@@ -79,7 +79,7 @@ export default function Footer() {
                   href="/itinerary"
                   className="inline-block py-1 text-[var(--ink-on-dark-muted)] hover:text-[#FFFDF9] hover:underline underline-offset-4 decoration-[#7CC4B8]/70 transition-colors"
                 >
-                  Lên lịch trình tour
+                  Lên lộ trình tour
                 </Link>
               </li>
               <li>

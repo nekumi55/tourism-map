@@ -1,7 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { Category } from '@/types';
-import { Trees, Palmtree, Landmark, Utensils, Compass, ChevronRight } from 'lucide-react';
+import {
+  Trees,
+  Palmtree,
+  Landmark,
+  Utensils,
+  Compass,
+  Building2,
+  Sparkles,
+  ChevronRight,
+} from 'lucide-react';
 
 interface CategoryCardProps {
   category: Category;
@@ -13,6 +22,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Landmark,
   Utensils,
   Compass,
+  Building2,
+  Sparkles,
 };
 
 export default function CategoryCard({ category }: CategoryCardProps) {

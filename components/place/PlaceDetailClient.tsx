@@ -13,6 +13,11 @@ import {
   ChevronRight,
   Compass,
   ExternalLink,
+  Landmark,
+  FileText,
+  Calendar,
+  Building2,
+  ShieldCheck,
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -189,6 +194,16 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
                   <span className="inline-flex items-center px-3 py-1 rounded-md bg-[#F59E0B] text-[#16201D] text-xs font-bold">
                     Điểm tiêu biểu
                   </span>
+                )}
+                {place.recognition_level && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-md bg-[var(--accent-ochre-soft)] text-[var(--accent-ochre-ink)] border border-[var(--accent-ochre)]/25 text-xs font-semibold">
+                    {place.recognition_level}
+                  </span>
+                )}
+                {place.region && (
+                  <Badge variant="outline" size="md">
+                    {place.region}
+                  </Badge>
                 )}
                 <span
                   className={`text-xs px-3 py-1 rounded-md font-semibold ${
@@ -372,6 +387,120 @@ export default function PlaceDetailClient({ initialPlace }: PlaceDetailClientPro
                 </Link>
               </div>
             </div>
+
+            {/* KHKT HERITAGE METADATA CARD */}
+            {(place.heritage_type ||
+              place.recognition_level ||
+              place.decision_number ||
+              place.recognition_date ||
+              place.listed_year ||
+              place.issuing_authority ||
+              place.management_unit ||
+              place.region ||
+              place.route_name ||
+              place.verification_source) && (
+              <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-5">
+                <h2 className="font-serif font-semibold text-[var(--ink-primary)] text-lg pb-3 border-b border-[var(--border-subtle)] flex items-center gap-2">
+                  <Landmark className="w-4.5 h-4.5 text-[var(--accent-jade)] shrink-0" aria-hidden="true" />
+                  <span>Hồ Sơ Di Sản &amp; Pháp Lý</span>
+                </h2>
+
+                <div className="space-y-3.5 text-sm">
+                  {place.route_name && (
+                    <div className="flex items-start gap-3">
+                      <Compass className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Tuyến di sản</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.route_name}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.region && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Phân vùng nghiên cứu</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.region}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.heritage_type && (
+                    <div className="flex items-start gap-3">
+                      <Landmark className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Loại hình di sản</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.heritage_type}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.recognition_level && (
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="w-4 h-4 text-[var(--accent-ochre)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Cấp công nhận</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5 font-medium">{place.recognition_level}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.decision_number && (
+                    <div className="flex items-start gap-3">
+                      <FileText className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Số văn bản / Quyết định</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.decision_number}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(place.recognition_date || place.listed_year) && (
+                    <div className="flex items-start gap-3">
+                      <Calendar className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">
+                          {place.recognition_date ? 'Ngày công nhận' : 'Năm ghi danh'}
+                        </div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5 tabular-nums">
+                          {[place.recognition_date, place.listed_year ? `Ghi danh ${place.listed_year}` : '']
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.issuing_authority && (
+                    <div className="flex items-start gap-3">
+                      <Building2 className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Thẩm quyền ban hành</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.issuing_authority}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.management_unit && (
+                    <div className="flex items-start gap-3">
+                      <Building2 className="w-4 h-4 text-[var(--accent-jade)] shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[var(--ink-primary)]">Đơn vị quản lý</div>
+                        <div className="text-[var(--ink-secondary)] mt-0.5">{place.management_unit}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {place.verification_source && (
+                    <div className="pt-3 border-t border-[var(--border-subtle)] text-xs text-[var(--ink-muted)] leading-relaxed">
+                      <span className="font-semibold text-[var(--ink-secondary)]">Nguồn kiểm chứng: </span>
+                      {place.verification_source}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* GPS COORDINATE CARD */}
             <div data-detail-aside-card className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-subtle)] space-y-4">

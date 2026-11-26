@@ -37,7 +37,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="mt-5 text-base sm:text-lg text-[var(--ink-on-dark-muted)] leading-relaxed max-w-2xl mx-auto">
-            Cổng tra cứu địa danh và lập lịch trình tương tác, kết nối du khách với biển đảo Lý Sơn, di tích Sa Huỳnh, núi Thiên Ấn và cao nguyên đại ngàn Măng Đen.
+            Cổng tra cứu địa danh và lập lộ trình tương tác, kết nối du khách với biển đảo Lý Sơn, di tích Sa Huỳnh, núi Thiên Ấn và cao nguyên đại ngàn Măng Đen.
           </p>
         </AnimatedContent>
       </section>
@@ -202,7 +202,7 @@ export default function AboutPage() {
                 className="ui-interactive-press min-h-11 px-4 rounded-lg border border-[var(--border-strong)] hover:bg-[var(--bg-surface-muted)] text-[var(--ink-primary)] text-sm font-semibold inline-flex items-center gap-2"
               >
                 <MapPin className="w-4 h-4 text-[var(--accent-jade)]" aria-hidden="true" />
-                <span>Tạo lịch trình tour</span>
+                <span>Tạo lộ trình tour</span>
               </Link>
             </div>
           </section>
