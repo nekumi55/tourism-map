@@ -21,6 +21,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useData } from '@/context/DataContext';
 import { Place } from '@/types';
+import MapPlacePopupCard, { usePlacePopup } from '@/components/map/MapPlacePopupCard';
 import {
   calculateDistanceKm,
   calculateTotalRouteDistance,
@@ -47,7 +48,7 @@ const LeafletMap = dynamic(() => import('@/components/map/LeafletMap'), {
 });
 
 export default function ItineraryPageContent() {
-  const { places } = useData();
+  const { places, categories } = useData();
 
   const [selectedPlaces, setSelectedPlaces] = useState<Place[]>(() => {
     const initial = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
@@ -55,6 +56,13 @@ export default function ItineraryPageContent() {
   });
 
   const [activeStepPlace, setActiveStepPlace] = useState<Place | null>(selectedPlaces[0] || null);
+  const {
+    popupPlace,
+    renderedPopupPlace,
+    popupRef,
+    openPopup,
+    closePopup,
+  } = usePlacePopup();
   const [activePreset, setActivePreset] = useState<'ly-son' | 'heritage' | null>('ly-son');
   const [mobileTab, setMobileTab] = useState<'stops' | 'map'>('stops');
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
@@ -450,12 +458,18 @@ export default function ItineraryPageContent() {
     );
   });
 
+  const handleSelectPlace = (place: Place) => {
+    setActiveStepPlace(place);
+    openPopup(place);
+  };
+
   const handlePresetLySon = () => {
     const lySon = places.filter((p) => p.district_id === 'dist-ly-son').slice(0, 4);
     const items = lySon.length > 0 ? lySon : places.slice(0, 4);
     setActivePreset('ly-son');
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
+    closePopup();
     setPresetTick((t) => t + 1);
     pulsePresetButton(lySonBtnRef.current);
   };
@@ -468,6 +482,7 @@ export default function ItineraryPageContent() {
     setActivePreset('heritage');
     setSelectedPlaces(items);
     setActiveStepPlace(items[0] || null);
+    closePopup();
     setPresetTick((t) => t + 1);
     pulsePresetButton(heritageBtnRef.current);
   };
@@ -712,7 +727,7 @@ export default function ItineraryPageContent() {
                         else stopCardRefs.current.delete(place.id);
                       }}
                       data-stop-card
-                      onClick={() => setActiveStepPlace(place)}
+                      onClick={() => handleSelectPlace(place)}
                       className={`group p-3.5 sm:p-4 bg-[var(--bg-surface)] rounded-xl border transition-[border-color,box-shadow,background-color] duration-200 cursor-pointer ${
                         isActiveStep
                           ? 'border-[var(--accent-jade)] ring-2 ring-[var(--accent-jade)]/15 shadow-soft-sm'
@@ -908,9 +923,27 @@ export default function ItineraryPageContent() {
             <LeafletMap
               places={places}
               selectedPlace={activeStepPlace}
-              onSelectPlace={(p) => setActiveStepPlace(p)}
+              onSelectPlace={handleSelectPlace}
               itineraryPlaces={selectedPlaces}
               mapLayer="standard"
+            />
+
+            <MapPlacePopupCard
+              popupRef={popupRef}
+              place={renderedPopupPlace}
+              isVisible={Boolean(popupPlace)}
+              categoryName={
+                renderedPopupPlace
+                  ? categories.find((c) => c.id === renderedPopupPlace.category_id)?.name
+                  : undefined
+              }
+              isInItinerary={
+                renderedPopupPlace
+                  ? selectedPlaces.some((p) => p.id === renderedPopupPlace.id)
+                  : false
+              }
+              onAddToItinerary={(place) => handleAddPlace(place.id)}
+              onClose={closePopup}
             />
           </div>
 

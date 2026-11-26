@@ -51,7 +51,7 @@ export const DISTRICTS: District[] = [
     name: 'Kon Tum & Vùng phụ cận',
     slug: 'kon-tum',
     description:
-      'Tây Quảng Ngãi: Di tích Quốc gia đặc biệt Nhà ngục Kon Tum, Di chỉ khảo cổ Lung Leng, Nhà thờ gỗ Kon Tum, Nhà rông Kon Klor, Không gian văn hóa cồng chiêng, Lễ ăn than và Gỏi lá Kon Tum.',
+      'Tây Quảng Ngãi: Di tích Quốc gia đặc biệt Nhà ngục Kon Tum, Di chỉ khảo cổ Lung Leng, Nhà thờ gỗ Kon Tum, Nhà rông Kon Klor, Không gian văn hóa cồng chiêng và Gỏi lá Kon Tum.',
     center_lat: 14.3497,
     center_lng: 108.0080,
   },
@@ -60,7 +60,7 @@ export const DISTRICTS: District[] = [
     name: 'Đăk Tô – Ngọc Hồi – Đăk Glei – Ngọc Linh',
     slug: 'dak-to-ngoc-hoi-dak-glei',
     description:
-      'Tây Quảng Ngãi: Đường Trường Sơn – Hồ Chí Minh, Chiến thắng Đăk Tô – Tân Cảnh, Ngục Đăk Glei, Chiến thắng Plei Kần, Chiến thắng Đăk Pék và Quốc bảo Sâm Ngọc Linh.',
+      'Tây Quảng Ngãi: Đường Trường Sơn – Hồ Chí Minh, Chiến thắng Đăk Tô – Tân Cảnh, Ngục Đăk Glei, Chiến thắng Plei Kần, Chiến thắng Đăk Pék, Lễ ăn than của người Gié-Triêng và Quốc bảo Sâm Ngọc Linh.',
     center_lat: 14.7850,
     center_lng: 107.7850,
   },
